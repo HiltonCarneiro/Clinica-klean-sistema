@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.PacienteController">
+
+    <top>
+        <VBox spacing="5">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Cadastro de Pacientes"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="0" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <!-- FORMULÁRIO -->
+            <GridPane hgap="10" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <!-- Nome -->
+                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <!-- CPF -->
+                <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <!-- Data Nasc -->
+                <Label text="Data Nasc.:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <!-- Telefone -->
+                <Label text="Telefone:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtTelefone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <!-- Rua -->
+                <Label text="Rua:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtRua" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <!-- Número -->
+                <Label text="Número:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtNumero" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <!-- Bairro -->
+                <Label text="Bairro:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtBairro" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <!-- Cidade -->
+                <Label text="Cidade:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtCidade" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                <!-- CEP + botão buscar -->
+                <Label text="CEP:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <HBox spacing="5" GridPane.rowIndex="8" GridPane.columnIndex="1">
+                    <TextField fx:id="txtCep" HBox.hgrow="ALWAYS"/>
+                    <Button text="Buscar CEP" onAction="#onBuscarCep"/>
+                </HBox>
+
+                <!-- UF -->
+                <Label text="UF:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtUf" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
+                <!-- Responsável legal -->
+                <Label text="Responsável legal:" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtResponsavelLegal" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <!-- BOTÕES + CHECKBOX -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Novo" onAction="#onNovo"/>
+                <Button text="Salvar" onAction="#onSalvar"/>
+                <Button fx:id="btnInativar" text="Inativar" onAction="#onInativar" disable="true"/>
+                <Button fx:id="btnAtivar" text="Reativar" onAction="#onAtivar" disable="true"/>
+                <Button text="Limpar" onAction="#onLimpar"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <CheckBox fx:id="chkMostrarInativos"
+                          text="Mostrar inativos"
+                          onAction="#onAtualizarLista"/>
+            </HBox>
+
+            <Label fx:id="lblMensagem" textFill="red"/>
+
+            <Separator/>
+
+            <!-- TABELA -->
+            <TableView fx:id="tablePacientes" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                    <TableColumn fx:id="colCpf" text="CPF" prefWidth="120"/>
+                    <TableColumn fx:id="colTelefone" text="Telefone" prefWidth="120"/>
+                    <TableColumn fx:id="colDataNascimento" text="Data Nasc." prefWidth="100"/>
+                    <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
+                </columns>
+            </TableView>
+
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -8,43 +8,56 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.clinica.controller.MainController">
 
+    <!-- MENU SUPERIOR -->
     <top>
-        <MenuBar>
-            <menus>
-                <Menu text="Arquivo">
-                    <items>
-                        <MenuItem text="Sair" onAction="#onSair"/>
-                    </items>
-                </Menu>
+        <VBox>
+            <MenuBar>
+                <menus>
 
-                <Menu text="Cadastros">
-                    <items>
-                        <MenuItem text="Pacientes" onAction="#onPacientes"/>
-                        <MenuItem text="Usuários" onAction="#onUsuarios"/>
-                    </items>
-                </Menu>
+                    <!-- ARQUIVO -->
+                    <Menu text="Arquivo">
+                        <items>
+                            <MenuItem text="Sair" onAction="#onSair"/>
+                        </items>
+                    </Menu>
 
-                <Menu text="Agenda">
-                    <items>
-                        <MenuItem text="Agendamentos" onAction="#onAgendamentos"/>
-                    </items>
-                </Menu>
+                    <!-- CADASTROS -->
+                    <Menu text="Cadastros">
+                        <items>
+                            <MenuItem text="Pacientes" onAction="#onPacientes"/>
+                            <MenuItem text="Usuários" onAction="#onUsuarios"/>
+                        </items>
+                    </Menu>
 
-                <Menu text="Estoque">
-                    <items>
-                        <MenuItem text="Produtos / Insumos" onAction="#onEstoque"/>
-                    </items>
-                </Menu>
+                    <!-- AGENDA -->
+                    <Menu text="Agenda">
+                        <items>
+                            <MenuItem text="Agendamentos" onAction="#onAgendamentos"/>
+                        </items>
+                    </Menu>
 
-                <Menu text="Financeiro">
-                    <items>
-                        <MenuItem text="Caixa / Notas" onAction="#onFinanceiro"/>
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
+                    <!-- ESTOQUE -->
+                    <Menu text="Estoque">
+                        <items>
+                            <MenuItem text="Produtos / Insumos" onAction="#onEstoque"/>
+                        </items>
+                    </Menu>
+
+                    <!-- FINANCEIRO -->
+                    <Menu text="Financeiro">
+                        <items>
+                            <MenuItem text="Caixa / Notas" onAction="#onFinanceiro"/>
+                        </items>
+                    </Menu>
+
+                </menus>
+            </MenuBar>
+
+            <Separator/>
+        </VBox>
     </top>
 
+    <!-- CONTEÚDO CENTRAL -->
     <center>
         <VBox alignment="CENTER" spacing="10">
             <padding>
@@ -52,13 +65,19 @@
             </padding>
 
             <Label text="Sistema da Clínica de Integração"
-                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
-            <Label fx:id="lblUsuario" text="Usuário: (não definido)"/>
-            <Label fx:id="lblPerfil" text="Perfil: (não definido)"/>
+            <Label fx:id="lblUsuario"
+                   text="Usuário: (não definido)"/>
+
+            <Label fx:id="lblPerfil"
+                   text="Perfil: (não definido)"/>
 
             <Label text="(Aqui depois vamos abrir as telas de Pacientes, Agenda, Estoque, etc.)"
-                   wrapText="true"/>
+                   wrapText="true"
+                   maxWidth="400"/>
+
         </VBox>
     </center>
+
 </BorderPane>

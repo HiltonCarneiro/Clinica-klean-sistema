@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.EstoqueController">
+
+    <top>
+        <VBox spacing="5">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Controle de Estoque - Produtos / Insumos"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="0" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <!-- FORMULÁRIO -->
+            <GridPane hgap="10" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <!-- Nome -->
+                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <!-- Tipo -->
+                <Label text="Tipo:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cbTipo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <!-- Unidade -->
+                <Label text="Unidade:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtUnidade" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <!-- Estoque atual -->
+                <Label text="Estoque atual:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtEstoqueAtual" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <!-- Estoque mínimo -->
+                <Label text="Estoque mínimo:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtEstoqueMinimo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <!-- Lote -->
+                <Label text="Lote:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtLote" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <!-- Validade -->
+                <Label text="Validade:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="dpValidade" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <!-- Preço custo -->
+                <Label text="Preço de custo:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecoCusto" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                <!-- Preço venda -->
+                <Label text="Preço de venda:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecoVenda" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                <!-- Ativo -->
+                <Label text="Ativo:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                <CheckBox fx:id="chkAtivo" GridPane.rowIndex="9" GridPane.columnIndex="1" selected="true"/>
+            </GridPane>
+
+            <!-- BOTÕES E FILTROS -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Novo" onAction="#onNovo"/>
+                <Button text="Salvar" onAction="#onSalvar"/>
+                <Button text="Ativar / Inativar" onAction="#onAtivarDesativar"/>
+                <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
+                <CheckBox fx:id="chkBaixoEstoque" text="Baixo estoque" onAction="#onAtualizarLista"/>
+                <CheckBox fx:id="chkVencendo" text="Vencendo em 30 dias" onAction="#onAtualizarLista"/>
+            </HBox>
+
+            <Label fx:id="lblMensagem" textFill="red"/>
+
+            <Separator/>
+
+            <!-- TABELA -->
+            <TableView fx:id="tableProdutos" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colNome" text="Nome" prefWidth="200"/>
+                    <TableColumn fx:id="colTipo" text="Tipo" prefWidth="80"/>
+                    <TableColumn fx:id="colEstoque" text="Estoque" prefWidth="120"/>
+                    <TableColumn fx:id="colValidade" text="Validade" prefWidth="100"/>
+                    <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
+                </columns>
+            </TableView>
+
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 
 public class MainController {
 
@@ -45,9 +47,25 @@ public class MainController {
     // ====== Menu Cadastros ======
     @FXML
     private void onPacientes() {
-        info("Pacientes", "Aqui vamos abrir a tela de cadastro/listagem de pacientes.");
-    }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/paciente-view.fxml"));
+            Scene scene = new Scene(loader.load(), 800, 600);
 
+            Stage stage = new Stage();
+            stage.setTitle("Pacientes - Clínica Integração");
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erro");
+            alert.setHeaderText("Erro ao abrir tela de pacientes");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
     @FXML
     private void onUsuarios() {
         info("Usuários", "Aqui vamos abrir a tela de gerenciamento de usuários.");
@@ -62,9 +80,25 @@ public class MainController {
     // ====== Menu Estoque ======
     @FXML
     private void onEstoque() {
-        info("Estoque", "Aqui vamos abrir a tela de produtos/insumos.");
-    }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/estoque-view.fxml"));
+            Scene scene = new Scene(loader.load(), 900, 600);
 
+            Stage stage = new Stage();
+            stage.setTitle("Estoque - Clínica Integração");
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace(); // deixa isso aqui pra ver o erro no console
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erro");
+            alert.setHeaderText("Erro ao abrir tela de estoque");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
     // ====== Menu Financeiro ======
     @FXML
     private void onFinanceiro() {

@@ -21,7 +21,7 @@ public class DatabaseConfig {
             // Garante que as foreign keys funcionem corretamente
             stmt.execute("PRAGMA foreign_keys = ON;");
 
-            // ----- TABELA PERFIL -----
+            // ====== TABELA PERFIL ======
             String sqlPerfil = """
                 CREATE TABLE IF NOT EXISTS perfil (
                     id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,11 +29,11 @@ public class DatabaseConfig {
                 );
             """;
 
-            // ----- TABELA USUARIO -----
+            // ====== TABELA USUARIO ======
             String sqlUsuario = """
                 CREATE TABLE IF NOT EXISTS usuario (
                     id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome      TEXT NOT NULL,            -- aqui vamos usar o CARGO (ex: ENFERMEIRA)
+                    nome      TEXT NOT NULL,            -- aqui usamos o CARGO (ex: ENFERMEIRA)
                     login     TEXT NOT NULL UNIQUE,
                     senha     TEXT NOT NULL,
                     ativo     INTEGER NOT NULL DEFAULT 1,
@@ -42,25 +42,50 @@ public class DatabaseConfig {
                 );
             """;
 
-            // ----- TABELA PACIENTE -----
+            // ====== TABELA PACIENTE (com endereço detalhado) ======
             String sqlPaciente = """
                 CREATE TABLE IF NOT EXISTS paciente (
-                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome             TEXT NOT NULL,
-                    cpf              TEXT UNIQUE,
-                    data_nascimento  TEXT,
-                    telefone         TEXT,
-                    endereco         TEXT,
+                    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome              TEXT NOT NULL,
+                    cpf               TEXT UNIQUE,
+                    data_nascimento   TEXT,
+                    telefone          TEXT,
+                    endereco          TEXT,          -- campo antigo (pode continuar usando se quiser)
                     responsavel_legal TEXT,
-                    ativo            INTEGER NOT NULL DEFAULT 1
+                    ativo             INTEGER NOT NULL DEFAULT 1,
+                    rua               TEXT,
+                    numero            TEXT,
+                    bairro            TEXT,
+                    cidade            TEXT,
+                    cep               TEXT,
+                    uf                TEXT
                 );
             """;
 
+            // ====== TABELA PRODUTO (ESTOQUE) ======
+            String sqlProduto = """
+                CREATE TABLE IF NOT EXISTS produto (
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome           TEXT NOT NULL,
+                    tipo           TEXT NOT NULL,           -- INSUMO ou VENDA
+                    unidade        TEXT,                    -- ml, un, caixa, etc.
+                    estoque_atual  REAL NOT NULL DEFAULT 0,
+                    estoque_minimo REAL NOT NULL DEFAULT 0,
+                    lote           TEXT,
+                    validade       TEXT,                    -- yyyy-MM-dd
+                    preco_custo    REAL,
+                    preco_venda    REAL,
+                    ativo          INTEGER NOT NULL DEFAULT 1
+                );
+            """;
+
+            // Cria / garante as tabelas
             stmt.execute(sqlPerfil);
             stmt.execute(sqlUsuario);
             stmt.execute(sqlPaciente);
+            stmt.execute(sqlProduto);
 
-            // ----- DADOS INICIAIS DE PERFIL -----
+            // ====== DADOS INICIAIS DE PERFIL ======
             String sqlPerfisIniciais = """
                 INSERT OR IGNORE INTO perfil (id, nome) VALUES
                     (1, 'ADMIN'),
@@ -70,10 +95,9 @@ public class DatabaseConfig {
                     (5, 'FISIOTERAPEUTA'),
                     (6, 'MEDICO');
             """;
-
             stmt.execute(sqlPerfisIniciais);
 
-            // ----- USUÁRIOS INICIAIS (NOME = CARGO) -----
+            // ====== USUÁRIOS INICIAIS (NOME = CARGO) ======
             String sqlUsuariosIniciais = """
                 INSERT OR IGNORE INTO usuario (id, nome, login, senha, ativo, perfil_id) VALUES
                     (1, 'ADMIN',          'admin',          'admin', 1, 1),
@@ -83,7 +107,6 @@ public class DatabaseConfig {
                     (5, 'FISIOTERAPEUTA', 'fisioterapeuta', '123',   1, 5),
                     (6, 'MEDICO',         'medico',         '123',   1, 6);
             """;
-
             stmt.execute(sqlUsuariosIniciais);
 
             System.out.println("Banco de dados inicializado com sucesso!");
