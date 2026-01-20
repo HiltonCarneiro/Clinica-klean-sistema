@@ -1,40 +1,23 @@
 package br.com.clinica;
 
 import br.com.clinica.database.DatabaseConfig;
-import br.com.clinica.dao.PacienteDAO;
-import br.com.clinica.model.Paciente;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
         DatabaseConfig.initializeDatabase();
 
-        // TESTE CRUD
-        PacienteDAO dao = new PacienteDAO();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
+        Scene scene = new Scene(loader.load(), 400, 250);
 
-        Paciente novo = new Paciente();
-        novo.setNome("João Teste");
-        novo.setCpf("12345678900");
-        novo.setTelefone("99999-0000");
-
-        dao.salvar(novo);
-
-        System.out.println("=== PACIENTES NO BANCO ===");
-        dao.listarTodos().forEach(System.out::println);
-
-        // Interface básica só para manter a janela aberta
-        Label label = new Label("Sistema da Clínica - JavaFX funcionando!");
-        StackPane root = new StackPane(label);
-        Scene scene = new Scene(root, 600, 400);
-
-        stage.setTitle("Clínica Integração");
+        stage.setTitle("Clínica Integração - Login");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 

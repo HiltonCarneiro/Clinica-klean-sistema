@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.MainController">
+
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="Arquivo">
+                    <items>
+                        <MenuItem text="Sair" onAction="#onSair"/>
+                    </items>
+                </Menu>
+
+                <Menu text="Cadastros">
+                    <items>
+                        <MenuItem text="Pacientes" onAction="#onPacientes"/>
+                        <MenuItem text="Usuários" onAction="#onUsuarios"/>
+                    </items>
+                </Menu>
+
+                <Menu text="Agenda">
+                    <items>
+                        <MenuItem text="Agendamentos" onAction="#onAgendamentos"/>
+                    </items>
+                </Menu>
+
+                <Menu text="Estoque">
+                    <items>
+                        <MenuItem text="Produtos / Insumos" onAction="#onEstoque"/>
+                    </items>
+                </Menu>
+
+                <Menu text="Financeiro">
+                    <items>
+                        <MenuItem text="Caixa / Notas" onAction="#onFinanceiro"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="10">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="Sistema da Clínica de Integração"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+            <Label fx:id="lblUsuario" text="Usuário: (não definido)"/>
+            <Label fx:id="lblPerfil" text="Perfil: (não definido)"/>
+
+            <Label text="(Aqui depois vamos abrir as telas de Pacientes, Agenda, Estoque, etc.)"
+                   wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>
