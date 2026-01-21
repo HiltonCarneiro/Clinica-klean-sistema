@@ -8,7 +8,9 @@ public class LoginService {
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     public Usuario autenticar(String login, String senha) {
-        if (login == null || login.isBlank() || senha == null || senha.isBlank()) {
+        // validação básica
+        if (login == null || login.isBlank() ||
+                senha == null || senha.isBlank()) {
             return null;
         }
 
@@ -16,6 +18,7 @@ public class LoginService {
         login = login.trim();
         senha = senha.trim();
 
-        return usuarioDAO.buscarPorLoginESenha(login, senha);
+        // chama o método certo do DAO
+        return usuarioDAO.autenticar(login, senha);
     }
 }

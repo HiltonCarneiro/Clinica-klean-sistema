@@ -1,83 +1,56 @@
 package br.com.clinica.controller;
 
-import br.com.clinica.model.Usuario;
-import br.com.clinica.session.Session;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class MainController {
 
     @FXML
-    private Label lblUsuario;
+    private Label lblUsuarioLogado;
 
-    @FXML
-    private Label lblPerfil;
+    private String usuarioLogado;
 
     @FXML
     private void initialize() {
-        Usuario usuario = Session.getUsuario();
+        // Se quiser, pode colocar algo inicial aqui depois
+    }
 
-        if (usuario != null) {
-            String textoUsuario = usuario.getNome() + " (" + usuario.getLogin() + ")";
-            lblUsuario.setText("Usuário: " + textoUsuario);
-
-            String nomePerfil = (usuario.getPerfil() != null)
-                    ? usuario.getPerfil().getNome()
-                    : "SEM PERFIL";
-
-            lblPerfil.setText("Perfil: " + nomePerfil);
-        } else {
-            lblUsuario.setText("Usuário: (não definido)");
-            lblPerfil.setText("Perfil: (não definido)");
+    /**
+     * Chamado pelo LoginController depois de autenticar
+     */
+    public void setUsuarioLogado(String usuario) {
+        this.usuarioLogado = usuario;
+        if (lblUsuarioLogado != null) {
+            lblUsuarioLogado.setText(usuario);
         }
     }
 
-    // ====== Menu Arquivo ======
-    @FXML
-    private void onSair() {
-        Session.limpar();
-        Stage stage = (Stage) lblUsuario.getScene().getWindow();
-        stage.close();
-    }
+    // ====== AÇÕES DO MENU E DOS BOTÕES DA TELA INICIAL ======
 
-    // ====== Menu Cadastros ======
     @FXML
     private void onPacientes() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/paciente-view.fxml"));
-            Scene scene = new Scene(loader.load(), 800, 600);
+            Scene scene = new Scene(loader.load(), 900, 600);
 
             Stage stage = new Stage();
             stage.setTitle("Pacientes - Clínica Integração");
             stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(true);
             stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erro");
-            alert.setHeaderText("Erro ao abrir tela de pacientes");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            mostrarErro("Erro ao abrir tela de pacientes", e.getMessage());
         }
     }
-    @FXML
-    private void onUsuarios() {
-        info("Usuários", "Aqui vamos abrir a tela de gerenciamento de usuários.");
-    }
 
-    // ====== Menu Agenda ======
-    @FXML
-    private void onAgendamentos() {
-        info("Agenda", "Aqui vamos abrir a tela de agendamentos.");
-    }
-
-    // ====== Menu Estoque ======
     @FXML
     private void onEstoque() {
         try {
@@ -87,26 +60,70 @@ public class MainController {
             Stage stage = new Stage();
             stage.setTitle("Estoque - Clínica Integração");
             stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(true);
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace(); // deixa isso aqui pra ver o erro no console
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erro");
-            alert.setHeaderText("Erro ao abrir tela de estoque");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir tela de estoque", e.getMessage());
         }
     }
-    // ====== Menu Financeiro ======
+
     @FXML
-    private void onFinanceiro() {
-        info("Financeiro", "Aqui vamos abrir a tela de caixa / notas.");
+    private void onAgenda() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/agenda-view.fxml"));
+            Scene scene = new Scene(loader.load(), 1000, 600);
+
+            Stage stage = new Stage();
+            stage.setTitle("Agenda - Clínica Integração");
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir tela de agenda", e.getMessage());
+        }
     }
 
-    // ====== Utilitário ======
-    private void info(String titulo, String mensagem) {
+    @FXML
+    private void onCaixa() {
+        // Ainda não implementamos o caixa / notas.
+        mostrarAviso("Caixa / Notas", "Tela de Caixa / Notas ainda não implementada.\nSerá ligada ao estoque e atendimentos.");
+    }
+
+    @FXML
+    private void onRelatorios() {
+        // Ainda não implementamos relatórios.
+        mostrarAviso("Relatórios", "Tela de Relatórios ainda não implementada.\nNo futuro: atendimentos, faturamento, estoque etc.");
+    }
+
+    @FXML
+    private void onUsuarios() {
+        // No futuro vamos fazer tela de administração de usuários/perfis
+        mostrarAviso("Usuários & Perfis", "Tela de administração de usuários ainda não implementada.");
+    }
+
+    @FXML
+    private void onSair() {
+        // Fecha a aplicação inteira
+        Stage stage = (Stage) lblUsuarioLogado.getScene().getWindow();
+        stage.close();
+    }
+
+    // ====== MÉTODOS DE APOIO ======
+
+    private void mostrarErro(String titulo, String detalhe) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Erro");
+        alert.setHeaderText(titulo);
+        alert.setContentText(detalhe);
+        alert.showAndWait();
+    }
+
+    private void mostrarAviso(String titulo, String mensagem) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
         alert.setHeaderText(null);

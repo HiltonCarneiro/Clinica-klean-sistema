@@ -109,6 +109,26 @@ public class DatabaseConfig {
             """;
             stmt.execute(sqlUsuariosIniciais);
 
+            // ====== TABELA AGENDAMENTO ======
+            String sqlAgendamento = """
+    CREATE TABLE IF NOT EXISTS agendamento (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        data            TEXT NOT NULL,            -- yyyy-MM-dd
+        hora_inicio     TEXT NOT NULL,            -- HH:mm
+        hora_fim        TEXT NOT NULL,            -- HH:mm
+        paciente_id     INTEGER,                  -- pode ser nulo se marcar sem paciente definido ainda
+        profissional_id INTEGER NOT NULL,         -- referencia usuario
+        sala            TEXT NOT NULL,            -- CONSULTORIO_1, CONSULTORIO_2, SALA_PROCEDIMENTOS
+        procedimento    TEXT,
+        observacoes     TEXT,
+        status          TEXT NOT NULL DEFAULT 'AGENDADO', -- AGENDADO, CANCELADO, CONCLUIDO
+        FOREIGN KEY (paciente_id) REFERENCES paciente(id),
+        FOREIGN KEY (profissional_id) REFERENCES usuario(id)
+    );
+""";
+
+            stmt.execute(sqlAgendamento);
+
             System.out.println("Banco de dados inicializado com sucesso!");
 
         } catch (SQLException e) {

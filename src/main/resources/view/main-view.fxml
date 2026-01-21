@@ -10,74 +10,119 @@
 
     <!-- MENU SUPERIOR -->
     <top>
-        <VBox>
+        <VBox spacing="5">
             <MenuBar>
-                <menus>
+                <Menu text="Cadastros">
+                    <MenuItem text="Pacientes" onAction="#onPacientes"/>
+                </Menu>
 
-                    <!-- ARQUIVO -->
-                    <Menu text="Arquivo">
-                        <items>
-                            <MenuItem text="Sair" onAction="#onSair"/>
-                        </items>
-                    </Menu>
+                <Menu text="Movimentações">
+                    <MenuItem text="Agenda" onAction="#onAgenda"/>
+                    <MenuItem text="Caixa / Notas" onAction="#onCaixa"/>
+                    <MenuItem text="Estoque" onAction="#onEstoque"/>
+                </Menu>
 
-                    <!-- CADASTROS -->
-                    <Menu text="Cadastros">
-                        <items>
-                            <MenuItem text="Pacientes" onAction="#onPacientes"/>
-                            <MenuItem text="Usuários" onAction="#onUsuarios"/>
-                        </items>
-                    </Menu>
+                <Menu text="Relatórios">
+                    <MenuItem text="Relatórios Gerais" onAction="#onRelatorios"/>
+                </Menu>
 
-                    <!-- AGENDA -->
-                    <Menu text="Agenda">
-                        <items>
-                            <MenuItem text="Agendamentos" onAction="#onAgendamentos"/>
-                        </items>
-                    </Menu>
+                <Menu text="Administração">
+                    <MenuItem text="Usuários &amp; Perfis" onAction="#onUsuarios"/>
+                </Menu>
 
-                    <!-- ESTOQUE -->
-                    <Menu text="Estoque">
-                        <items>
-                            <MenuItem text="Produtos / Insumos" onAction="#onEstoque"/>
-                        </items>
-                    </Menu>
-
-                    <!-- FINANCEIRO -->
-                    <Menu text="Financeiro">
-                        <items>
-                            <MenuItem text="Caixa / Notas" onAction="#onFinanceiro"/>
-                        </items>
-                    </Menu>
-
-                </menus>
+                <Menu text="Sistema">
+                    <MenuItem text="Sair" onAction="#onSair"/>
+                </Menu>
             </MenuBar>
 
             <Separator/>
         </VBox>
     </top>
 
-    <!-- CONTEÚDO CENTRAL -->
+    <!-- CENTRO: DASHBOARD -->
     <center>
-        <VBox alignment="CENTER" spacing="10">
+        <VBox spacing="15">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="15" right="20" bottom="20" left="20"/>
             </padding>
 
-            <Label text="Sistema da Clínica de Integração"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <!-- TÍTULOS -->
+            <VBox spacing="5">
+                <Label text="Clínica Integração"
+                       style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                <Label text="Selecione uma área para começar"
+                       style="-fx-font-size: 14px; -fx-text-fill: #555555;"/>
+            </VBox>
 
-            <Label fx:id="lblUsuario"
-                   text="Usuário: (não definido)"/>
+            <!-- CARDS / BOTÕES GRANDES -->
+            <GridPane hgap="15" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33"/>
+                    <ColumnConstraints percentWidth="33"/>
+                    <ColumnConstraints percentWidth="33"/>
+                </columnConstraints>
 
-            <Label fx:id="lblPerfil"
-                   text="Perfil: (não definido)"/>
+                <!-- Pacientes -->
+                <Button text="Pacientes"
+                        onAction="#onPacientes"
+                        GridPane.rowIndex="0" GridPane.columnIndex="0"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
 
-            <Label text="(Aqui depois vamos abrir as telas de Pacientes, Agenda, Estoque, etc.)"
-                   wrapText="true"
-                   maxWidth="400"/>
+                <!-- Agenda -->
+                <Button text="Agenda"
+                        onAction="#onAgenda"
+                        GridPane.rowIndex="0" GridPane.columnIndex="1"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
+
+                <!-- Estoque -->
+                <Button text="Estoque / Produtos"
+                        onAction="#onEstoque"
+                        GridPane.rowIndex="0" GridPane.columnIndex="2"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
+
+                <!-- Caixa / Notas -->
+                <Button text="Caixa / Notas"
+                        onAction="#onCaixa"
+                        GridPane.rowIndex="1" GridPane.columnIndex="0"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
+
+                <!-- Relatórios -->
+                <Button text="Relatórios"
+                        onAction="#onRelatorios"
+                        GridPane.rowIndex="1" GridPane.columnIndex="1"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
+
+                <!-- Administração -->
+                <Button text="Usuários &amp; Perfis"
+                        onAction="#onUsuarios"
+                        GridPane.rowIndex="1" GridPane.columnIndex="2"
+                        maxWidth="Infinity" maxHeight="80"
+                        style="-fx-font-size: 16px; -fx-padding: 15;"/>
+            </GridPane>
 
         </VBox>
     </center>
+
+    <!-- RODAPÉ: USUÁRIO LOGADO -->
+    <bottom>
+        <HBox spacing="10">
+            <padding>
+                <Insets top="5" right="10" bottom="5" left="10"/>
+            </padding>
+
+            <Label text="Usuário logado:"/>
+            <Label fx:id="lblUsuarioLogado" text="(não informado)"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Clínica Integração - Sistema Interno"
+                   style="-fx-text-fill: #777777;"/>
+        </HBox>
+    </bottom>
 
 </BorderPane>

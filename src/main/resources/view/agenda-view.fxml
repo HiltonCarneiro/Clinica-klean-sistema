@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.AgendaController">
+
+    <top>
+        <VBox spacing="8.0">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Agenda - Clínica de Integração"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <GridPane hgap="10.0" vgap="8.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="80.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                    <ColumnConstraints minWidth="80.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="60.0" />
+                </rowConstraints>
+
+                <!-- Data / Profissional -->
+                <Label text="Data:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="dpData"
+                            onAction="#onDataAlterada"
+                            GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Profissional:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <ComboBox fx:id="cbProfissional"
+                          prefWidth="200"
+                          GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                <!-- Paciente / Sala -->
+                <Label text="Paciente:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cbPaciente"
+                          prefWidth="200"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Sala:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <ComboBox fx:id="cbSala"
+                          prefWidth="150"
+                          GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                <!-- Horários -->
+                <Label text="Hora início:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtHoraInicio"
+                           promptText="08:00"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Hora fim:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtHoraFim"
+                           promptText="09:00"
+                           GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                <!-- Procedimento / Observações -->
+                <Label text="Procedimento:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtProcedimento"
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Observações:" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                <TextArea fx:id="txtObservacoes"
+                          prefRowCount="2"
+                          GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+            </GridPane>
+
+            <!-- Botões -->
+            <HBox spacing="10.0">
+                <Button text="Novo" onAction="#onNovo"/>
+                <Button text="Salvar" onAction="#onSalvar"/>
+                <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
+
+                <Label fx:id="lblMensagem"
+                       textFill="red"
+                       style="-fx-font-weight: bold;"
+                       HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox>
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <TableView fx:id="tbAgenda" prefHeight="400.0">
+                <columns>
+                    <TableColumn fx:id="colHora" text="Horário" prefWidth="140.0"/>
+                    <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="200.0"/>
+                    <TableColumn fx:id="colSala" text="Sala" prefWidth="120.0"/>
+                    <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="200.0"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="120.0"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>

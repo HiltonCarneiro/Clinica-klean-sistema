@@ -41,13 +41,23 @@ public class LoginController {
         // guarda na sessão
         Session.setUsuario(usuario);
 
-        abrirTelaPrincipal();
+        // abre tela principal passando o usuário autenticado
+        abrirTelaPrincipal(usuario);
     }
 
-    private void abrirTelaPrincipal() {
+    private void abrirTelaPrincipal(Usuario usuario) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
             Scene scene = new Scene(loader.load());
+
+            // pega o controller da tela principal
+            MainController mainController = loader.getController();
+            // aqui você escolhe o que mostrar: nome, cargo, login...
+            // Exemplo: mostrar o nome ou o login
+            String nomeOuLogin = usuario.getNome() != null && !usuario.getNome().isBlank()
+                    ? usuario.getNome()
+                    : usuario.getLogin();
+            mainController.setUsuarioLogado(nomeOuLogin);
 
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -55,7 +65,7 @@ public class LoginController {
             stage.setResizable(false);
             stage.show();
 
-            // fecha login
+            // fecha a tela de login
             ((Stage) txtUsuario.getScene().getWindow()).close();
 
         } catch (Exception e) {

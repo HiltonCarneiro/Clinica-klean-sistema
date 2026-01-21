@@ -9,7 +9,13 @@ public class Paciente {
     private String cpf;
     private LocalDate dataNascimento;
     private String telefone;
+    private String responsavelLegal;
+    private boolean ativo = true;
 
+    // Endereço COMPLETO (campo que você usa na tela hoje)
+    private String endereco;
+
+    // Endereço detalhado (campos novos – opcionais)
     private String rua;
     private String numero;
     private String bairro;
@@ -17,11 +23,10 @@ public class Paciente {
     private String cep;
     private String uf;
 
-    private String responsavelLegal;
-    private boolean ativo;
-
     public Paciente() {
     }
+
+    // ===== Getters / Setters =====
 
     public Long getId() {
         return id;
@@ -62,6 +67,33 @@ public class Paciente {
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
+
+    public String getResponsavelLegal() {
+        return responsavelLegal;
+    }
+
+    public void setResponsavelLegal(String responsavelLegal) {
+        this.responsavelLegal = responsavelLegal;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    // ===== Endereço completo (campo da tela) =====
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    // ===== Endereço detalhado (campos novos) =====
 
     public String getRua() {
         return rua;
@@ -111,25 +143,9 @@ public class Paciente {
         this.uf = uf;
     }
 
-    public String getResponsavelLegal() {
-        return responsavelLegal;
-    }
-
-    public void setResponsavelLegal(String responsavelLegal) {
-        this.responsavelLegal = responsavelLegal;
-    }
-
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
-    }
-
     @Override
     public String toString() {
-        return nome + " - " + (cpf != null ? cpf : "") +
-                (ativo ? " (ATIVO)" : " (INATIVO)");
+        // usado em ComboBox / TableView etc.
+        return nome == null ? "" : nome;
     }
 }
