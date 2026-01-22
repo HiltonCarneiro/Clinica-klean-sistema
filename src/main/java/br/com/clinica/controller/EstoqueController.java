@@ -7,21 +7,22 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class EstoqueController {
+
+    // ====== CAMPOS DO FORMULÁRIO ======
 
     @FXML
     private TextField txtNome;
 
     @FXML
-    private ComboBox<TipoProduto> cbTipo;       // AGORA COM TipoProduto
+    private ComboBox<TipoProduto> cbTipo;
 
     @FXML
     private TextField txtUnidade;
@@ -47,6 +48,8 @@ public class EstoqueController {
     @FXML
     private CheckBox chkAtivo;
 
+    // ====== FILTROS ======
+
     @FXML
     private CheckBox chkMostrarInativos;
 
@@ -55,6 +58,8 @@ public class EstoqueController {
 
     @FXML
     private CheckBox chkVencendo;
+
+    // ====== TABELA ======
 
     @FXML
     private TableView<Produto> tableProdutos;
@@ -74,57 +79,126 @@ public class EstoqueController {
     @FXML
     private TableColumn<Produto, Boolean> colAtivo;
 
+    // ====== MENSAGEM ======
+
     @FXML
     private Label lblMensagem;
 
-    private final ProdutoDAO produtoDAO = new ProdutoDAO();
-    private final ObservableList<Produto> dados = FXCollections.observableArrayList();
+    // ====== INFRA ======
 
+    private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private Produto selecionado;
 
-    private final DateTimeFormatter BR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATA_BR =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
-    private void initialize() {
-        // Preenche tipos no ComboBox usando o enum (vai mostrar o rótulo bonitinho)
+    public void initialize() {
+        // Combo de tipos: agora só SUPLEMENTO e INSUMO
         cbTipo.setItems(FXCollections.observableArrayList(TipoProduto.values()));
 
-        // Configura as colunas da tabela
-        colNome.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getNome()));
+        // Colunas da tabela
+        colNome.setCellValueFactory(cell ->
+                new SimpleStringProperty(cell.getValue().getNome()));
 
-        colTipo.setCellValueFactory(c -> {
-            TipoProduto t = c.getValue().getTipo();
-            return new SimpleStringProperty(t != null ? t.getRotulo() : "");
+        colTipo.setCellValueFactory(cell -> {
+            TipoProduto t = cell.getValue().getTipo();
+            return new SimpleStringProperty(t != null ? t.getDescricao() : "");
         });
 
-        colEstoque.setCellValueFactory(c ->
-                new SimpleDoubleProperty(c.getValue().getEstoqueAtual()));
+        colEstoque.setCellValueFactory(cell ->
+                new SimpleDoubleProperty(cell.getValue().getEstoqueAtual()));
 
-        colValidade.setCellValueFactory(c -> {
-            LocalDate v = c.getValue().getValidade();
-            return new SimpleStringProperty(v != null ? v.format(BR) : "");
+        colValidade.setCellValueFactory(cell -> {
+            LocalDate v = cell.getValue().getValidade();
+            String texto = v != null ? v.format(DATA_BR) : "";
+            return new SimpleStringProperty(texto);
         });
 
-        colAtivo.setCellValueFactory(c ->
-                new SimpleBooleanProperty(c.getValue().isAtivo()));
+        colAtivo.setCellValueFactory(cell ->
+                new SimpleBooleanProperty(cell.getValue().isAtivo()));
 
-        tableProdutos.setItems(dados);
-        tableProdutos.setOnMouseClicked(this::onSelecionarProduto);
+        colAtivo.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Boolean ativo, boolean empty) {
+                super.updateItem(ativo, empty);
+                if (empty || ativo == null) {
+                    setText(null);
+                } else {
+                    setText(ativo ? "Ativo" : "Inativo");
+                }
+            }
+        });
 
-        carregarLista();
-        novoProduto();
+        // seleção na tabela -> preenche o formulário
+        tableProdutos.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSel, newSel) -> preencherFormulario(newSel));
+
+        chkAtivo.setSelected(true);
+        lblMensagem.setText("");
+
+        atualizarLista();
     }
 
-    private void carregarLista() {
-        boolean incluirInativos = chkMostrarInativos.isSelected();
-        boolean baixoEstoque = chkBaixoEstoque.isSelected();
-        boolean vencendo = chkVencendo.isSelected();
+    // ====== BOTÕES ======
 
-        dados.setAll(produtoDAO.listar(incluirInativos, baixoEstoque, vencendo));
+    @FXML
+    private void onNovo() {
+        limparFormulario();
+        tableProdutos.getSelectionModel().clearSelection();
+        txtNome.requestFocus();
+        lblMensagem.setText("");
     }
 
-    private void novoProduto() {
+    @FXML
+    private void onSalvar() {
+        lblMensagem.setText("");
+
+        try {
+            Produto p = obterDoFormulario();
+            produtoDAO.salvar(p);
+            atualizarLista();
+            selecionarNaTabela(p);
+            lblMensagem.setText("Produto salvo com sucesso!");
+        } catch (IllegalArgumentException e) {
+            lblMensagem.setText(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensagem.setText("Erro ao salvar produto: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onAtivarDesativar() {
+        Produto p = tableProdutos.getSelectionModel().getSelectedItem();
+        if (p == null) {
+            lblMensagem.setText("Selecione um produto na tabela.");
+            return;
+        }
+
+        produtoDAO.ativarDesativar(p);
+        atualizarLista();
+        selecionarNaTabela(p);
+        lblMensagem.setText("Produto " + (p.isAtivo() ? "ativado" : "inativado") + " com sucesso.");
+    }
+
+    @FXML
+    private void onAtualizarLista() {
+        atualizarLista();
+    }
+
+    // ====== APOIO ======
+
+    private void atualizarLista() {
+        boolean incluirInativos = chkMostrarInativos != null && chkMostrarInativos.isSelected();
+        boolean baixoEstoque = chkBaixoEstoque != null && chkBaixoEstoque.isSelected();
+        boolean vencendo = chkVencendo != null && chkVencendo.isSelected();
+
+        List<Produto> produtos = produtoDAO.listar(incluirInativos, baixoEstoque, vencendo);
+        tableProdutos.setItems(FXCollections.observableArrayList(produtos));
+    }
+
+    private void limparFormulario() {
         selecionado = null;
         txtNome.clear();
         cbTipo.getSelectionModel().clearSelection();
@@ -136,92 +210,13 @@ public class EstoqueController {
         txtPrecoCusto.clear();
         txtPrecoVenda.clear();
         chkAtivo.setSelected(true);
-        lblMensagem.setText("");
     }
 
-    @FXML
-    private void onNovo() {
-        novoProduto();
-    }
-
-    @FXML
-    private void onSalvar() {
-        lblMensagem.setText("");
-
-        if (txtNome.getText().isBlank()) {
-            lblMensagem.setText("Informe o nome do produto.");
-            return;
-        }
-
-        if (cbTipo.getValue() == null) {
-            lblMensagem.setText("Selecione o tipo do produto.");
-            return;
-        }
-
-        try {
-            Produto p = (selecionado == null) ? new Produto() : selecionado;
-
-            p.setNome(txtNome.getText().trim());
-            p.setTipo(cbTipo.getValue()); // Enum
-            p.setUnidade(txtUnidade.getText().trim());
-
-            double estAtual = parseDouble(txtEstoqueAtual.getText());
-            double estMin = parseDouble(txtEstoqueMinimo.getText());
-            p.setEstoqueAtual(estAtual);
-            p.setEstoqueMinimo(estMin);
-
-            p.setLote(txtLote.getText().trim());
-            p.setValidade(dpValidade.getValue());
-
-            p.setPrecoCusto(parseDoubleNullable(txtPrecoCusto.getText()));
-            p.setPrecoVenda(parseDoubleNullable(txtPrecoVenda.getText()));
-
-            p.setAtivo(chkAtivo.isSelected());
-
-            produtoDAO.salvar(p);
-
-            lblMensagem.setText("Produto salvo com sucesso!");
-            carregarLista();
-            novoProduto();
-
-        } catch (NumberFormatException e) {
-            lblMensagem.setText("Verifique os valores numéricos (estoque / preços).");
-        }
-    }
-
-    private double parseDouble(String texto) {
-        if (texto == null || texto.isBlank()) return 0.0;
-        return Double.parseDouble(texto.replace(",", "."));
-    }
-
-    private Double parseDoubleNullable(String texto) {
-        if (texto == null || texto.isBlank()) return null;
-        return Double.parseDouble(texto.replace(",", "."));
-    }
-
-    @FXML
-    private void onAtivarDesativar() {
-        Produto p = tableProdutos.getSelectionModel().getSelectedItem();
+    private void preencherFormulario(Produto p) {
         if (p == null) {
-            lblMensagem.setText("Selecione um produto na tabela.");
+            limparFormulario();
             return;
         }
-
-        p.setAtivo(!p.isAtivo());
-        produtoDAO.ativarDesativar(p);
-        carregarLista();
-
-        lblMensagem.setText("Produto " + (p.isAtivo() ? "ativado" : "inativado") + " com sucesso.");
-    }
-
-    @FXML
-    private void onAtualizarLista() {
-        carregarLista();
-    }
-
-    private void onSelecionarProduto(MouseEvent event) {
-        Produto p = tableProdutos.getSelectionModel().getSelectedItem();
-        if (p == null) return;
 
         selecionado = p;
 
@@ -235,5 +230,80 @@ public class EstoqueController {
         txtPrecoCusto.setText(p.getPrecoCusto() != null ? String.valueOf(p.getPrecoCusto()) : "");
         txtPrecoVenda.setText(p.getPrecoVenda() != null ? String.valueOf(p.getPrecoVenda()) : "");
         chkAtivo.setSelected(p.isAtivo());
+    }
+
+    private Produto obterDoFormulario() {
+        String nome = txtNome.getText() != null ? txtNome.getText().trim() : "";
+        if (nome.isBlank()) {
+            throw new IllegalArgumentException("Informe o nome do produto.");
+        }
+
+        TipoProduto tipo = cbTipo.getValue();
+        if (tipo == null) {
+            throw new IllegalArgumentException("Selecione o tipo do produto (Suplemento ou Insumo).");
+        }
+
+        String unidade = txtUnidade.getText() != null ? txtUnidade.getText().trim() : "";
+        if (unidade.isBlank()) {
+            throw new IllegalArgumentException("Informe a unidade (ex.: un, ml, cx).");
+        }
+
+        double estoqueAtual = parseDouble(txtEstoqueAtual.getText(), "Estoque atual");
+        double estoqueMinimo = parseDouble(txtEstoqueMinimo.getText(), "Estoque mínimo");
+
+        String lote = txtLote.getText();
+        LocalDate validade = dpValidade.getValue();
+
+        Double precoCusto = parseDoubleNullable(txtPrecoCusto.getText());
+        Double precoVenda = parseDoubleNullable(txtPrecoVenda.getText());
+
+        Produto p = (selecionado != null) ? selecionado : new Produto();
+
+        p.setNome(nome);
+        p.setTipo(tipo);
+        p.setUnidade(unidade);
+        p.setEstoqueAtual(estoqueAtual);
+        p.setEstoqueMinimo(estoqueMinimo);
+        p.setLote(lote);
+        p.setValidade(validade);
+        p.setPrecoCusto(precoCusto);
+        p.setPrecoVenda(precoVenda);
+        p.setAtivo(chkAtivo.isSelected());
+
+        return p;
+    }
+
+    private double parseDouble(String texto, String campo) {
+        try {
+            if (texto == null) return 0.0;
+            texto = texto.trim().replace(",", ".");
+            if (texto.isBlank()) return 0.0;
+            return Double.parseDouble(texto);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valor inválido no campo '" + campo + "'.");
+        }
+    }
+
+    private Double parseDoubleNullable(String texto) {
+        if (texto == null) return null;
+        texto = texto.trim().replace(",", ".");
+        if (texto.isBlank()) return null;
+        try {
+            return Double.parseDouble(texto);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valor inválido em preço.");
+        }
+    }
+
+    private void selecionarNaTabela(Produto p) {
+        if (p == null || p.getId() == null) return;
+
+        for (Produto item : tableProdutos.getItems()) {
+            if (p.getId().equals(item.getId())) {
+                tableProdutos.getSelectionModel().select(item);
+                tableProdutos.scrollTo(item);
+                break;
+            }
+        }
     }
 }

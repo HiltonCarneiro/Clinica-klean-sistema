@@ -4,13 +4,65 @@ import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.Produto;
 import br.com.clinica.model.TipoProduto;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO de acesso à tabela 'produto'.
+ */
 public class ProdutoDAO {
 
+    /**
+     * Lista produtos com filtros opcionais.
+     *
+     * @param incluirInativos   se false, retorna apenas produtos com ativo = 1
+     * @param apenasBaixoEstoque se true, retorna apenas produtos com estoqueAtual <= estoqueMinimo
+     * @param apenasVencendo    se true, retorna apenas produtos com validade próxima (30 dias) ou já vencidos
+     */
+    public List<Produto> listar(boolean incluirInativos,
+                                boolean apenasBaixoEstoque,
+                                boolean apenasVencendo) {
+
+        String sql = "SELECT * FROM produto";
+        if (!incluirInativos) {
+            sql += " WHERE ativo = 1";
+        }
+
+        List<Produto> produtos = new ArrayList<>();
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Produto p = mapRow(rs);
+
+                if (apenasBaixoEstoque && p.getEstoqueAtual() > p.getEstoqueMinimo()) {
+                    continue;
+                }
+
+                if (apenasVencendo && !isVencendo(p)) {
+                    continue;
+                }
+
+                produtos.add(p);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar produtos", e);
+        }
+
+        return produtos;
+    }
+
+    /**
+     * Insere ou atualiza um produto.
+     */
     public void salvar(Produto p) {
         if (p.getId() == null) {
             inserir(p);
@@ -20,128 +72,101 @@ public class ProdutoDAO {
     }
 
     private void inserir(Produto p) {
-        String sql = """
-                INSERT INTO produto
-                (nome, tipo, unidade, estoque_atual, estoque_minimo,
-                 lote, validade, preco_custo, preco_venda, ativo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            preencherStatement(p, stmt);
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    p.setId(rs.getInt(1));
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void atualizar(Produto p) {
-        String sql = """
-                UPDATE produto SET
-                    nome           = ?,
-                    tipo           = ?,
-                    unidade        = ?,
-                    estoque_atual  = ?,
-                    estoque_minimo = ?,
-                    lote           = ?,
-                    validade       = ?,
-                    preco_custo    = ?,
-                    preco_venda    = ?,
-                    ativo          = ?
-                WHERE id = ?
-                """;
+        String sql = "INSERT INTO produto (" +
+                "nome, tipo, unidade, estoque_atual, estoque_minimo, lote, validade, preco_custo, preco_venda, ativo" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            preencherStatement(p, stmt);
-            stmt.setInt(11, p.getId());
-
+            preencherCampos(stmt, p);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao inserir produto", e);
         }
     }
 
-    private void preencherStatement(Produto p, PreparedStatement stmt) throws SQLException {
+    private void atualizar(Produto p) {
+        String sql = "UPDATE produto SET " +
+                "nome = ?, tipo = ?, unidade = ?, estoque_atual = ?, estoque_minimo = ?, " +
+                "lote = ?, validade = ?, preco_custo = ?, preco_venda = ?, ativo = ? " +
+                "WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            preencherCampos(stmt, p);
+            stmt.setLong(11, p.getId());
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar produto", e);
+        }
+    }
+
+    /**
+     * Ativa ou inativa (toggle) um produto.
+     */
+    public void ativarDesativar(Produto p) {
+        if (p.getId() == null) {
+            return;
+        }
+        boolean novoStatus = !p.isAtivo();
+
+        String sql = "UPDATE produto SET ativo = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, novoStatus ? 1 : 0);
+            stmt.setLong(2, p.getId());
+            stmt.executeUpdate();
+
+            p.setAtivo(novoStatus);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao alterar status do produto", e);
+        }
+    }
+
+    private void preencherCampos(PreparedStatement stmt, Produto p) throws SQLException {
         stmt.setString(1, p.getNome());
-        stmt.setString(2, p.getTipo() != null ? p.getTipo().toDatabase() : null); // SUPLEMENTO/ORAL/INJETAVEL/TOPICO
+        stmt.setString(2, p.getTipo() != null ? p.getTipo().toDatabase() : null);
         stmt.setString(3, p.getUnidade());
         stmt.setDouble(4, p.getEstoqueAtual());
         stmt.setDouble(5, p.getEstoqueMinimo());
         stmt.setString(6, p.getLote());
-        stmt.setString(7, p.getValidade() != null ? p.getValidade().toString() : null); // yyyy-MM-dd
+
+        if (p.getValidade() != null) {
+            stmt.setString(7, p.getValidade().toString()); // ISO yyyy-MM-dd
+        } else {
+            stmt.setString(7, null);
+        }
 
         if (p.getPrecoCusto() != null) {
             stmt.setDouble(8, p.getPrecoCusto());
         } else {
-            stmt.setNull(8, Types.REAL);
+            stmt.setNull(8, java.sql.Types.REAL);
         }
 
         if (p.getPrecoVenda() != null) {
             stmt.setDouble(9, p.getPrecoVenda());
         } else {
-            stmt.setNull(9, Types.REAL);
+            stmt.setNull(9, java.sql.Types.REAL);
         }
 
         stmt.setInt(10, p.isAtivo() ? 1 : 0);
     }
 
-    public List<Produto> listar(boolean incluirInativos, boolean apenasBaixoEstoque, boolean vencendo30Dias) {
-        List<Produto> lista = new ArrayList<>();
-
-        StringBuilder sql = new StringBuilder("""
-                SELECT * FROM produto WHERE 1=1
-                """);
-
-        if (!incluirInativos) {
-            sql.append(" AND ativo = 1 ");
-        }
-
-        if (apenasBaixoEstoque) {
-            sql.append(" AND estoque_atual <= estoque_minimo ");
-        }
-
-        if (vencendo30Dias) {
-            sql.append(" AND validade IS NOT NULL ");
-            sql.append(" AND validade <= date('now', '+30 day') ");
-        }
-
-        sql.append(" ORDER BY nome ");
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString());
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                lista.add(mapear(rs));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return lista;
-    }
-
-    private Produto mapear(ResultSet rs) throws SQLException {
+    private Produto mapRow(ResultSet rs) throws SQLException {
         Produto p = new Produto();
 
-        p.setId(rs.getInt("id"));
+        p.setId(rs.getLong("id"));
         p.setNome(rs.getString("nome"));
 
-        String tipoDb = rs.getString("tipo"); // SUPLEMENTO/ORAL/INJETAVEL/TOPICO
-        p.setTipo(TipoProduto.fromDatabase(tipoDb));
+        String tipoDb = rs.getString("tipo");
+        p.setTipo(tipoDb != null ? TipoProduto.fromDatabase(tipoDb) : null);
 
         p.setUnidade(rs.getString("unidade"));
         p.setEstoqueAtual(rs.getDouble("estoque_atual"));
@@ -149,18 +174,18 @@ public class ProdutoDAO {
         p.setLote(rs.getString("lote"));
 
         String validadeStr = rs.getString("validade");
-        if (validadeStr != null) {
-            p.setValidade(LocalDate.parse(validadeStr)); // yyyy-MM-dd
+        if (validadeStr != null && !validadeStr.isBlank()) {
+            p.setValidade(LocalDate.parse(validadeStr));
         }
 
-        double custo = rs.getDouble("preco_custo");
-        if (!rs.wasNull()) {
-            p.setPrecoCusto(custo);
+        Object precoCustoObj = rs.getObject("preco_custo");
+        if (precoCustoObj != null) {
+            p.setPrecoCusto(rs.getDouble("preco_custo"));
         }
 
-        double venda = rs.getDouble("preco_venda");
-        if (!rs.wasNull()) {
-            p.setPrecoVenda(venda);
+        Object precoVendaObj = rs.getObject("preco_venda");
+        if (precoVendaObj != null) {
+            p.setPrecoVenda(rs.getDouble("preco_venda"));
         }
 
         p.setAtivo(rs.getInt("ativo") == 1);
@@ -168,18 +193,13 @@ public class ProdutoDAO {
         return p;
     }
 
-    public void ativarDesativar(Produto p) {
-        String sql = "UPDATE produto SET ativo = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, p.isAtivo() ? 1 : 0);
-            stmt.setInt(2, p.getId());
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private boolean isVencendo(Produto p) {
+        LocalDate validade = p.getValidade();
+        if (validade == null) {
+            return false;
         }
+        LocalDate hoje = LocalDate.now();
+        LocalDate limite = hoje.plusDays(30);
+        return !validade.isAfter(limite);
     }
 }

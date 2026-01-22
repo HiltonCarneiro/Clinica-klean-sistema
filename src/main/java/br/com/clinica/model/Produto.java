@@ -2,27 +2,32 @@ package br.com.clinica.model;
 
 import java.time.LocalDate;
 
+/**
+ * Entidade de produto / insumo de estoque.
+ */
 public class Produto {
 
-    private Integer id;
+    private Long id;
     private String nome;
-    private TipoProduto tipo;      // AGORA usando enum
-    private String unidade;        // ex: ml, un, caixa
+    private TipoProduto tipo;
+    private String unidade;        // ex.: "ml", "un", "cx"
     private double estoqueAtual;
     private double estoqueMinimo;
     private String lote;
-    private LocalDate validade;    // yyyy-MM-dd no banco, dd/MM/yyyy na tela
+    private LocalDate validade;
     private Double precoCusto;
     private Double precoVenda;
-    private boolean ativo = true;
+    private boolean ativo;
 
-    // ====== GETTERS / SETTERS ======
+    public Produto() {
+        this.ativo = true;
+    }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
