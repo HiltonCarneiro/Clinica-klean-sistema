@@ -62,13 +62,16 @@ public class EstoqueController {
     // ====== TABELA ======
 
     @FXML
-    private TableView<Produto> tableProdutos;
+    private TableView<Produto> tblProdutos;
 
     @FXML
     private TableColumn<Produto, String> colNome;
 
     @FXML
     private TableColumn<Produto, String> colTipo;
+
+    @FXML
+    private TableColumn<Produto, String> colUnidade;
 
     @FXML
     private TableColumn<Produto, Number> colEstoque;
@@ -131,7 +134,7 @@ public class EstoqueController {
         });
 
         // seleção na tabela -> preenche o formulário
-        tableProdutos.getSelectionModel().selectedItemProperty()
+        tblProdutos.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldSel, newSel) -> preencherFormulario(newSel));
 
         chkAtivo.setSelected(true);
@@ -145,7 +148,7 @@ public class EstoqueController {
     @FXML
     private void onNovo() {
         limparFormulario();
-        tableProdutos.getSelectionModel().clearSelection();
+        tblProdutos.getSelectionModel().clearSelection();
         txtNome.requestFocus();
         lblMensagem.setText("");
     }
@@ -170,7 +173,7 @@ public class EstoqueController {
 
     @FXML
     private void onAtivarDesativar() {
-        Produto p = tableProdutos.getSelectionModel().getSelectedItem();
+        Produto p = tblProdutos.getSelectionModel().getSelectedItem();
         if (p == null) {
             lblMensagem.setText("Selecione um produto na tabela.");
             return;
@@ -195,7 +198,7 @@ public class EstoqueController {
         boolean vencendo = chkVencendo != null && chkVencendo.isSelected();
 
         List<Produto> produtos = produtoDAO.listar(incluirInativos, baixoEstoque, vencendo);
-        tableProdutos.setItems(FXCollections.observableArrayList(produtos));
+        tblProdutos.setItems(FXCollections.observableArrayList(produtos));
     }
 
     private void limparFormulario() {
@@ -298,10 +301,10 @@ public class EstoqueController {
     private void selecionarNaTabela(Produto p) {
         if (p == null || p.getId() == null) return;
 
-        for (Produto item : tableProdutos.getItems()) {
+        for (Produto item : tblProdutos.getItems()) {
             if (p.getId().equals(item.getId())) {
-                tableProdutos.getSelectionModel().select(item);
-                tableProdutos.scrollTo(item);
+                tblProdutos.getSelectionModel().select(item);
+                tblProdutos.scrollTo(item);
                 break;
             }
         }

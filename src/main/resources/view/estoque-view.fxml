@@ -94,15 +94,17 @@
             <Separator/>
 
             <!-- TABELA -->
-            <TableView fx:id="tableProdutos" prefHeight="300">
+            <TableView fx:id="tblProdutos" prefHeight="200.0" prefWidth="600.0">
                 <columns>
-                    <TableColumn fx:id="colNome" text="Nome" prefWidth="200"/>
-                    <TableColumn fx:id="colTipo" text="Tipo" prefWidth="80"/>
-                    <TableColumn fx:id="colEstoque" text="Estoque" prefWidth="120"/>
-                    <TableColumn fx:id="colValidade" text="Validade" prefWidth="100"/>
-                    <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
+                    <TableColumn fx:id="colNome"    text="Nome"    prefWidth="200.0"/>
+                    <TableColumn fx:id="colTipo"    text="Tipo"    prefWidth="120.0"/>
+                    <TableColumn fx:id="colUnidade" text="Unidade" prefWidth="100.0"/>
+                    <TableColumn fx:id="colEstoque" text="Estoque" prefWidth="100.0"/>
+                    <TableColumn fx:id="colValidade" text="Validade" prefWidth="120.0"/>
+                    <TableColumn fx:id="colAtivo"   text="Ativo"   prefWidth="80.0"/>
                 </columns>
             </TableView>
+
 
         </VBox>
     </center>
