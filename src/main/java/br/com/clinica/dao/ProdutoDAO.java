@@ -202,4 +202,18 @@ public class ProdutoDAO {
         LocalDate limite = hoje.plusDays(30);
         return !validade.isAfter(limite);
     }
+
+    /**
+     * Baixa a quantidade informada do estoque do produto.
+     * Usa a mesma Connection da transação da Nota.
+     */
+    public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
+        String sql = "UPDATE produto SET estoque_atual = estoque_atual - ? WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, quantidade);
+            stmt.setLong(2, idProduto);
+            stmt.executeUpdate();
+        }
+    }
 }

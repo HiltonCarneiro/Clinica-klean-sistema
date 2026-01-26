@@ -90,8 +90,21 @@ public class MainController {
 
     @FXML
     private void onCaixa() {
-        // Ainda não implementamos o caixa / notas.
-        mostrarAviso("Caixa / Notas", "Tela de Caixa / Notas ainda não implementada.\nSerá ligada ao estoque e atendimentos.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/caixa-view.fxml"));
+            Scene scene = new Scene(loader.load(), 1000, 600);
+
+            Stage stage = new Stage();
+            stage.setTitle("Caixa / Notas - Clínica Integração");
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir tela de caixa / notas", e.getMessage());
+        }
     }
 
     @FXML
