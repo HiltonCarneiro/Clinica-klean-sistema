@@ -108,6 +108,26 @@ public class MainController {
     }
 
     @FXML
+    private void onMovimentoCaixa() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/movimento-caixa-view.fxml"));
+            Scene scene = new Scene(loader.load(), 900, 600);
+
+            Stage stage = new Stage();
+            stage.setTitle("Movimento de Caixa - Clínica Integração");
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir tela de movimento de caixa", e.getMessage());
+        }
+    }
+
+
+    @FXML
     private void onRelatorios() {
         // Ainda não implementamos relatórios.
         mostrarAviso("Relatórios", "Tela de Relatórios ainda não implementada.\nNo futuro: atendimentos, faturamento, estoque etc.");

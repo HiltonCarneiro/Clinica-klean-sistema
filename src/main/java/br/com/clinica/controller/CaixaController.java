@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
+import br.com.clinica.service.NotaPrintService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -95,6 +96,10 @@ public class CaixaController {
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private final NotaDAO notaDAO = new NotaDAO();
+
+    // novo serviço de impressão
+    private final NotaPrintService notaPrintService = new NotaPrintService();
+
 
     // Lista observável de itens da nota
     private final ObservableList<NotaItem> itensNota = FXCollections.observableArrayList();
@@ -344,7 +349,11 @@ public class CaixaController {
             nota.setItens(listaItens);
             nota.recalcularTotais();
 
+            // 1) Salva no banco (nota, itens, movimento, baixa estoque)
             notaDAO.salvarNota(nota);
+
+            // 2) Imprime (ou salva em PDF via Microsoft Print to PDF)
+            notaPrintService.imprimirNota(nota, lblTotal.getScene().getWindow());
 
             mostrarAviso("Nota salva", "Nota / recibo gravado com sucesso!");
             limparFormulario();

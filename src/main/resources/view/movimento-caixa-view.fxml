@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.MovimentoCaixaController">
+
+    <!-- TOPO: filtros de período -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Movimento de Caixa"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="De:"/>
+            <DatePicker fx:id="dtInicio"/>
+
+            <Label text="Até:"/>
+            <DatePicker fx:id="dtFim"/>
+
+            <Button fx:id="btnBuscar"
+                    text="Buscar"
+                    onAction="#onBuscar"/>
+        </HBox>
+    </top>
+
+    <!-- CENTRO: tabela -->
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="5" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <TableView fx:id="tblMovimentos" prefHeight="400">
+                <columns>
+                    <TableColumn fx:id="colData" text="Data" prefWidth="100"/>
+                    <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="250"/>
+                    <TableColumn fx:id="colTipo" text="Tipo" prefWidth="80"/>
+                    <TableColumn fx:id="colValor" text="Valor" prefWidth="100"/>
+                    <TableColumn fx:id="colFormaPagamento" text="Pagamento" prefWidth="120"/>
+                    <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="180"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- RODAPÉ: totais -->
+    <bottom>
+        <HBox spacing="20" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="5" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Entradas:"/>
+            <Label fx:id="lblEntradas" text="R$ 0,00"
+                   style="-fx-font-weight: bold;"/>
+
+            <Label text="Saídas:"/>
+            <Label fx:id="lblSaidas" text="R$ 0,00"
+                   style="-fx-font-weight: bold;"/>
+
+            <Label text="Saldo:"/>
+            <Label fx:id="lblSaldo" text="R$ 0,00"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button fx:id="btnFechar"
+                    text="Fechar"
+                    onAction="#onFechar"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

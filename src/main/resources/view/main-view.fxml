@@ -19,6 +19,7 @@
                 <Menu text="Movimentações">
                     <MenuItem text="Agenda" onAction="#onAgenda"/>
                     <MenuItem text="Caixa / Notas" onAction="#onCaixa"/>
+                    <MenuItem text="Movimento de Caixa" onAction="#onMovimentoCaixa"/>
                     <MenuItem text="Estoque" onAction="#onEstoque"/>
                 </Menu>
 
