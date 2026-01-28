@@ -5,16 +5,17 @@ import br.com.clinica.dao.PacienteDAO;
 import br.com.clinica.dao.ProdutoDAO;
 import br.com.clinica.dao.UsuarioDAO;
 import br.com.clinica.model.*;
+import br.com.clinica.service.NotaPdfService;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.ToggleGroup;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import br.com.clinica.service.NotaPrintService;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,9 +98,8 @@ public class CaixaController {
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private final NotaDAO notaDAO = new NotaDAO();
 
-    // novo serviço de impressão
-    private final NotaPrintService notaPrintService = new NotaPrintService();
-
+    // Serviço para geração de PDF
+    private final NotaPdfService notaPdfService = new NotaPdfService();
 
     // Lista observável de itens da nota
     private final ObservableList<NotaItem> itensNota = FXCollections.observableArrayList();
@@ -124,7 +124,6 @@ public class CaixaController {
     }
 
     private void carregarCombosPrincipais() {
-        // Aqui você pode ajustar para os métodos reais dos seus DAOs
         List<Paciente> pacientes = pacienteDAO.listarAtivos();
         cbPaciente.setItems(FXCollections.observableArrayList(pacientes));
 
@@ -164,7 +163,6 @@ public class CaixaController {
             return new SimpleStringProperty(texto);
         });
 
-        // IMPORTANTE: TableColumn agora é <NotaItem, Double>
         colQuantidade.setCellValueFactory(cell ->
                 new SimpleDoubleProperty(cell.getValue().getQuantidade()).asObject());
 
@@ -180,7 +178,6 @@ public class CaixaController {
 
         grupoTipoItem.selectedToggleProperty().addListener((obs, old, novo) -> atualizarCamposTipoItem());
 
-        // Ao selecionar um produto, sugere o preço de venda no campo de valor unitário
         cbProduto.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
             if (novo != null && novo.getPrecoVenda() != null) {
                 txtValorUnitario.setText(String.valueOf(novo.getPrecoVenda()));
@@ -307,7 +304,7 @@ public class CaixaController {
 
     private void limparCamposItem() {
         txtDescricaoProcedimento.clear();
-        // mantém quantidade e valor (facilita uso repetido)
+        // mantém quantidade e valor
     }
 
     // -------------------------------------------------------------------------
@@ -352,10 +349,35 @@ public class CaixaController {
             // 1) Salva no banco (nota, itens, movimento, baixa estoque)
             notaDAO.salvarNota(nota);
 
-            // 2) Imprime (ou salva em PDF via Microsoft Print to PDF)
-            notaPrintService.imprimirNota(nota, lblTotal.getScene().getWindow());
+            // 2) Escolhe onde salvar o PDF
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Salvar nota em PDF");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Arquivo PDF", "*.pdf"));
 
-            mostrarAviso("Nota salva", "Nota / recibo gravado com sucesso!");
+            String nomePaciente = paciente.getNome() != null
+                    ? paciente.getNome().replaceAll("[^a-zA-Z0-9_\\- ]", "")
+                    : "nota";
+
+            fileChooser.setInitialFileName("nota_" + nomePaciente + ".pdf");
+
+            File destino = fileChooser.showSaveDialog(lblTotal.getScene().getWindow());
+
+            if (destino != null) {
+                try {
+                    notaPdfService.gerarRecibo(nota, destino);
+                    mostrarAviso("Nota salva",
+                            "Nota gravada com sucesso!\n\nPDF gerado em:\n" + destino.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    mostrarErro("Erro ao gerar PDF", ex.getMessage());
+                    return; // não limpa se der erro no PDF
+                }
+            } else {
+                mostrarAviso("Nota salva",
+                        "Nota gravada com sucesso.\n(O PDF não foi gerado porque o salvamento foi cancelado.)");
+            }
+
             limparFormulario();
 
         } catch (Exception e) {
