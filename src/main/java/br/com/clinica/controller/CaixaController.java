@@ -10,15 +10,19 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class CaixaController {
 
@@ -101,7 +105,12 @@ public class CaixaController {
     // Serviço para geração de PDF
     private final NotaPdfService notaPdfService = new NotaPdfService();
 
-    // Lista observável de itens da nota
+    // Listas principais (originais) para pesquisa
+    private final ObservableList<Paciente> pacientes = FXCollections.observableArrayList();
+    private final ObservableList<Usuario> profissionais = FXCollections.observableArrayList();
+    private final ObservableList<Produto> produtos = FXCollections.observableArrayList();
+
+    // Lista de itens da nota
     private final ObservableList<NotaItem> itensNota = FXCollections.observableArrayList();
 
     @FXML
@@ -110,6 +119,7 @@ public class CaixaController {
         carregarCombosPrincipais();
         configurarTabela();
         configurarTipoItem();
+        configurarPesquisaCombos();  // <<< habilita pesquisa
         atualizarTotal();
     }
 
@@ -124,12 +134,15 @@ public class CaixaController {
     }
 
     private void carregarCombosPrincipais() {
-        List<Paciente> pacientes = pacienteDAO.listarAtivos();
-        cbPaciente.setItems(FXCollections.observableArrayList(pacientes));
+        // Pacientes
+        pacientes.setAll(pacienteDAO.listarAtivos());
+        cbPaciente.setItems(pacientes);
 
-        List<Usuario> profissionais = usuarioDAO.listarProfissionaisAtivos();
-        cbProfissional.setItems(FXCollections.observableArrayList(profissionais));
+        // Profissionais
+        profissionais.setAll(usuarioDAO.listarProfissionaisAtivos());
+        cbProfissional.setItems(profissionais);
 
+        // Formas de pagamento
         cbFormaPagamento.setItems(FXCollections.observableArrayList(
                 "DINHEIRO",
                 "PIX",
@@ -140,8 +153,9 @@ public class CaixaController {
             cbFormaPagamento.getSelectionModel().selectFirst();
         }
 
-        List<Produto> produtos = produtoDAO.listar(false, false, false);
-        cbProduto.setItems(FXCollections.observableArrayList(produtos));
+        // Produtos
+        produtos.setAll(produtoDAO.listar(false, false, false));
+        cbProduto.setItems(produtos);
     }
 
     private void configurarTabela() {
@@ -197,6 +211,84 @@ public class CaixaController {
 
         txtQuantidade.setDisable(false);
         txtValorUnitario.setDisable(false);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pesquisa em Combos (Paciente e Produto)
+    // -------------------------------------------------------------------------
+
+    private void configurarPesquisaCombos() {
+        // Paciente: pesquisa pelo nome
+        configurarComboPesquisa(cbPaciente, pacientes, Paciente::getNome);
+
+        // Produto: pesquisa pelo nome
+        configurarComboPesquisa(cbProduto, produtos, Produto::getNome);
+    }
+
+    /**
+     * Deixa um ComboBox pesquisável: conforme digita, filtra a lista.
+     */
+    private <T> void configurarComboPesquisa(ComboBox<T> comboBox,
+                                             ObservableList<T> itensOriginais,
+                                             Function<T, String> textoFunc) {
+
+        comboBox.setEditable(true);
+
+        // Lista filtrada que é mostrada no combo
+        FilteredList<T> filtrados = new FilteredList<>(itensOriginais, p -> true);
+        comboBox.setItems(filtrados);
+
+        // Como o objeto vira texto no editor
+        comboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(T obj) {
+                return obj == null ? "" : textoFunc.apply(obj);
+            }
+
+            @Override
+            public T fromString(String string) {
+                // não usamos o editor para criar novos itens
+                return comboBox.getValue();
+            }
+        });
+
+        TextField editor = comboBox.getEditor();
+
+        // Quando digitar, filtra
+        editor.textProperty().addListener((obs, old, texto) -> {
+            T selecionado = comboBox.getSelectionModel().getSelectedItem();
+
+            // se o selecionado já é igual ao texto, não filtra
+            if (selecionado != null && textoFunc.apply(selecionado).equals(texto)) {
+                return;
+            }
+
+            filtrados.setPredicate(item -> {
+                if (texto == null || texto.isBlank()) return true;
+                String lower = texto.toLowerCase();
+                return textoFunc.apply(item).toLowerCase().contains(lower);
+            });
+
+            comboBox.show();
+        });
+
+        // Quando escolher um item, coloca o texto certinho no editor
+        comboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
+            if (novo != null) {
+                editor.setText(textoFunc.apply(novo));
+            }
+        });
+
+        // Quando fechar o popup, volta a lista completa
+        comboBox.setOnHidden(e -> {
+            filtrados.setPredicate(item -> true);
+            T selecionado = comboBox.getSelectionModel().getSelectedItem();
+            if (selecionado == null) {
+                editor.clear();
+            } else {
+                editor.setText(textoFunc.apply(selecionado));
+            }
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -390,7 +482,7 @@ public class CaixaController {
         itensNota.clear();
         atualizarTotal();
         txtObservacao.clear();
-        // mantém paciente, profissional e forma de pagamento
+        // mantém paciente, profissional e forma de pagamento selecionados
     }
 
     @FXML

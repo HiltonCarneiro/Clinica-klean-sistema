@@ -45,11 +45,8 @@ public class NotaPdfService {
                 y = desenharLogo(document, content, startX, y);
                 y -= 20;
 
-                // ===== DADOS DA CLÍNICA =====
+                // ===== NOME DA CLÍNICA (sem endereço/telefone) =====
                 y = escreverLinha(content, startX, y, 16, true, "Klean Saúde Integrativa");
-                y = escreverLinha(content, startX, y, 12, false, "Clínica de Saúde Integrativa");
-                y = escreverLinha(content, startX, y, 10, false, "Endereço: ______________________________");
-                y = escreverLinha(content, startX, y, 10, false, "Telefone: ______________________________");
                 y -= 10;
 
                 // ===== TÍTULO E DADOS GERAIS =====
@@ -87,12 +84,16 @@ public class NotaPdfService {
                 // ===== ITENS =====
                 int index = 1;
                 for (NotaItem item : nota.getItens()) {
+                    // ITEM: apenas o número (1, 2, 3...)
+                    escreverTexto(content, colItemX, y, 10, false, String.valueOf(index));
+
+                    // DESCRIÇÃO: "Produto: X" ou "Procedimento: Y" (formato C)
                     String tipo = (item.getTipoItem() == TipoItemNota.PRODUTO)
                             ? "Produto" : "Procedimento";
-                    String itemLabel = index + " - " + tipo;
+                    String descricaoFinal = tipo + ": " + item.getDescricao();
+                    escreverTexto(content, colDescX, y, 10, false, descricaoFinal);
 
-                    escreverTexto(content, colItemX, y, 10, false, itemLabel);
-                    escreverTexto(content, colDescX, y, 10, false, item.getDescricao());
+                    // Quantidade / Unitário / Total
                     escreverTexto(content, colQtdX,  y, 10, false,
                             String.format("%.2f", item.getQuantidade()));
                     escreverTexto(content, colUnitX, y, 10, false,

@@ -110,4 +110,8 @@ public class Produto {
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
     }
+    @Override
+    public String toString() {
+        return nome != null ? nome : "Produto";
+    }
 }
