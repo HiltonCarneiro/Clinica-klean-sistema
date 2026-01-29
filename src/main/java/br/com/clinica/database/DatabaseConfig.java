@@ -7,7 +7,6 @@ import java.sql.Statement;
 
 public class DatabaseConfig {
 
-    // Caminho do arquivo SQLite (será criado na pasta raiz do projeto)
     private static final String URL = "jdbc:sqlite:clinica.db";
 
     public static Connection getConnection() throws SQLException {
@@ -18,39 +17,44 @@ public class DatabaseConfig {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // Garante que as foreign keys funcionem corretamente
             stmt.execute("PRAGMA foreign_keys = ON;");
 
-            // ====== TABELA PERFIL ======
-            String sqlPerfil = """
+            // ===== PERFIL =====
+            stmt.execute("""
                 CREATE TABLE IF NOT EXISTS perfil (
                     id   INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome TEXT NOT NULL UNIQUE
                 );
-            """;
+            """);
 
-            // ====== TABELA USUARIO ======
-            String sqlUsuario = """
+            // ===== USUARIO (com pessoa_nome) =====
+            stmt.execute("""
                 CREATE TABLE IF NOT EXISTS usuario (
-                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome      TEXT NOT NULL,            -- aqui usamos o CARGO (ex: ENFERMEIRA)
-                    login     TEXT NOT NULL UNIQUE,
-                    senha     TEXT NOT NULL,
-                    ativo     INTEGER NOT NULL DEFAULT 1,
-                    perfil_id INTEGER NOT NULL,
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome        TEXT NOT NULL,            -- CARGO (ex: ENFERMEIRA)
+                    pessoa_nome TEXT,                     -- Nome da pessoa
+                    login       TEXT NOT NULL UNIQUE,     -- login normalizado (ex: patricia.goncalo)
+                    senha       TEXT NOT NULL,
+                    ativo       INTEGER NOT NULL DEFAULT 1,
+                    perfil_id   INTEGER NOT NULL,
                     FOREIGN KEY (perfil_id) REFERENCES perfil(id)
                 );
-            """;
+            """);
 
-            // ====== TABELA PACIENTE (com endereço detalhado) ======
-            String sqlPaciente = """
+            // MIGRAÇÃO: se banco antigo não tinha pessoa_nome
+            try {
+                stmt.execute("ALTER TABLE usuario ADD COLUMN pessoa_nome TEXT;");
+            } catch (SQLException ignored) { }
+
+            // ===== PACIENTE =====
+            stmt.execute("""
                 CREATE TABLE IF NOT EXISTS paciente (
                     id                INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome              TEXT NOT NULL,
                     cpf               TEXT UNIQUE,
                     data_nascimento   TEXT,
                     telefone          TEXT,
-                    endereco          TEXT,          -- campo antigo (pode continuar usando se quiser)
+                    endereco          TEXT,
                     responsavel_legal TEXT,
                     ativo             INTEGER NOT NULL DEFAULT 1,
                     rua               TEXT,
@@ -60,76 +64,79 @@ public class DatabaseConfig {
                     cep               TEXT,
                     uf                TEXT
                 );
-            """;
+            """);
 
-            // ====== TABELA PRODUTO (ESTOQUE) ======
-            String sqlProduto = """
+            // ===== PRODUTO =====
+            stmt.execute("""
                 CREATE TABLE IF NOT EXISTS produto (
                     id             INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome           TEXT NOT NULL,
-                    tipo           TEXT NOT NULL,           -- INSUMO ou VENDA
-                    unidade        TEXT,                    -- ml, un, caixa, etc.
+                    tipo           TEXT NOT NULL,
+                    unidade        TEXT,
                     estoque_atual  REAL NOT NULL DEFAULT 0,
                     estoque_minimo REAL NOT NULL DEFAULT 0,
                     lote           TEXT,
-                    validade       TEXT,                    -- yyyy-MM-dd
+                    validade       TEXT,
                     preco_custo    REAL,
                     preco_venda    REAL,
                     ativo          INTEGER NOT NULL DEFAULT 1
                 );
-            """;
+            """);
 
-            // Cria / garante as tabelas
-            stmt.execute(sqlPerfil);
-            stmt.execute(sqlUsuario);
-            stmt.execute(sqlPaciente);
-            stmt.execute(sqlProduto);
+            // ===== AGENDAMENTO =====
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS agendamento (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data            TEXT NOT NULL,
+                    hora_inicio     TEXT NOT NULL,
+                    hora_fim        TEXT NOT NULL,
+                    paciente_id     INTEGER,
+                    profissional_id INTEGER NOT NULL,
+                    sala            TEXT NOT NULL,
+                    procedimento    TEXT,
+                    observacoes     TEXT,
+                    status          TEXT NOT NULL DEFAULT 'AGENDADO',
+                    FOREIGN KEY (paciente_id) REFERENCES paciente(id),
+                    FOREIGN KEY (profissional_id) REFERENCES usuario(id)
+                );
+            """);
 
-            // ====== DADOS INICIAIS DE PERFIL ======
-            String sqlPerfisIniciais = """
-                INSERT OR IGNORE INTO perfil (id, nome) VALUES
-                    (1, 'ADMIN'),
-                    (2, 'ENFERMEIRA'),
-                    (3, 'RECEPCIONISTA'),
-                    (4, 'NUTRICIONISTA'),
-                    (5, 'FISIOTERAPEUTA'),
-                    (6, 'MEDICO');
-            """;
-            stmt.execute(sqlPerfisIniciais);
+            // ===== MIGRAÇÃO PERFIL: MEDICO -> MEDICA (se existir) =====
+            stmt.execute("UPDATE perfil SET nome='MEDICA' WHERE nome='MEDICO';");
 
-            // ====== USUÁRIOS INICIAIS (NOME = CARGO) ======
-            String sqlUsuariosIniciais = """
-                INSERT OR IGNORE INTO usuario (id, nome, login, senha, ativo, perfil_id) VALUES
-                    (1, 'ADMIN',          'admin',          'admin', 1, 1),
-                    (2, 'ENFERMEIRA',     'enfermeira',     '123',   1, 2),
-                    (3, 'RECEPCIONISTA',  'recepcionista',  '123',   1, 3),
-                    (4, 'NUTRICIONISTA',  'nutricionista',  '123',   1, 4),
-                    (5, 'FISIOTERAPEUTA', 'fisioterapeuta', '123',   1, 5),
-                    (6, 'MEDICO',         'medico',         '123',   1, 6);
-            """;
-            stmt.execute(sqlUsuariosIniciais);
+            // ===== PERFIS INICIAIS =====
+            stmt.execute("""
+                INSERT OR IGNORE INTO perfil (nome) VALUES
+                    ('ADMINISTRADOR'),
+                    ('ENFERMEIRA'),
+                    ('RECEPCIONISTA'),
+                    ('NUTRICIONISTA'),
+                    ('FISIOTERAPEUTA'),
+                    ('PSICOLOGA'),
+                    ('MEDICA');
+            """);
 
-            // ====== TABELA AGENDAMENTO ======
-            String sqlAgendamento = """
-    CREATE TABLE IF NOT EXISTS agendamento (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        data            TEXT NOT NULL,            -- yyyy-MM-dd
-        hora_inicio     TEXT NOT NULL,            -- HH:mm
-        hora_fim        TEXT NOT NULL,            -- HH:mm
-        paciente_id     INTEGER,                  -- pode ser nulo se marcar sem paciente definido ainda
-        profissional_id INTEGER NOT NULL,         -- referencia usuario
-        sala            TEXT NOT NULL,            -- CONSULTORIO_1, CONSULTORIO_2, SALA_PROCEDIMENTOS
-        procedimento    TEXT,
-        observacoes     TEXT,
-        status          TEXT NOT NULL DEFAULT 'AGENDADO', -- AGENDADO, CANCELADO, CONCLUIDO
-        FOREIGN KEY (paciente_id) REFERENCES paciente(id),
-        FOREIGN KEY (profissional_id) REFERENCES usuario(id)
-    );
-""";
+            // ===== USUÁRIOS INICIAIS (login normalizado) =====
+            stmt.execute("""
+                INSERT OR IGNORE INTO usuario (nome, pessoa_nome, login, senha, ativo, perfil_id) VALUES
+                    ('ENFERMEIRA',     'Irenilza Lins',      'irencilza.lins',       '123',   1, (SELECT id FROM perfil WHERE nome='ENFERMEIRA')),
+                    ('NUTRICIONISTA',  'Gerlane Cavalcante', 'gerlane.cavalcante',   '123',   1, (SELECT id FROM perfil WHERE nome='NUTRICIONISTA')),
+                    ('FISIOTERAPEUTA', 'Isabelly Fernandes', 'isabelly.fernandes',   '123',   1, (SELECT id FROM perfil WHERE nome='FISIOTERAPEUTA')),
+                    ('MEDICA',         'Enolla Mayenne',     'enolla.mayenne',       '123',   1, (SELECT id FROM perfil WHERE nome='MEDICA')),
+                    ('PSICOLOGA',      'Gisélia Costa',      'giselia.costa',        '123',   1, (SELECT id FROM perfil WHERE nome='PSICOLOGA')),
+                    ('RECEPCIONISTA',  'Patrícia Gonçalo',   'patricia.goncalo',     '123',   1, (SELECT id FROM perfil WHERE nome='RECEPCIONISTA')),
+                    ('ADMINISTRADOR',  'Irenilza Lins',      'irencilza.lins.admin', 'admin', 1, (SELECT id FROM perfil WHERE nome='ADMINISTRADOR'));
+            """);
 
-            stmt.execute(sqlAgendamento);
+            // MIGRAÇÃO: se existia usuário "medico"
+            stmt.execute("""
+                UPDATE usuario
+                   SET nome='MEDICA',
+                       perfil_id=(SELECT id FROM perfil WHERE nome='MEDICA')
+                 WHERE nome='MEDICO';
+            """);
 
-            System.out.println("Banco de dados inicializado com sucesso!");
+            System.out.println("Banco de dados inicializado/migrado com sucesso!");
 
         } catch (SQLException e) {
             System.out.println("Erro ao inicializar o banco: " + e.getMessage());

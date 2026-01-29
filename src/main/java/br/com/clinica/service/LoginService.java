@@ -19,6 +19,7 @@ public class LoginService {
         senha = senha.trim();
 
         // chama o método certo do DAO
-        return usuarioDAO.autenticar(login, senha);
+        return usuarioDAO.buscarPorLoginESenha(login, senha);
+
     }
 }

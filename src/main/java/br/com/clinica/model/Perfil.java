@@ -26,8 +26,9 @@ public class Perfil {
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        this.nome = (nome == null) ? null : nome.trim().toUpperCase();
     }
+
 
     @Override
     public String toString() {

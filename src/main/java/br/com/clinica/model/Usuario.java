@@ -21,6 +21,17 @@ public class Usuario {
         this.perfil = perfil;
     }
 
+    private String pessoaNome;
+
+    public String getPessoaNome() {
+        return pessoaNome;
+    }
+
+    public void setPessoaNome(String pessoaNome) {
+        this.pessoaNome = pessoaNome;
+    }
+
+
     // === ID ===
     public Integer getId() {
         return id;
@@ -77,10 +88,8 @@ public class Usuario {
 
     @Override
     public String toString() {
-        // isso que aparece no ComboBox de profissional
-        if (perfil != null) {
-            return nome + " (" + perfil.getNome().toUpperCase() + ")";
-        }
-        return nome;
+        String pessoa = (pessoaNome != null && !pessoaNome.isBlank()) ? pessoaNome : "(sem nome)";
+        return pessoa + " - " + nome + " (" + login + ")";
     }
+
 }

@@ -4,26 +4,24 @@ import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.Perfil;
 import br.com.clinica.model.Usuario;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.*;
 
 public class UsuarioDAO {
 
-    // === Autenticar login ===
-    public Usuario autenticar(String login, String senha) {
+    public Usuario buscarPorLoginESenha(String login, String senha) {
         String sql = """
-                SELECT u.id,
-                       u.nome,
-                       u.login,
-                       u.senha,
-                       u.ativo,
-                       p.id AS perfil_id,
-                       p.nome AS perfil_nome
-                FROM usuario u
-                LEFT JOIN perfil p ON p.id = u.perfil_id
-                WHERE u.login = ? AND u.senha = ? AND u.ativo = 1
-                """;
+           SELECT u.id, u.nome, u.pessoa_nome, u.login, u.senha, u.ativo,
+                  p.id AS perfil_id, p.nome AS perfil_nome
+           FROM usuario u
+           JOIN perfil p ON p.id = u.perfil_id
+           WHERE u.login = ? AND u.senha = ? AND u.ativo = 1
+        """;
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -34,64 +32,66 @@ public class UsuarioDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return mapUsuario(rs);
+                Usuario u = new Usuario();
+                u.setId(rs.getInt("id"));
+                u.setNome(rs.getString("nome")); // CARGO (ex: ENFERMEIRA)
+                u.setPessoaNome(rs.getString("pessoa_nome")); // NOME DA PESSOA
+                u.setLogin(rs.getString("login"));
+                u.setSenha(rs.getString("senha"));
+                u.setAtivo(rs.getInt("ativo") == 1);
+
+                Perfil perfil = new Perfil();
+                perfil.setId(rs.getLong("perfil_id"));
+                perfil.setNome(rs.getString("perfil_nome"));
+                u.setPerfil(perfil);
+
+                return u;
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Erro ao autenticar usuário: " + e.getMessage());
         }
 
         return null;
     }
-
-    // === Listar todos ativos ===
     public List<Usuario> listarProfissionaisAtivos() {
+        String sql = """
+        SELECT u.id, u.nome, u.pessoa_nome, u.login, u.senha, u.ativo,
+               p.id AS perfil_id, p.nome AS perfil_nome
+        FROM usuario u
+        JOIN perfil p ON p.id = u.perfil_id
+        WHERE u.ativo = 1
+          AND p.nome <> 'ADMIN'          -- tira o admin
+        ORDER BY p.nome, u.pessoa_nome, u.nome;
+    """;
+
         List<Usuario> lista = new ArrayList<>();
 
-        String sql = """
-                SELECT u.id,
-                       u.nome,
-                       u.login,
-                       u.senha,
-                       u.ativo,
-                       p.id AS perfil_id,
-                       p.nome AS perfil_nome
-                FROM usuario u
-                LEFT JOIN perfil p ON p.id = u.perfil_id
-                WHERE u.ativo = 1
-                ORDER BY u.nome ASC
-                """;
-
         try (Connection conn = DatabaseConfig.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                lista.add(mapUsuario(rs));
-            }
+                Usuario u = new Usuario();
+                u.setId(rs.getInt("id"));
+                u.setNome(rs.getString("nome")); // cargo
+                u.setPessoaNome(rs.getString("pessoa_nome")); // nome da pessoa (se existir)
+                u.setLogin(rs.getString("login"));
+                u.setSenha(rs.getString("senha"));
+                u.setAtivo(rs.getInt("ativo") == 1);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+                Perfil perfil = new Perfil();
+                perfil.setId(rs.getLong("perfil_id"));
+                perfil.setNome(rs.getString("perfil_nome"));
+                u.setPerfil(perfil);
+
+                lista.add(u);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar profissionais", e);
         }
 
         return lista;
     }
 
-    // === Mapear resultado para objeto Usuario ===
-    private Usuario mapUsuario(ResultSet rs) throws Exception {
-        Usuario u = new Usuario();
-
-        u.setId(rs.getInt("id"));
-        u.setNome(rs.getString("nome"));
-        u.setLogin(rs.getString("login"));
-        u.setSenha(rs.getString("senha"));
-        u.setAtivo(rs.getInt("ativo") == 1);
-
-        Perfil perfil = new Perfil();
-        perfil.setId(rs.getLong("perfil_id"));
-        perfil.setNome(rs.getString("perfil_nome"));
-        u.setPerfil(perfil);
-
-        return u;
-    }
 }

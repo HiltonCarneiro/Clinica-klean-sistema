@@ -50,6 +50,37 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
             Scene scene = new Scene(loader.load());
 
+            MainController mainController = loader.getController();
+
+            String cargo = usuario.getNome();
+            String pessoa = usuario.getPessoaNome();
+            String login = usuario.getLogin();
+
+            String texto = (cargo != null ? cargo : "SEM CARGO")
+                    + " - "
+                    + (pessoa != null && !pessoa.isBlank() ? pessoa : "SEM NOME")
+                    + " (" + login + ")";
+
+            mainController.setUsuarioLogado(texto);
+
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle("Clínica Integração - Sistema");
+            stage.setResizable(false);
+            stage.show();
+
+            ((Stage) txtUsuario.getScene().getWindow()).close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*private void abrirTelaPrincipal(Usuario usuario) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
+            Scene scene = new Scene(loader.load());
+
             // pega o controller da tela principal
             MainController mainController = loader.getController();
             // aqui você escolhe o que mostrar: nome, cargo, login...
@@ -70,6 +101,5 @@ public class LoginController {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
+        }*/
 }

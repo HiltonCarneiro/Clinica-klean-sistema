@@ -1,5 +1,9 @@
 package br.com.clinica.controller;
 
+import br.com.clinica.auth.AuthGuard;
+import br.com.clinica.auth.Permissao;
+import br.com.clinica.auth.exceptions.AcessoNegadoException;
+import br.com.clinica.auth.exceptions.NaoAutenticadoException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -35,6 +39,8 @@ public class MainController {
     @FXML
     private void onPacientes() {
         try {
+            AuthGuard.exigirPermissao(Permissao.PACIENTE_VER);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/paciente-view.fxml"));
             Scene scene = new Scene(loader.load(), 900, 600);
 
@@ -45,6 +51,8 @@ public class MainController {
             stage.setResizable(true);
             stage.show();
 
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao abrir tela de pacientes", e.getMessage());
@@ -54,6 +62,8 @@ public class MainController {
     @FXML
     private void onEstoque() {
         try {
+            AuthGuard.exigirPermissao(Permissao.ESTOQUE_VER);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/estoque-view.fxml"));
             Scene scene = new Scene(loader.load(), 900, 600);
 
@@ -64,6 +74,8 @@ public class MainController {
             stage.setResizable(true);
             stage.show();
 
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao abrir tela de estoque", e.getMessage());
@@ -73,6 +85,8 @@ public class MainController {
     @FXML
     private void onAgenda() {
         try {
+            AuthGuard.exigirPermissao(Permissao.AGENDA_VER);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/agenda-view.fxml"));
             Scene scene = new Scene(loader.load(), 1000, 600);
 
@@ -82,6 +96,8 @@ public class MainController {
             stage.setResizable(true);
             stage.show();
 
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao abrir tela de agenda", e.getMessage());
@@ -91,6 +107,8 @@ public class MainController {
     @FXML
     private void onCaixa() {
         try {
+            AuthGuard.exigirPermissao(Permissao.FINANCEIRO_VER);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/caixa-view.fxml"));
             Scene scene = new Scene(loader.load(), 1000, 600);
 
@@ -101,6 +119,8 @@ public class MainController {
             stage.setResizable(true);
             stage.show();
 
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao abrir tela de caixa / notas", e.getMessage());
@@ -110,6 +130,8 @@ public class MainController {
     @FXML
     private void onMovimentoCaixa() {
         try {
+            AuthGuard.exigirPermissao(Permissao.FINANCEIRO_VER);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/movimento-caixa-view.fxml"));
             Scene scene = new Scene(loader.load(), 900, 600);
 
@@ -120,28 +142,36 @@ public class MainController {
             stage.setResizable(true);
             stage.show();
 
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao abrir tela de movimento de caixa", e.getMessage());
         }
     }
 
-
     @FXML
     private void onRelatorios() {
-        // Ainda não implementamos relatórios.
-        mostrarAviso("Relatórios", "Tela de Relatórios ainda não implementada.\nNo futuro: atendimentos, faturamento, estoque etc.");
+        try {
+            AuthGuard.exigirPermissao(Permissao.RELATORIOS_VER);
+            mostrarAviso("Relatórios", "Tela de Relatórios ainda não implementada.\nNo futuro: atendimentos, faturamento, estoque etc.");
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
+        }
     }
 
     @FXML
     private void onUsuarios() {
-        // No futuro vamos fazer tela de administração de usuários/perfis
-        mostrarAviso("Usuários & Perfis", "Tela de administração de usuários ainda não implementada.");
+        try {
+            AuthGuard.exigirPermissao(Permissao.USUARIO_GERENCIAR);
+            mostrarAviso("Usuários & Perfis", "Tela de administração de usuários ainda não implementada.");
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            mostrarErro("Acesso negado", e.getMessage());
+        }
     }
 
     @FXML
     private void onSair() {
-        // Fecha a aplicação inteira
         Stage stage = (Stage) lblUsuarioLogado.getScene().getWindow();
         stage.close();
     }
