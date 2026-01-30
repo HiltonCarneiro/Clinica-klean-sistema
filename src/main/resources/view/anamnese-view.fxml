@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.9"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.AnamneseController">
+
+    <!-- CABEÇALHO -->
+    <top>
+        <VBox spacing="6">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label fx:id="lblPaciente"
+                   text="Paciente:"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+            <Label fx:id="lblProfissional" text="Profissional:"/>
+            <Label fx:id="lblAgendamento" text="Agendamento:"/>
+        </VBox>
+    </top>
+
+    <!-- CONTEÚDO -->
+    <center>
+        <SplitPane dividerPositions="0.55">
+
+            <!-- ESQUERDA: FORMULÁRIO -->
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+
+                <HBox spacing="10">
+                    <Label text="Tipo:"/>
+                    <ComboBox fx:id="cbTipo" prefWidth="200"/>
+
+                    <Button fx:id="btnNovaEvolucao"
+                            text="Nova evolução"
+                            onAction="#onNovaEvolucao"
+                            visible="false"
+                            managed="false"/>
+                </HBox>
+
+                <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+
+                    <!-- TAB 1: Queixa / Evolução -->
+                    <Tab text="Queixa / Evolução">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <Label text="Queixa principal:"/>
+                            <TextArea fx:id="taQueixa" prefRowCount="3" wrapText="true"/>
+
+                            <Label text="Evolução / Observações clínicas:"/>
+                            <TextArea fx:id="taEvolucao" prefRowCount="6" wrapText="true"/>
+
+                            <Label text="Observações gerais:"/>
+                            <TextArea fx:id="taObservacoes" prefRowCount="3" wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- TAB 2: Sinais vitais -->
+                    <Tab text="Sinais vitais">
+                        <GridPane hgap="10" vgap="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <Label text="PA:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tfPA" promptText="Ex: 120/80" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="FC:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <TextField fx:id="tfFC" promptText="Ex: 78 bpm" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <Label text="FR:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tfFR" promptText="Ex: 16 irpm" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Temperatura:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="tfTemp" promptText="Ex: 36.5" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <Label text="Sat O₂:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <!-- ✅ NÃO começa com % -->
+                            <TextField fx:id="tfSat" promptText="Ex: 98 %" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Peso:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <TextField fx:id="tfPeso" promptText="Ex: 70 kg" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                            <Label text="Altura:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tfAltura" promptText="Ex: 1.70 m" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </Tab>
+
+                    <!-- TAB 3: Histórico clínico -->
+                    <Tab text="Histórico clínico">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <Label text="Alergias:"/>
+                            <HBox spacing="10">
+                                <CheckBox fx:id="ckAlergia" text="Possui alergia"/>
+                                <TextField fx:id="tfAlergiaQual"
+                                           prefWidth="380"
+                                           promptText="Quais? (ex: Dipirona, Látex...)"/>
+                            </HBox>
+
+                            <Label text="Medicamentos em uso:"/>
+                            <TextArea fx:id="taMedicamentos" prefRowCount="3" wrapText="true"/>
+
+                            <Label text="Comorbidades / Doenças prévias:"/>
+                            <TextArea fx:id="taComorbidades" prefRowCount="3" wrapText="true"/>
+
+                            <Label text="Histórico familiar:"/>
+                            <TextArea fx:id="taHistoricoFamiliar" prefRowCount="3" wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- TAB 4: Hábitos -->
+                    <Tab text="Hábitos">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <HBox spacing="10">
+                                <Label text="Tabagismo:"/>
+                                <ComboBox fx:id="cbTabagismo" prefWidth="220"/>
+
+                                <Label text="Etilismo:"/>
+                                <ComboBox fx:id="cbEtilismo" prefWidth="220"/>
+                            </HBox>
+
+                            <Label text="Hábitos / Rotina / Alimentação / Sono:"/>
+                            <TextArea fx:id="taHabitos" prefRowCount="6" wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- TAB 5: Exame físico -->
+                    <Tab text="Exame físico">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <Label text="Exame físico / achados relevantes:"/>
+                            <TextArea fx:id="taExameFisico" prefRowCount="10" wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                </TabPane>
+
+                <!-- BOTÕES -->
+                <HBox spacing="10">
+                    <Button fx:id="btnSalvarInicial"
+                            text="Salvar anamnese inicial"
+                            onAction="#onSalvarInicial"/>
+
+                    <Button fx:id="btnSalvarEvolucao"
+                            text="Salvar evolução"
+                            onAction="#onSalvarEvolucao"
+                            visible="false"
+                            managed="false"/>
+                </HBox>
+
+                <Label fx:id="lblInfo" textFill="red" style="-fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- DIREITA: HISTÓRICO -->
+            <VBox spacing="8">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+
+                <Label text="Histórico de anamneses / evoluções:" style="-fx-font-weight: bold;"/>
+
+                <TableView fx:id="tvHistorico" prefHeight="600">
+                    <columns>
+                        <TableColumn fx:id="colData" text="Data / Hora" prefWidth="180"/>
+                        <TableColumn fx:id="colTipo" text="Tipo" prefWidth="180"/>
+                    </columns>
+                </TableView>
+
+                <Label text="Clique em um item para visualizar (histórico não é editável)."
+                       style="-fx-font-size: 11px;"/>
+            </VBox>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>

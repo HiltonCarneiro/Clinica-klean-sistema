@@ -17,6 +17,13 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+
 public class AgendaController {
 
     private static final DateTimeFormatter HORA_FORMATTER =
@@ -240,6 +247,40 @@ public class AgendaController {
         List<Agendamento> lista = agendamentoDAO.listarPorData(data);
         tbAgenda.setItems(FXCollections.observableArrayList(lista));
     }
+
+    @FXML
+    private void onIniciarAtendimento() {
+        Agendamento selecionado = tbAgenda.getSelectionModel().getSelectedItem();
+
+        if (selecionado == null) {
+            lblMensagem.setText("Selecione um agendamento para iniciar o atendimento.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/anamnese-view.fxml")
+            );
+            Parent root = loader.load();
+
+            AnamneseController controller = loader.getController();
+            controller.setAgendamento(selecionado);
+
+            Stage stage = new Stage();
+            stage.setTitle("Anamnese / Evolução");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            // se quiser atualizar a agenda ao voltar
+            carregarAgendaDoDia();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensagem.setText("Erro ao abrir a tela de anamnese.");
+        }
+    }
+
 
     private void limparFormulario() {
         txtHoraInicio.clear();

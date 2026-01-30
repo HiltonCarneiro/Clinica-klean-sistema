@@ -80,8 +80,8 @@
             <HBox spacing="10.0">
                 <Button text="Novo" onAction="#onNovo"/>
                 <Button text="Salvar" onAction="#onSalvar"/>
+                <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento"/>
                 <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
-
                 <Label fx:id="lblMensagem"
                        textFill="red"
                        style="-fx-font-weight: bold;"
