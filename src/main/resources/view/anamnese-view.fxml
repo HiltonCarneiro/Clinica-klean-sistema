@@ -47,7 +47,7 @@
 
                 <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 
-                    <!-- TAB 1: Queixa / Evolução -->
+                    <!-- TAB 1 -->
                     <Tab text="Queixa / Evolução">
                         <VBox spacing="8">
                             <padding>
@@ -65,7 +65,7 @@
                         </VBox>
                     </Tab>
 
-                    <!-- TAB 2: Sinais vitais -->
+                    <!-- TAB 2 -->
                     <Tab text="Sinais vitais">
                         <GridPane hgap="10" vgap="8">
                             <padding>
@@ -85,7 +85,6 @@
                             <TextField fx:id="tfTemp" promptText="Ex: 36.5" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
                             <Label text="Sat O₂:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                            <!-- ✅ NÃO começa com % -->
                             <TextField fx:id="tfSat" promptText="Ex: 98 %" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                             <Label text="Peso:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
@@ -96,7 +95,7 @@
                         </GridPane>
                     </Tab>
 
-                    <!-- TAB 3: Histórico clínico -->
+                    <!-- TAB 3 -->
                     <Tab text="Histórico clínico">
                         <VBox spacing="10">
                             <padding>
@@ -122,7 +121,7 @@
                         </VBox>
                     </Tab>
 
-                    <!-- TAB 4: Hábitos -->
+                    <!-- TAB 4 -->
                     <Tab text="Hábitos">
                         <VBox spacing="10">
                             <padding>
@@ -142,7 +141,7 @@
                         </VBox>
                     </Tab>
 
-                    <!-- TAB 5: Exame físico -->
+                    <!-- TAB 5 -->
                     <Tab text="Exame físico">
                         <VBox spacing="8">
                             <padding>
@@ -151,6 +150,34 @@
 
                             <Label text="Exame físico / achados relevantes:"/>
                             <TextArea fx:id="taExameFisico" prefRowCount="10" wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- ✅ TAB 6: ANEXOS -->
+                    <Tab text="Anexos (PDF)">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+
+                            <HBox spacing="10">
+                                <TextField fx:id="tfDescricaoAnexo"
+                                           promptText="Descrição do exame (opcional)"
+                                           prefWidth="320"/>
+                                <Button text="Anexar PDF" onAction="#onAnexarPdf"/>
+                                <Button text="Abrir" onAction="#onAbrirPdf"/>
+                                <Button text="Remover" onAction="#onRemoverPdf"/>
+                            </HBox>
+
+                            <TableView fx:id="tvAnexos" prefHeight="260">
+                                <columns>
+                                    <TableColumn fx:id="colAnexoData" text="Data/Hora" prefWidth="160"/>
+                                    <TableColumn fx:id="colAnexoNome" text="Arquivo" prefWidth="220"/>
+                                    <TableColumn fx:id="colAnexoDesc" text="Descrição" prefWidth="260"/>
+                                </columns>
+                            </TableView>
+
+                            <Label fx:id="lblAnexoInfo" textFill="red" style="-fx-font-weight: bold;"/>
                         </VBox>
                     </Tab>
 
