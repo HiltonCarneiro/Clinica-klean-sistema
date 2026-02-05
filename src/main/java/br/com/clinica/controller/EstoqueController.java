@@ -7,6 +7,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -18,89 +21,57 @@ public class EstoqueController {
 
     // ====== CAMPOS DO FORMULÁRIO ======
 
-    @FXML
-    private TextField txtNome;
-
-    @FXML
-    private ComboBox<TipoProduto> cbTipo;
-
-    @FXML
-    private TextField txtUnidade;
-
-    @FXML
-    private TextField txtEstoqueAtual;
-
-    @FXML
-    private TextField txtEstoqueMinimo;
-
-    @FXML
-    private TextField txtLote;
-
-    @FXML
-    private DatePicker dpValidade;
-
-    @FXML
-    private TextField txtPrecoCusto;
-
-    @FXML
-    private TextField txtPrecoVenda;
-
-    @FXML
-    private CheckBox chkAtivo;
+    @FXML private TextField txtNome;
+    @FXML private ComboBox<TipoProduto> cbTipo;
+    @FXML private TextField txtUnidade;
+    @FXML private TextField txtEstoqueAtual;
+    @FXML private TextField txtEstoqueMinimo;
+    @FXML private TextField txtLote;
+    @FXML private DatePicker dpValidade;
+    @FXML private TextField txtPrecoCusto;
+    @FXML private TextField txtPrecoVenda;
+    @FXML private CheckBox chkAtivo;
 
     // ====== FILTROS ======
 
-    @FXML
-    private CheckBox chkMostrarInativos;
+    @FXML private CheckBox chkMostrarInativos;
+    @FXML private CheckBox chkBaixoEstoque;
+    @FXML private CheckBox chkVencendo;
 
-    @FXML
-    private CheckBox chkBaixoEstoque;
+    // ====== BUSCA ======
 
-    @FXML
-    private CheckBox chkVencendo;
+    @FXML private TextField txtBuscar;
 
     // ====== TABELA ======
 
-    @FXML
-    private TableView<Produto> tblProdutos;
-
-    @FXML
-    private TableColumn<Produto, String> colNome;
-
-    @FXML
-    private TableColumn<Produto, String> colTipo;
-
-    @FXML
-    private TableColumn<Produto, String> colUnidade;
-
-    @FXML
-    private TableColumn<Produto, Number> colEstoque;
-
-    @FXML
-    private TableColumn<Produto, String> colValidade;
-
-    @FXML
-    private TableColumn<Produto, Boolean> colAtivo;
+    @FXML private TableView<Produto> tblProdutos;
+    @FXML private TableColumn<Produto, String> colNome;
+    @FXML private TableColumn<Produto, String> colTipo;
+    @FXML private TableColumn<Produto, String> colUnidade;
+    @FXML private TableColumn<Produto, Number> colEstoque;
+    @FXML private TableColumn<Produto, String> colValidade;
+    @FXML private TableColumn<Produto, Boolean> colAtivo;
 
     // ====== MENSAGEM ======
 
-    @FXML
-    private Label lblMensagem;
+    @FXML private Label lblMensagem;
 
     // ====== INFRA ======
 
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private Produto selecionado;
 
+    private final ObservableList<Produto> masterList = FXCollections.observableArrayList();
+    private FilteredList<Produto> filteredList;
+
     private static final DateTimeFormatter DATA_BR =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     public void initialize() {
-        // Combo de tipos: agora só SUPLEMENTO e INSUMO
         cbTipo.setItems(FXCollections.observableArrayList(TipoProduto.values()));
 
-        // Colunas da tabela
+        // Colunas
         colNome.setCellValueFactory(cell ->
                 new SimpleStringProperty(cell.getValue().getNome()));
 
@@ -109,13 +80,15 @@ public class EstoqueController {
             return new SimpleStringProperty(t != null ? t.getDescricao() : "");
         });
 
+        colUnidade.setCellValueFactory(cell ->
+                new SimpleStringProperty(cell.getValue().getUnidade() != null ? cell.getValue().getUnidade() : ""));
+
         colEstoque.setCellValueFactory(cell ->
                 new SimpleDoubleProperty(cell.getValue().getEstoqueAtual()));
 
         colValidade.setCellValueFactory(cell -> {
             LocalDate v = cell.getValue().getValidade();
-            String texto = v != null ? v.format(DATA_BR) : "";
-            return new SimpleStringProperty(texto);
+            return new SimpleStringProperty(v != null ? v.format(DATA_BR) : "");
         });
 
         colAtivo.setCellValueFactory(cell ->
@@ -125,22 +98,30 @@ public class EstoqueController {
             @Override
             protected void updateItem(Boolean ativo, boolean empty) {
                 super.updateItem(ativo, empty);
-                if (empty || ativo == null) {
-                    setText(null);
-                } else {
-                    setText(ativo ? "Ativo" : "Inativo");
-                }
+                if (empty || ativo == null) setText(null);
+                else setText(ativo ? "Ativo" : "Inativo");
             }
         });
 
-        // seleção na tabela -> preenche o formulário
+        // Seleção -> preenche formulário
         tblProdutos.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldSel, newSel) -> preencherFormulario(newSel));
+
+        // Liga lista ao filtro/busca
+        filteredList = new FilteredList<>(masterList, p -> true);
+        SortedList<Produto> sorted = new SortedList<>(filteredList);
+        sorted.comparatorProperty().bind(tblProdutos.comparatorProperty());
+        tblProdutos.setItems(sorted);
+
+        // Busca em tempo real
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldV, newV) -> aplicarFiltroBusca());
+        }
 
         chkAtivo.setSelected(true);
         lblMensagem.setText("");
 
-        atualizarLista();
+        atualizarLista(); // carrega do banco -> masterList
     }
 
     // ====== BOTÕES ======
@@ -160,8 +141,10 @@ public class EstoqueController {
         try {
             Produto p = obterDoFormulario();
             produtoDAO.salvar(p);
+
             atualizarLista();
             selecionarNaTabela(p);
+
             lblMensagem.setText("Produto salvo com sucesso!");
         } catch (IllegalArgumentException e) {
             lblMensagem.setText(e.getMessage());
@@ -180,14 +163,22 @@ public class EstoqueController {
         }
 
         produtoDAO.ativarDesativar(p);
+
         atualizarLista();
         selecionarNaTabela(p);
+
         lblMensagem.setText("Produto " + (p.isAtivo() ? "ativado" : "inativado") + " com sucesso.");
     }
 
     @FXML
     private void onAtualizarLista() {
         atualizarLista();
+    }
+
+    @FXML
+    private void onLimparBusca() {
+        if (txtBuscar != null) txtBuscar.clear();
+        aplicarFiltroBusca();
     }
 
     // ====== APOIO ======
@@ -198,7 +189,38 @@ public class EstoqueController {
         boolean vencendo = chkVencendo != null && chkVencendo.isSelected();
 
         List<Produto> produtos = produtoDAO.listar(incluirInativos, baixoEstoque, vencendo);
-        tblProdutos.setItems(FXCollections.observableArrayList(produtos));
+
+        masterList.setAll(produtos);
+        aplicarFiltroBusca(); // reaplica busca após atualizar lista
+    }
+
+    private void aplicarFiltroBusca() {
+        String termo = (txtBuscar != null && txtBuscar.getText() != null)
+                ? txtBuscar.getText().trim().toLowerCase()
+                : "";
+
+        if (termo.isBlank()) {
+            filteredList.setPredicate(p -> true);
+            return;
+        }
+
+        filteredList.setPredicate(p -> {
+            if (p == null) return false;
+
+            String nome = safeLower(p.getNome());
+            String unidade = safeLower(p.getUnidade());
+            String lote = safeLower(p.getLote());
+            String tipo = (p.getTipo() != null) ? safeLower(p.getTipo().getDescricao()) : "";
+
+            return nome.contains(termo)
+                    || tipo.contains(termo)
+                    || unidade.contains(termo)
+                    || lote.contains(termo);
+        });
+    }
+
+    private String safeLower(String s) {
+        return s == null ? "" : s.toLowerCase();
     }
 
     private void limparFormulario() {
@@ -237,19 +259,13 @@ public class EstoqueController {
 
     private Produto obterDoFormulario() {
         String nome = txtNome.getText() != null ? txtNome.getText().trim() : "";
-        if (nome.isBlank()) {
-            throw new IllegalArgumentException("Informe o nome do produto.");
-        }
+        if (nome.isBlank()) throw new IllegalArgumentException("Informe o nome do produto.");
 
         TipoProduto tipo = cbTipo.getValue();
-        if (tipo == null) {
-            throw new IllegalArgumentException("Selecione o tipo do produto (Suplemento ou Insumo).");
-        }
+        if (tipo == null) throw new IllegalArgumentException("Selecione o tipo do produto (Suplemento ou Insumo).");
 
         String unidade = txtUnidade.getText() != null ? txtUnidade.getText().trim() : "";
-        if (unidade.isBlank()) {
-            throw new IllegalArgumentException("Informe a unidade (ex.: un, ml, cx).");
-        }
+        if (unidade.isBlank()) throw new IllegalArgumentException("Informe a unidade (ex.: un, ml, cx).");
 
         double estoqueAtual = parseDouble(txtEstoqueAtual.getText(), "Estoque atual");
         double estoqueMinimo = parseDouble(txtEstoqueMinimo.getText(), "Estoque mínimo");
@@ -301,7 +317,8 @@ public class EstoqueController {
     private void selecionarNaTabela(Produto p) {
         if (p == null || p.getId() == null) return;
 
-        for (Produto item : tblProdutos.getItems()) {
+        // procura no masterList (porque a tabela pode estar filtrada)
+        for (Produto item : masterList) {
             if (p.getId().equals(item.getId())) {
                 tblProdutos.getSelectionModel().select(item);
                 tblProdutos.scrollTo(item);
