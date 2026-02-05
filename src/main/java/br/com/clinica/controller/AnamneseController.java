@@ -37,12 +37,12 @@ public class AnamneseController {
     @FXML private TextArea taEvolucao;
     @FXML private TextArea taObservacoes;
 
-    // ===== Histórico (direita)
+    // Histórico
     @FXML private TableView<Anamnese> tvHistorico;
     @FXML private TableColumn<Anamnese, String> colData;
     @FXML private TableColumn<Anamnese, String> colTipo;
 
-    // ===== Anexos (PDF)
+    // Anexos
     @FXML private TextField tfDescricaoAnexo;
 
     @FXML private TableView<AnexoPacienteDAO.AnexoPacienteItem> tvAnexos;
@@ -63,42 +63,41 @@ public class AnamneseController {
 
     private boolean inicialJaSalva = false;
 
-    private static final DateTimeFormatter DB_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", new Locale("pt", "BR"));
+    private static final DateTimeFormatter DB_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", new Locale("pt", "BR"));
 
     @FXML
     public void initialize() {
         cbTipo.setItems(FXCollections.observableArrayList("ANAMNESE_INICIAL", "EVOLUCAO"));
         cbTipo.getSelectionModel().select("ANAMNESE_INICIAL");
 
-        // histórico
-        if (colData != null) colData.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
-        if (colTipo != null) colTipo.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getTipo()));
+        // Histórico
+        colData.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
+        colTipo.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getTipo()));
 
-        if (tvHistorico != null) {
-            tvHistorico.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-                if (sel != null) carregarSelecionada(sel);
-            });
-        }
+        tvHistorico.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) carregarSelecionada(sel);
+        });
 
         cbTipo.valueProperty().addListener((obs, old, tipo) -> atualizarVisibilidadeBotoes(tipo));
         atualizarVisibilidadeBotoes(cbTipo.getValue());
 
-        // anexos
-        if (colAnexoData != null) {
-            colAnexoData.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
-        }
-        if (colAnexoArquivo != null) {
-            colAnexoArquivo.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNomeArquivo()));
-        }
-        if (colAnexoDescricao != null) {
-            colAnexoDescricao.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
-                    c.getValue().getDescricao() == null ? "" : c.getValue().getDescricao()
-            ));
-        }
+        // ✅ ANEXOS: aqui é o que faltava bater com o seu FXML
+        colAnexoData.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
 
-        if (tvAnexos != null) {
-            tvAnexos.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> atualizarBotoesAnexos());
-        }
+        // ✅ Mostra o nome do arquivo
+        colAnexoArquivo.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getNomeArquivo()));
+
+        colAnexoDescricao.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(
+                        c.getValue().getDescricao() == null ? "" : c.getValue().getDescricao()
+                ));
+
+        tvAnexos.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> atualizarBotoesAnexos());
         atualizarBotoesAnexos();
     }
 
@@ -115,8 +114,8 @@ public class AnamneseController {
         preencherCabecalho();
         recarregarHistorico();
 
-        inicialJaSalva = tvHistorico != null
-                && tvHistorico.getItems().stream().anyMatch(a -> "ANAMNESE_INICIAL".equalsIgnoreCase(a.getTipo()));
+        inicialJaSalva = tvHistorico.getItems().stream()
+                .anyMatch(a -> "ANAMNESE_INICIAL".equalsIgnoreCase(a.getTipo()));
 
         cbTipo.getSelectionModel().select(inicialJaSalva ? "EVOLUCAO" : "ANAMNESE_INICIAL");
         atualizarVisibilidadeBotoes(cbTipo.getValue());
@@ -141,8 +140,6 @@ public class AnamneseController {
     }
 
     private void recarregarHistorico() {
-        if (tvHistorico == null) return;
-
         if (paciente == null || paciente.getId() == null) {
             tvHistorico.setItems(FXCollections.observableArrayList());
             return;
@@ -168,26 +165,22 @@ public class AnamneseController {
             isInicial = true;
         }
 
-        if (btnSalvarInicial != null) {
-            btnSalvarInicial.setVisible(isInicial);
-            btnSalvarInicial.setManaged(isInicial);
-        }
-        if (btnSalvarEvolucao != null) {
-            btnSalvarEvolucao.setVisible(isEvolucao);
-            btnSalvarEvolucao.setManaged(isEvolucao);
-        }
-        if (btnNovaEvolucao != null) {
-            btnNovaEvolucao.setVisible(isEvolucao);
-            btnNovaEvolucao.setManaged(isEvolucao);
-        }
+        btnSalvarInicial.setVisible(isInicial);
+        btnSalvarInicial.setManaged(isInicial);
+
+        btnSalvarEvolucao.setVisible(isEvolucao);
+        btnSalvarEvolucao.setManaged(isEvolucao);
+
+        btnNovaEvolucao.setVisible(isEvolucao);
+        btnNovaEvolucao.setManaged(isEvolucao);
     }
 
     @FXML
     private void onNovaEvolucao() {
-        if (tvHistorico != null) tvHistorico.getSelectionModel().clearSelection();
+        tvHistorico.getSelectionModel().clearSelection();
         cbTipo.getSelectionModel().select("EVOLUCAO");
         limparFormulario();
-        if (lblInfo != null) lblInfo.setText("");
+        setInfo("");
     }
 
     @FXML
@@ -201,7 +194,7 @@ public class AnamneseController {
     }
 
     private void salvarRegistro(String tipo) {
-        if (lblInfo != null) lblInfo.setText("");
+        setInfo("");
 
         if (paciente == null || paciente.getId() == null) {
             setInfo("Paciente não definido.");
@@ -261,20 +254,18 @@ public class AnamneseController {
         taQueixa.setText(extrairCampoJson(json, "queixa"));
         taEvolucao.setText(extrairCampoJson(json, "evolucao"));
 
-        if (taObservacoes != null) taObservacoes.setText(a.getObservacoes() == null ? "" : a.getObservacoes());
+        taObservacoes.setText(a.getObservacoes() == null ? "" : a.getObservacoes());
 
         atualizarVisibilidadeBotoes(cbTipo.getValue());
     }
 
     private void limparFormulario() {
-        if (taQueixa != null) taQueixa.clear();
-        if (taEvolucao != null) taEvolucao.clear();
-        if (taObservacoes != null) taObservacoes.clear();
+        taQueixa.clear();
+        taEvolucao.clear();
+        taObservacoes.clear();
     }
 
-    // =========================================================
-    // ANEXOS (PDF)
-    // =========================================================
+    // ================= ANEXOS =================
 
     @FXML
     private void onAnexarPdf() {
@@ -292,14 +283,13 @@ public class AnamneseController {
         File pdf = fc.showOpenDialog(lblPaciente.getScene().getWindow());
         if (pdf == null) return;
 
-        // Se o usuário selecionou um item do histórico, relaciona ao id da anamnese selecionada (opcional)
         Integer anamneseId = null;
-        if (tvHistorico != null && tvHistorico.getSelectionModel().getSelectedItem() != null) {
+        if (tvHistorico.getSelectionModel().getSelectedItem() != null) {
             Anamnese sel = tvHistorico.getSelectionModel().getSelectedItem();
             if (sel.getId() != null) anamneseId = sel.getId();
         }
 
-        String desc = (tfDescricaoAnexo != null) ? tfDescricaoAnexo.getText() : null;
+        String desc = tfDescricaoAnexo != null ? tfDescricaoAnexo.getText() : null;
 
         try {
             anexoDAO.anexarPdf(paciente.getId(), anamneseId, pdf, desc);
@@ -315,8 +305,6 @@ public class AnamneseController {
     @FXML
     private void onAbrirPdf() {
         setInfo("");
-
-        if (tvAnexos == null) return;
 
         var sel = tvAnexos.getSelectionModel().getSelectedItem();
         if (sel == null) {
@@ -335,8 +323,6 @@ public class AnamneseController {
     @FXML
     private void onRemoverPdf() {
         setInfo("");
-
-        if (tvAnexos == null) return;
 
         var sel = tvAnexos.getSelectionModel().getSelectedItem();
         if (sel == null) {
@@ -363,8 +349,6 @@ public class AnamneseController {
     }
 
     private void carregarAnexosDoPaciente() {
-        if (tvAnexos == null) return;
-
         if (paciente == null || paciente.getId() == null) {
             tvAnexos.setItems(FXCollections.observableArrayList());
             atualizarBotoesAnexos();
@@ -383,18 +367,15 @@ public class AnamneseController {
     }
 
     private void atualizarBotoesAnexos() {
-        if (btnAbrirPdf == null || btnRemoverPdf == null || tvAnexos == null) return;
         boolean temSel = tvAnexos.getSelectionModel().getSelectedItem() != null;
         btnAbrirPdf.setDisable(!temSel);
         btnRemoverPdf.setDisable(!temSel);
     }
 
-    // =========================================================
-    // Helpers
-    // =========================================================
+    // ================= HELPERS =================
 
     private void setInfo(String msg) {
-        if (lblInfo != null) lblInfo.setText(msg == null ? "" : msg);
+        lblInfo.setText(msg == null ? "" : msg);
     }
 
     private String safe(TextArea ta) {
@@ -417,6 +398,9 @@ public class AnamneseController {
         int start = i + key.length();
         int end = json.indexOf("\"", start);
         if (end < 0) return "";
-        return json.substring(start, end).replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
+        return json.substring(start, end)
+                .replace("\\n", "\n")
+                .replace("\\\"", "\"")
+                .replace("\\\\", "\\");
     }
 }
