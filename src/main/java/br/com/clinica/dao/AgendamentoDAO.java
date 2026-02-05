@@ -77,6 +77,30 @@ public class AgendamentoDAO {
         return lista;
     }
 
+    // ✅ NOVO: lista por data + profissional
+    public List<Agendamento> listarPorDataEProfissional(LocalDate data, int profissionalId) {
+        String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? ORDER BY hora_inicio";
+        List<Agendamento> lista = new ArrayList<>();
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, data.toString());
+            ps.setInt(2, profissionalId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearAgendamento(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar agendamentos por profissional", e);
+        }
+
+        return lista;
+    }
+
     public boolean existeConflito(Agendamento ag) {
         String sql =
                 "SELECT COUNT(*) FROM agendamento " +
@@ -96,12 +120,13 @@ public class AgendamentoDAO {
             ps.setString(1, dataStr);
             ps.setInt(2, ag.getProfissionalId());
             ps.setString(3, ag.getSala().name());
+
             if (ag.getPacienteId() != null) {
                 ps.setInt(4, ag.getPacienteId());
             } else {
                 ps.setNull(4, java.sql.Types.INTEGER);
             }
-            // condição de intervalo de horário
+
             ps.setString(5, horaFimStr);      // hora_inicio < fimNovo
             ps.setString(6, horaInicioStr);   // hora_fim > inicioNovo
             ps.setString(7, StatusAgendamento.CANCELADO.name());

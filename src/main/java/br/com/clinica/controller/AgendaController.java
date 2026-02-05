@@ -1,5 +1,6 @@
 package br.com.clinica.controller;
 
+import br.com.clinica.auth.Perfis;
 import br.com.clinica.dao.AgendamentoDAO;
 import br.com.clinica.dao.PacienteDAO;
 import br.com.clinica.dao.UsuarioDAO;
@@ -8,6 +9,7 @@ import br.com.clinica.model.Paciente;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.model.enums.SalaAtendimento;
 import br.com.clinica.model.enums.StatusAgendamento;
+import br.com.clinica.session.Session;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -23,7 +25,6 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-
 public class AgendaController {
 
     private static final DateTimeFormatter HORA_FORMATTER =
@@ -33,54 +34,22 @@ public class AgendaController {
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final PacienteDAO pacienteDAO = new PacienteDAO();
 
-    // ==== Campos da tela ====
+    @FXML private DatePicker dpData;
+    @FXML private ComboBox<Usuario> cbProfissional;
+    @FXML private ComboBox<Paciente> cbPaciente;
+    @FXML private ComboBox<SalaAtendimento> cbSala;
+    @FXML private TextField txtHoraInicio;
+    @FXML private TextField txtHoraFim;
+    @FXML private TextField txtProcedimento;
+    @FXML private TextArea txtObservacoes;
+    @FXML private Label lblMensagem;
 
-    @FXML
-    private DatePicker dpData;
-
-    @FXML
-    private ComboBox<Usuario> cbProfissional;
-
-    @FXML
-    private ComboBox<Paciente> cbPaciente;
-
-    @FXML
-    private ComboBox<SalaAtendimento> cbSala;
-
-    @FXML
-    private TextField txtHoraInicio;
-
-    @FXML
-    private TextField txtHoraFim;
-
-    @FXML
-    private TextField txtProcedimento;
-
-    @FXML
-    private TextArea txtObservacoes;
-
-    @FXML
-    private Label lblMensagem;
-
-    @FXML
-    private TableView<Agendamento> tbAgenda;
-
-    @FXML
-    private TableColumn<Agendamento, String> colHora;
-
-    @FXML
-    private TableColumn<Agendamento, String> colProfissional;
-
-    @FXML
-    private TableColumn<Agendamento, String> colSala;
-
-    @FXML
-    private TableColumn<Agendamento, String> colPaciente;
-
-    @FXML
-    private TableColumn<Agendamento, String> colStatus;
-
-    // ==== Inicialização ====
+    @FXML private TableView<Agendamento> tbAgenda;
+    @FXML private TableColumn<Agendamento, String> colHora;
+    @FXML private TableColumn<Agendamento, String> colProfissional;
+    @FXML private TableColumn<Agendamento, String> colSala;
+    @FXML private TableColumn<Agendamento, String> colPaciente;
+    @FXML private TableColumn<Agendamento, String> colStatus;
 
     @FXML
     private void initialize() {
@@ -136,17 +105,41 @@ public class AgendaController {
                 )
         );
 
+        aplicarRegraDeVisaoPorPerfil();
+
         carregarAgendaDoDia();
     }
 
-    // ==== Ações dos botões ====
+    private boolean podeVerTodos() {
+        Usuario logado = Session.getUsuario();
+        if (logado == null || logado.getPerfil() == null || logado.getPerfil().getNome() == null) {
+            return true; // fallback
+        }
 
-    // BOTÃO NOVO (era o que tava dando erro no FXML)
+        String perfil = logado.getPerfil().getNome();
+        return Perfis.ADMIN.equals(perfil) || Perfis.RECEPCIONISTA.equals(perfil);
+    }
+
+    private void aplicarRegraDeVisaoPorPerfil() {
+        if (!podeVerTodos()) {
+            // Profissional: trava no usuário logado
+            Usuario logado = Session.getUsuario();
+            if (logado != null) {
+                cbProfissional.setItems(FXCollections.observableArrayList(logado));
+                cbProfissional.getSelectionModel().select(logado);
+                cbProfissional.setDisable(true);
+            }
+        } else {
+            // Admin/Recep: pode escolher (ou deixar vazio pra ver todos)
+            cbProfissional.setDisable(false);
+            cbProfissional.getSelectionModel().clearSelection();
+        }
+    }
+
     @FXML
     private void onNovo() {
         lblMensagem.setText("");
         limparFormulario();
-        // mantém data/profissional/sala para facilitar
     }
 
     @FXML
@@ -171,45 +164,54 @@ public class AgendaController {
             LocalTime horaInicio = LocalTime.parse(txtIni, HORA_FORMATTER);
             LocalTime horaFim = LocalTime.parse(txtFim, HORA_FORMATTER);
 
-            Usuario profissional = cbProfissional.getValue();
-            SalaAtendimento sala = cbSala.getValue();
-            Paciente paciente = cbPaciente.getValue();
-
-            if (profissional == null || sala == null) {
-                lblMensagem.setText("Selecione o profissional e a sala.");
-                return;
-            }
-
             if (!horaFim.isAfter(horaInicio)) {
                 lblMensagem.setText("Hora fim deve ser depois da hora início.");
                 return;
             }
 
+            SalaAtendimento sala = cbSala.getValue();
+            if (sala == null) {
+                lblMensagem.setText("Selecione a sala.");
+                return;
+            }
+
+            Paciente paciente = cbPaciente.getValue();
+
+            // ✅ Regra: profissional só agenda para ele mesmo
+            Usuario profissional;
+            if (podeVerTodos()) {
+                profissional = cbProfissional.getValue();
+            } else {
+                profissional = Session.getUsuario();
+            }
+
+            if (profissional == null) {
+                lblMensagem.setText("Selecione o profissional.");
+                return;
+            }
+
+            String nomeProf = (profissional.getPessoaNome() != null && !profissional.getPessoaNome().isBlank())
+                    ? profissional.getPessoaNome()
+                    : profissional.getNome();
+
             Agendamento ag = new Agendamento();
             ag.setData(data);
             ag.setHoraInicio(horaInicio);
             ag.setHoraFim(horaFim);
-            ag.setProfissionalId(profissional.getId().intValue());
-            ag.setProfissionalNome(profissional.getNome());
+            ag.setProfissionalId(profissional.getId());
+            ag.setProfissionalNome(nomeProf);
             ag.setSala(sala);
-            ag.setProcedimento(txtProcedimento.getText() != null
-                    ? txtProcedimento.getText().trim()
-                    : "");
-            ag.setObservacoes(txtObservacoes.getText() != null
-                    ? txtObservacoes.getText().trim()
-                    : "");
+            ag.setProcedimento(txtProcedimento.getText() != null ? txtProcedimento.getText().trim() : "");
+            ag.setObservacoes(txtObservacoes.getText() != null ? txtObservacoes.getText().trim() : "");
             ag.setStatus(StatusAgendamento.AGENDADO);
 
             if (paciente != null) {
-                ag.setPacienteId(paciente.getId().intValue());
+                ag.setPacienteId(Math.toIntExact(paciente.getId()));
                 ag.setPacienteNome(paciente.getNome());
             }
 
-            // Regra de conflito (profissional, sala, paciente)
             if (agendamentoDAO.existeConflito(ag)) {
-                lblMensagem.setText(
-                        "Conflito de agenda: profissional, sala ou paciente já possuem agendamento neste horário."
-                );
+                lblMensagem.setText("Conflito de agenda: profissional, sala ou paciente já possuem agendamento neste horário.");
                 return;
             }
 
@@ -235,8 +237,6 @@ public class AgendaController {
         carregarAgendaDoDia();
     }
 
-    // ==== Métodos auxiliares ====
-
     private void carregarAgendaDoDia() {
         LocalDate data = dpData.getValue();
         if (data == null) {
@@ -244,7 +244,26 @@ public class AgendaController {
             dpData.setValue(data);
         }
 
-        List<Agendamento> lista = agendamentoDAO.listarPorData(data);
+        List<Agendamento> lista;
+
+        if (podeVerTodos()) {
+            // Admin/Recep: vê todos (opcional: se escolher alguém, filtra)
+            Usuario escolhido = cbProfissional.getValue();
+            if (escolhido != null) {
+                lista = agendamentoDAO.listarPorDataEProfissional(data, escolhido.getId());
+            } else {
+                lista = agendamentoDAO.listarPorData(data);
+            }
+        } else {
+            // Profissional: só os dele
+            Usuario logado = Session.getUsuario();
+            if (logado == null) {
+                lista = agendamentoDAO.listarPorData(data); // fallback
+            } else {
+                lista = agendamentoDAO.listarPorDataEProfissional(data, logado.getId());
+            }
+        }
+
         tbAgenda.setItems(FXCollections.observableArrayList(lista));
     }
 
@@ -272,7 +291,6 @@ public class AgendaController {
             stage.setScene(new Scene(root));
             stage.showAndWait();
 
-            // se quiser atualizar a agenda ao voltar
             carregarAgendaDoDia();
 
         } catch (Exception e) {
@@ -281,13 +299,11 @@ public class AgendaController {
         }
     }
 
-
     private void limparFormulario() {
         txtHoraInicio.clear();
         txtHoraFim.clear();
         txtProcedimento.clear();
         txtObservacoes.clear();
         cbPaciente.getSelectionModel().clearSelection();
-        // deixa data / profissional / sala selecionados
     }
 }
