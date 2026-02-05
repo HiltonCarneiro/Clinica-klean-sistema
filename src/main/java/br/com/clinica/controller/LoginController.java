@@ -13,14 +13,9 @@ import javafx.stage.Stage;
 
 public class LoginController {
 
-    @FXML
-    private TextField txtUsuario;
-
-    @FXML
-    private PasswordField txtSenha;
-
-    @FXML
-    private Label lblErro;
+    @FXML private TextField txtUsuario;
+    @FXML private PasswordField txtSenha;
+    @FXML private Label lblErro;
 
     private final LoginService loginService = new LoginService();
 
@@ -38,14 +33,11 @@ public class LoginController {
             return;
         }
 
-        // guarda na sessão
         Session.setUsuario(usuario);
-
-        // abre tela principal passando o usuário autenticado
-        abrirTelaPrincipal(usuario);
+        abrirTelaPrincipalNoMesmoStage(usuario);
     }
 
-    private void abrirTelaPrincipal(Usuario usuario) {
+    private void abrirTelaPrincipalNoMesmoStage(Usuario usuario) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
             Scene scene = new Scene(loader.load());
@@ -63,43 +55,14 @@ public class LoginController {
 
             mainController.setUsuarioLogado(texto);
 
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.setTitle("Clínica Integração - Sistema");
-            stage.setResizable(false);
-            stage.show();
-
-            ((Stage) txtUsuario.getScene().getWindow()).close();
+            Stage stageAtual = (Stage) txtUsuario.getScene().getWindow();
+            stageAtual.setTitle("Clínica Integração - Sistema");
+            stageAtual.setResizable(true);
+            stageAtual.setScene(scene);
 
         } catch (Exception e) {
             e.printStackTrace();
+            lblErro.setText("Erro ao abrir o sistema.");
         }
     }
-
-    /*private void abrirTelaPrincipal(Usuario usuario) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
-            Scene scene = new Scene(loader.load());
-
-            // pega o controller da tela principal
-            MainController mainController = loader.getController();
-            // aqui você escolhe o que mostrar: nome, cargo, login...
-            // Exemplo: mostrar o nome ou o login
-            String nomeOuLogin = usuario.getNome() != null && !usuario.getNome().isBlank()
-                    ? usuario.getNome()
-                    : usuario.getLogin();
-            mainController.setUsuarioLogado(nomeOuLogin);
-
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.setTitle("Clínica Integração - Sistema");
-            stage.setResizable(false);
-            stage.show();
-
-            // fecha a tela de login
-            ((Stage) txtUsuario.getScene().getWindow()).close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 }
