@@ -122,7 +122,6 @@ public class MainController {
     @FXML
     private void onUsuarios() {
         abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR);
-        // Se você ainda não tem essa tela, pode manter seu "mostrarInfo(...)"
     }
 
     // ================== NAVEGAÇÃO INTERNA ==================

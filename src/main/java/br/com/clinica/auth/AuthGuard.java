@@ -2,10 +2,10 @@ package br.com.clinica.auth;
 
 import br.com.clinica.auth.exceptions.AcessoNegadoException;
 import br.com.clinica.auth.exceptions.NaoAutenticadoException;
+import br.com.clinica.model.Perfil;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.session.Session;
 
-//aqui lança as exceções
 public final class AuthGuard {
     private AuthGuard() {}
 
@@ -17,11 +17,23 @@ public final class AuthGuard {
 
     public static Usuario exigirPermissao(Permissao permissao) {
         Usuario u = exigirLogin();
-        String perfil = (u.getPerfil() != null) ? u.getPerfil().getNome() : null;
 
-        if (!Policy.temPermissao(perfil, permissao)) {
+        Perfil perfil = u.getPerfil();
+        Integer perfilId = null;
+        String perfilNome = null;
+
+        if (perfil != null) {
+            perfilNome = perfil.getNome();
+            if (perfil.getId() != null) {
+                // Perfil.id é Long no seu model
+                perfilId = Math.toIntExact(perfil.getId());
+            }
+        }
+
+        if (!Policy.temPermissao(perfilId, perfilNome, permissao)) {
             throw new AcessoNegadoException();
         }
+
         return u;
     }
 }
