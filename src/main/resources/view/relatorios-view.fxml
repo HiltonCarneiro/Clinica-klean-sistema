@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21.0.9" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.RelatoriosController">
+
+    <children>
+        <VBox spacing="12" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+            <padding>
+                <Insets top="14" right="14" bottom="14" left="14"/>
+            </padding>
+
+            <Label text="Relatórios" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <TabPane VBox.vgrow="ALWAYS">
+
+                <!-- ===================== ABA: RELATÓRIO DO CAIXA ===================== -->
+                <Tab text="Relatório do Caixa" closable="false">
+                    <BorderPane>
+                        <top>
+                            <VBox spacing="10" BorderPane.alignment="CENTER">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Período:"/>
+                                    <DatePicker fx:id="dtRelInicio"/>
+                                    <Label text="até"/>
+                                    <DatePicker fx:id="dtRelFim"/>
+
+                                    <Label text="Agrupar por:"/>
+                                    <ComboBox fx:id="cbAgrupamento" prefWidth="160"/>
+
+                                    <Label text="Profissional:"/>
+                                    <ComboBox fx:id="cbRelProfissional" prefWidth="240"/>
+
+                                    <Button text="Buscar" onAction="#onBuscarRelatorio"/>
+                                    <Button text="Exportar CSV" onAction="#onExportarRelatorioCsv"/>
+                                </HBox>
+
+                                <HBox spacing="16" alignment="CENTER_LEFT">
+                                    <Label text="Total (Entradas):" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="lblRelTotal" text="R$ 0,00"/>
+                                </HBox>
+
+                                <Separator/>
+                            </VBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="tblRelatorio" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colRelChave" text="Chave" prefWidth="420"/>
+                                    <TableColumn fx:id="colRelTotal" text="Total (R$)" prefWidth="160"/>
+                                </columns>
+                            </TableView>
+                        </center>
+                    </BorderPane>
+                </Tab>
+
+                <!-- ===================== ABA: NOTAS (CONSULTA / REIMPRESSÃO) ===================== -->
+                <Tab text="Notas (Consultar / Reimprimir)" closable="false">
+                    <BorderPane>
+                        <top>
+                            <VBox spacing="10">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Período:"/>
+                                    <DatePicker fx:id="dtNotaInicio"/>
+                                    <Label text="até"/>
+                                    <DatePicker fx:id="dtNotaFim"/>
+
+                                    <Label text="Paciente (contém):"/>
+                                    <TextField fx:id="txtPacienteFiltro" promptText="Ex: maria" prefWidth="180"/>
+
+                                    <Label text="Profissional:"/>
+                                    <ComboBox fx:id="cbNotaProfissional" prefWidth="240"/>
+
+                                    <Label text="Forma:"/>
+                                    <ComboBox fx:id="cbNotaForma" prefWidth="160"/>
+
+                                    <Button text="Buscar" onAction="#onBuscarNotas"/>
+                                    <Button text="Reimprimir PDF" onAction="#onReimprimirNota"/>
+                                </HBox>
+
+                                <Separator/>
+                            </VBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="tblNotas" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colNotaId" text="ID" prefWidth="60"/>
+                                    <TableColumn fx:id="colNotaDataHora" text="Data/Hora" prefWidth="150"/>
+                                    <TableColumn fx:id="colNotaPaciente" text="Paciente" prefWidth="260"/>
+                                    <TableColumn fx:id="colNotaProfissional" text="Profissional" prefWidth="220"/>
+                                    <TableColumn fx:id="colNotaForma" text="Forma" prefWidth="120"/>
+                                    <TableColumn fx:id="colNotaTotal" text="Total (R$)" prefWidth="120"/>
+                                </columns>
+                            </TableView>
+                        </center>
+                    </BorderPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
+    </children>
+</AnchorPane>

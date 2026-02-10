@@ -55,8 +55,8 @@
                 <TextField fx:id="txtRua" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                 <!-- Número -->
-                <Label text="Número:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtNumero" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                <TextField fx:id="txtNumero" />
+                <CheckBox fx:id="chkSemNumero" text="Sem número" onAction="#onToggleSemNumero"/>
 
                 <!-- Bairro -->
                 <Label text="Bairro:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
