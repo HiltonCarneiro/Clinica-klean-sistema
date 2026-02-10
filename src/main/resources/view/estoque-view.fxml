@@ -42,37 +42,33 @@
                 <Label text="Tipo:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                 <ComboBox fx:id="cbTipo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <!-- Unidade -->
-                <Label text="Unidade:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtUnidade" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
                 <!-- Estoque atual -->
-                <Label text="Estoque atual:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtEstoqueAtual" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                <Label text="Estoque atual:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtEstoqueAtual" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                 <!-- Estoque mínimo -->
-                <Label text="Estoque mínimo:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtEstoqueMinimo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                <Label text="Estoque mínimo:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtEstoqueMinimo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
                 <!-- Lote -->
-                <Label text="Lote:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtLote" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                <Label text="Lote:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtLote" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                 <!-- Validade -->
-                <Label text="Validade:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="dpValidade" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                <Label text="Validade:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="dpValidade" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
                 <!-- Preço custo -->
-                <Label text="Preço de custo:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtPrecoCusto" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                <Label text="Preço de custo:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecoCusto" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
                 <!-- Preço venda -->
-                <Label text="Preço de venda:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtPrecoVenda" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+                <Label text="Preço de venda:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecoVenda" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
 
                 <!-- Ativo -->
-                <Label text="Ativo:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
-                <CheckBox fx:id="chkAtivo" GridPane.rowIndex="9" GridPane.columnIndex="1" selected="true"/>
+                <Label text="Ativo:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <CheckBox fx:id="chkAtivo" GridPane.rowIndex="8" GridPane.columnIndex="1" selected="true"/>
             </GridPane>
 
             <!-- BOTÕES + FILTROS -->
@@ -92,7 +88,7 @@
             <!-- BUSCA -->
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <Label text="Buscar:"/>
-                <TextField fx:id="txtBuscar" promptText="Digite nome, tipo, unidade ou lote..."
+                <TextField fx:id="txtBuscar" promptText="Digite nome, tipo ou lote..."
                            HBox.hgrow="ALWAYS"/>
                 <Button text="Limpar" onAction="#onLimparBusca"/>
             </HBox>
@@ -104,10 +100,9 @@
             <!-- TABELA -->
             <TableView fx:id="tblProdutos" prefHeight="200.0" prefWidth="600.0">
                 <columns>
-                    <TableColumn fx:id="colNome"     text="Nome"     prefWidth="200.0"/>
-                    <TableColumn fx:id="colTipo"     text="Tipo"     prefWidth="120.0"/>
-                    <TableColumn fx:id="colUnidade"  text="Unidade"  prefWidth="100.0"/>
-                    <TableColumn fx:id="colEstoque"  text="Estoque"  prefWidth="100.0"/>
+                    <TableColumn fx:id="colNome"     text="Nome"     prefWidth="260.0"/>
+                    <TableColumn fx:id="colTipo"     text="Tipo"     prefWidth="140.0"/>
+                    <TableColumn fx:id="colEstoque"  text="Estoque"  prefWidth="120.0"/>
                     <TableColumn fx:id="colValidade" text="Validade" prefWidth="120.0"/>
                     <TableColumn fx:id="colAtivo"    text="Ativo"    prefWidth="80.0"/>
                 </columns>
