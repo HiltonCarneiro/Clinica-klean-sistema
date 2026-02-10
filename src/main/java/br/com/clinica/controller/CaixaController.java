@@ -6,6 +6,7 @@ import br.com.clinica.dao.ProdutoDAO;
 import br.com.clinica.dao.UsuarioDAO;
 import br.com.clinica.model.*;
 import br.com.clinica.service.NotaPdfService;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,7 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -27,74 +28,37 @@ import java.util.function.Function;
 public class CaixaController {
 
     // === Controles da parte superior ===
-    @FXML
-    private ComboBox<Paciente> cbPaciente;
-
-    @FXML
-    private ComboBox<Usuario> cbProfissional;
-
-    @FXML
-    private ComboBox<String> cbFormaPagamento;
-
-    @FXML
-    private TextArea txtObservacao;
+    @FXML private ComboBox<Paciente> cbPaciente;
+    @FXML private ComboBox<Usuario> cbProfissional;
+    @FXML private ComboBox<String> cbFormaPagamento;
+    @FXML private TextArea txtObservacao;
 
     // === Controles de tipo de item ===
-    @FXML
-    private RadioButton rbProduto;
+    @FXML private RadioButton rbProduto;
+    @FXML private RadioButton rbProcedimento;
 
-    @FXML
-    private RadioButton rbProcedimento;
-
-    // ToggleGroup será criado via código
     private final ToggleGroup grupoTipoItem = new ToggleGroup();
 
     // === Controles de dados do item ===
-    @FXML
-    private ComboBox<Produto> cbProduto;
+    @FXML private ComboBox<Produto> cbProduto;
+    @FXML private TextField txtDescricaoProcedimento;
+    @FXML private TextField txtQuantidade;
+    @FXML private TextField txtValorUnitario;
 
-    @FXML
-    private TextField txtDescricaoProcedimento;
-
-    @FXML
-    private TextField txtQuantidade;
-
-    @FXML
-    private TextField txtValorUnitario;
-
-    @FXML
-    private Button btnAdicionarItem;
-
-    @FXML
-    private Button btnRemoverItem;
+    @FXML private Button btnAdicionarItem;
+    @FXML private Button btnRemoverItem;
 
     // === Tabela de itens ===
-    @FXML
-    private TableView<NotaItem> tblItens;
+    @FXML private TableView<NotaItem> tblItens;
+    @FXML private TableColumn<NotaItem, String> colDescricao;
+    @FXML private TableColumn<NotaItem, String> colTipo;
+    @FXML private TableColumn<NotaItem, Double> colQuantidade;
+    @FXML private TableColumn<NotaItem, Double> colValorUnitario;
+    @FXML private TableColumn<NotaItem, Double> colValorTotal;
 
-    @FXML
-    private TableColumn<NotaItem, String> colDescricao;
-
-    @FXML
-    private TableColumn<NotaItem, String> colTipo;
-
-    @FXML
-    private TableColumn<NotaItem, Double> colQuantidade;
-
-    @FXML
-    private TableColumn<NotaItem, Double> colValorUnitario;
-
-    @FXML
-    private TableColumn<NotaItem, Double> colValorTotal;
-
-    @FXML
-    private Label lblTotal;
-
-    @FXML
-    private Button btnFinalizar;
-
-    @FXML
-    private Button btnFechar;
+    @FXML private Label lblTotal;
+    @FXML private Button btnFinalizar;
+    @FXML private Button btnFechar;
 
     // === DAOs ===
     private final PacienteDAO pacienteDAO = new PacienteDAO();
@@ -119,7 +83,10 @@ public class CaixaController {
         carregarCombosPrincipais();
         configurarTabela();
         configurarTipoItem();
-        configurarPesquisaCombos();  // <<< habilita pesquisa
+
+        // >>> AUTOCOMPLETE / PESQUISA (corrigido p/ não “sumir” seleção)
+        configurarPesquisaCombos();
+
         atualizarTotal();
     }
 
@@ -144,10 +111,7 @@ public class CaixaController {
 
         // Formas de pagamento
         cbFormaPagamento.setItems(FXCollections.observableArrayList(
-                "DINHEIRO",
-                "PIX",
-                "CARTAO",
-                "DEBITO"
+                "DINHEIRO", "PIX", "CARTAO", "DEBITO"
         ));
         if (!cbFormaPagamento.getItems().isEmpty()) {
             cbFormaPagamento.getSelectionModel().selectFirst();
@@ -167,13 +131,9 @@ public class CaixaController {
         colTipo.setCellValueFactory(cell -> {
             TipoItemNota tipo = cell.getValue().getTipoItem();
             String texto;
-            if (tipo == TipoItemNota.PRODUTO) {
-                texto = "Produto";
-            } else if (tipo == TipoItemNota.PROCEDIMENTO) {
-                texto = "Procedimento";
-            } else {
-                texto = "";
-            }
+            if (tipo == TipoItemNota.PRODUTO) texto = "Produto";
+            else if (tipo == TipoItemNota.PROCEDIMENTO) texto = "Procedimento";
+            else texto = "";
             return new SimpleStringProperty(texto);
         });
 
@@ -205,28 +165,42 @@ public class CaixaController {
         cbProduto.setDisable(!isProduto);
         txtDescricaoProcedimento.setDisable(isProduto);
 
-        if (isProduto) {
-            txtDescricaoProcedimento.clear();
-        }
+        if (isProduto) txtDescricaoProcedimento.clear();
 
         txtQuantidade.setDisable(false);
         txtValorUnitario.setDisable(false);
     }
 
     // -------------------------------------------------------------------------
-    // Pesquisa em Combos (Paciente e Produto)
+    // Pesquisa em Combos (Paciente, Produto, Profissional) — COMMIT/SELEÇÃO FIXA
     // -------------------------------------------------------------------------
 
     private void configurarPesquisaCombos() {
         // Paciente: pesquisa pelo nome
-        configurarComboPesquisa(cbPaciente, pacientes, Paciente::getNome);
+        configurarComboPesquisa(cbPaciente, pacientes, p -> safe(p.getNome()));
 
         // Produto: pesquisa pelo nome
-        configurarComboPesquisa(cbProduto, produtos, Produto::getNome);
+        configurarComboPesquisa(cbProduto, produtos, p -> safe(p.getNome()));
+
+        // Profissional: "Pessoa (CARGO)"
+        configurarComboPesquisa(cbProfissional, profissionais, this::textoProfissional);
+    }
+
+    private String textoProfissional(Usuario u) {
+        if (u == null) return "";
+        String pessoa = safe(u.getPessoaNome());
+        String cargo = safe(u.getNome()); // no seu projeto, "nome" é o cargo do profissional
+        if (pessoa.isBlank() && !safe(u.getLogin()).isBlank()) pessoa = u.getLogin();
+        if (cargo.isBlank()) return pessoa;
+        return pessoa + " (" + cargo + ")";
     }
 
     /**
-     * Deixa um ComboBox pesquisável: conforme digita, filtra a lista.
+     * ComboBox pesquisável com seleção estável:
+     * - Filtra enquanto digita
+     * - ENTER confirma o primeiro match
+     * - Clique confirma e FECHA o popup
+     * - Ao perder foco, tenta casar texto com item; se não casar, restaura seleção anterior
      */
     private <T> void configurarComboPesquisa(ComboBox<T> comboBox,
                                              ObservableList<T> itensOriginais,
@@ -234,62 +208,131 @@ public class CaixaController {
 
         comboBox.setEditable(true);
 
-        // Lista filtrada que é mostrada no combo
         FilteredList<T> filtrados = new FilteredList<>(itensOriginais, p -> true);
         comboBox.setItems(filtrados);
 
-        // Como o objeto vira texto no editor
-        comboBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(T obj) {
-                return obj == null ? "" : textoFunc.apply(obj);
-            }
+        // Converter + cells (pra não aparecer login/toString “estranho”)
+        StringConverter<T> conv = new StringConverter<>() {
+            @Override public String toString(T obj) { return obj == null ? "" : safe(textoFunc.apply(obj)); }
+            @Override public T fromString(String s) { return comboBox.getValue(); }
+        };
+        comboBox.setConverter(conv);
 
-            @Override
-            public T fromString(String string) {
-                // não usamos o editor para criar novos itens
-                return comboBox.getValue();
+        comboBox.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
+            }
+        });
+        comboBox.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
             }
         });
 
         TextField editor = comboBox.getEditor();
 
-        // Quando digitar, filtra
+        // Filtra ao digitar (mas sem “quebrar” seleção)
         editor.textProperty().addListener((obs, old, texto) -> {
-            T selecionado = comboBox.getSelectionModel().getSelectedItem();
+            T sel = comboBox.getSelectionModel().getSelectedItem();
+            if (sel != null && safe(textoFunc.apply(sel)).equals(texto)) return;
 
-            // se o selecionado já é igual ao texto, não filtra
-            if (selecionado != null && textoFunc.apply(selecionado).equals(texto)) {
-                return;
-            }
+            String t = (texto == null) ? "" : texto.trim().toLowerCase();
 
             filtrados.setPredicate(item -> {
-                if (texto == null || texto.isBlank()) return true;
-                String lower = texto.toLowerCase();
-                return textoFunc.apply(item).toLowerCase().contains(lower);
+                if (t.isBlank()) return true;
+                return safe(textoFunc.apply(item)).toLowerCase().contains(t);
             });
 
-            comboBox.show();
+            if (!comboBox.isShowing()) comboBox.show();
         });
 
-        // Quando escolher um item, coloca o texto certinho no editor
+        // Clique/seleção pelo mouse: fixa e fecha
         comboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
             if (novo != null) {
-                editor.setText(textoFunc.apply(novo));
+                Platform.runLater(() -> {
+                    comboBox.getEditor().setText(conv.toString(novo));
+                    comboBox.hide();
+                });
             }
         });
 
-        // Quando fechar o popup, volta a lista completa
-        comboBox.setOnHidden(e -> {
-            filtrados.setPredicate(item -> true);
-            T selecionado = comboBox.getSelectionModel().getSelectedItem();
-            if (selecionado == null) {
-                editor.clear();
-            } else {
-                editor.setText(textoFunc.apply(selecionado));
+        // ENTER confirma: se tem item filtrado, seleciona o primeiro
+        editor.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                confirmarSelecaoOuManter(comboBox, filtrados, textoFunc);
+                comboBox.hide();
+                e.consume();
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+                comboBox.hide();
+                e.consume();
             }
         });
+
+        // Ao perder foco: tenta casar texto; se não casar, restaura última seleção válida
+        editor.focusedProperty().addListener((obs, old, focado) -> {
+            if (Boolean.TRUE.equals(focado)) return;
+            confirmarSelecaoOuManter(comboBox, filtrados, textoFunc);
+            comboBox.hide();
+        });
+
+        // Ao esconder popup: não limpar o texto se já existe seleção
+        comboBox.setOnHidden(e -> {
+            T sel = comboBox.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                editor.setText(conv.toString(sel));
+            }
+            filtrados.setPredicate(x -> true); // volta lista completa
+        });
     }
+
+    private <T> void confirmarSelecaoOuManter(ComboBox<T> comboBox,
+                                              FilteredList<T> filtrados,
+                                              Function<T, String> textoFunc) {
+
+        String digitado = safe(comboBox.getEditor().getText()).trim();
+        T atual = comboBox.getSelectionModel().getSelectedItem();
+
+        if (digitado.isBlank()) {
+            // se apagou tudo, limpa seleção
+            comboBox.getSelectionModel().clearSelection();
+            comboBox.getEditor().clear();
+            return;
+        }
+
+        // 1) tenta match exato (case-insensitive) em TODOS os itens originais
+        T exato = null;
+        for (T item : filtrados.getSource()) {
+            if (safe(textoFunc.apply(item)).equalsIgnoreCase(digitado)) {
+                exato = item;
+                break;
+            }
+        }
+
+        if (exato != null) {
+            comboBox.getSelectionModel().select(exato);
+            comboBox.getEditor().setText(safe(textoFunc.apply(exato)));
+            return;
+        }
+
+        // 2) se não achou exato, e tem filtrados, seleciona o primeiro filtrado
+        if (!filtrados.isEmpty()) {
+            T first = filtrados.get(0);
+            comboBox.getSelectionModel().select(first);
+            comboBox.getEditor().setText(safe(textoFunc.apply(first)));
+            return;
+        }
+
+        // 3) não achou nada: volta para seleção anterior (não “some”)
+        if (atual != null) {
+            comboBox.getEditor().setText(safe(textoFunc.apply(atual)));
+        } else {
+            comboBox.getEditor().clear();
+        }
+    }
+
+    private String safe(String s) { return s == null ? "" : s; }
 
     // -------------------------------------------------------------------------
     // Ações de itens
@@ -298,13 +341,12 @@ public class CaixaController {
     @FXML
     private void onAdicionarItem() {
         try {
-            if (rbProduto.isSelected()) {
-                adicionarItemProduto();
-            } else {
-                adicionarItemProcedimento();
-            }
+            if (rbProduto.isSelected()) adicionarItemProduto();
+            else adicionarItemProcedimento();
+
             atualizarTotal();
             limparCamposItem();
+
         } catch (NumberFormatException e) {
             mostrarErro("Valor inválido", "Informe valores numéricos válidos para quantidade e valor.");
         } catch (Exception e) {
@@ -341,9 +383,7 @@ public class CaixaController {
         }
 
         double quantidade = lerQuantidade();
-        if (quantidade <= 0) {
-            quantidade = 1.0;
-        }
+        if (quantidade <= 0) quantidade = 1.0;
 
         double valorUnitario = lerValorUnitario(null);
 
@@ -358,20 +398,14 @@ public class CaixaController {
 
     private double lerQuantidade() {
         String textoQtd = txtQuantidade.getText();
-        if (textoQtd == null || textoQtd.isBlank()) {
-            return 1.0;
-        }
+        if (textoQtd == null || textoQtd.isBlank()) return 1.0;
         return Double.parseDouble(textoQtd.replace(",", "."));
     }
 
     private double lerValorUnitario(Double valorSugestao) {
         String textoValor = txtValorUnitario.getText();
-        if ((textoValor == null || textoValor.isBlank()) && valorSugestao != null) {
-            return valorSugestao;
-        }
-        if (textoValor == null || textoValor.isBlank()) {
-            throw new NumberFormatException("Valor unitário vazio.");
-        }
+        if ((textoValor == null || textoValor.isBlank()) && valorSugestao != null) return valorSugestao;
+        if (textoValor == null || textoValor.isBlank()) throw new NumberFormatException("Valor unitário vazio.");
         return Double.parseDouble(textoValor.replace(",", "."));
     }
 
@@ -388,9 +422,7 @@ public class CaixaController {
 
     private void atualizarTotal() {
         double soma = 0.0;
-        for (NotaItem item : itensNota) {
-            soma += item.getValorTotal();
-        }
+        for (NotaItem item : itensNota) soma += item.getValorTotal();
         lblTotal.setText(String.format("R$ %.2f", soma));
     }
 
@@ -410,22 +442,10 @@ public class CaixaController {
             Usuario profissional = cbProfissional.getValue();
             String formaPagamento = cbFormaPagamento.getValue();
 
-            if (paciente == null) {
-                mostrarErro("Paciente obrigatório", "Selecione um paciente.");
-                return;
-            }
-            if (profissional == null) {
-                mostrarErro("Profissional obrigatório", "Selecione um profissional.");
-                return;
-            }
-            if (formaPagamento == null || formaPagamento.isBlank()) {
-                mostrarErro("Forma de pagamento obrigatória", "Selecione a forma de pagamento.");
-                return;
-            }
-            if (itensNota.isEmpty()) {
-                mostrarErro("Nenhum item", "Adicione pelo menos um item à nota antes de finalizar.");
-                return;
-            }
+            if (paciente == null) { mostrarErro("Paciente obrigatório", "Selecione um paciente."); return; }
+            if (profissional == null) { mostrarErro("Profissional obrigatório", "Selecione um profissional."); return; }
+            if (formaPagamento == null || formaPagamento.isBlank()) { mostrarErro("Forma de pagamento obrigatória", "Selecione a forma de pagamento."); return; }
+            if (itensNota.isEmpty()) { mostrarErro("Nenhum item", "Adicione pelo menos um item à nota antes de finalizar."); return; }
 
             Nota nota = new Nota();
             nota.setDataHora(LocalDateTime.now());
@@ -463,7 +483,7 @@ public class CaixaController {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     mostrarErro("Erro ao gerar PDF", ex.getMessage());
-                    return; // não limpa se der erro no PDF
+                    return;
                 }
             } else {
                 mostrarAviso("Nota salva",
