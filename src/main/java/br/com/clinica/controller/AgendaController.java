@@ -55,7 +55,7 @@ public class AgendaController {
     private void initialize() {
         dpData.setValue(LocalDate.now());
 
-        // Profissionais (usuários ativos)
+        // Profissionais (usuários ativos filtrados no DAO)
         List<Usuario> profissionais = usuarioDAO.listarProfissionaisAtivos();
         cbProfissional.setItems(FXCollections.observableArrayList(profissionais));
 
@@ -106,7 +106,6 @@ public class AgendaController {
         );
 
         aplicarRegraDeVisaoPorPerfil();
-
         carregarAgendaDoDia();
     }
 
@@ -177,7 +176,7 @@ public class AgendaController {
 
             Paciente paciente = cbPaciente.getValue();
 
-            // ✅ Regra: profissional só agenda para ele mesmo
+            // Regra: profissional só agenda para ele mesmo
             Usuario profissional;
             if (podeVerTodos()) {
                 profissional = cbProfissional.getValue();

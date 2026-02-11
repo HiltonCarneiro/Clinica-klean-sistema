@@ -3,7 +3,8 @@ package br.com.clinica.model;
 public class Usuario {
 
     private Integer id;
-    private String nome;
+    private String nome;        // no seu projeto, isso é o CARGO (ex: ENFERMEIRA)
+    private String pessoaNome;  // nome da pessoa
     private String login;
     private String senha;
     private boolean ativo;
@@ -21,18 +22,6 @@ public class Usuario {
         this.perfil = perfil;
     }
 
-    private String pessoaNome;
-
-    public String getPessoaNome() {
-        return pessoaNome;
-    }
-
-    public void setPessoaNome(String pessoaNome) {
-        this.pessoaNome = pessoaNome;
-    }
-
-
-    // === ID ===
     public Integer getId() {
         return id;
     }
@@ -41,7 +30,7 @@ public class Usuario {
         this.id = id;
     }
 
-    // === NOME ===
+    // CARGO
     public String getNome() {
         return nome;
     }
@@ -50,7 +39,15 @@ public class Usuario {
         this.nome = nome;
     }
 
-    // === LOGIN ===
+    // NOME DA PESSOA
+    public String getPessoaNome() {
+        return pessoaNome;
+    }
+
+    public void setPessoaNome(String pessoaNome) {
+        this.pessoaNome = pessoaNome;
+    }
+
     public String getLogin() {
         return login;
     }
@@ -59,7 +56,6 @@ public class Usuario {
         this.login = login;
     }
 
-    // === SENHA ===
     public String getSenha() {
         return senha;
     }
@@ -68,7 +64,6 @@ public class Usuario {
         this.senha = senha;
     }
 
-    // === ATIVO ===
     public boolean isAtivo() {
         return ativo;
     }
@@ -77,7 +72,6 @@ public class Usuario {
         this.ativo = ativo;
     }
 
-    // === PERFIL ===
     public Perfil getPerfil() {
         return perfil;
     }
@@ -88,8 +82,18 @@ public class Usuario {
 
     @Override
     public String toString() {
-        String pessoa = (pessoaNome != null && !pessoaNome.isBlank()) ? pessoaNome : "(sem nome)";
-        return pessoa + " - " + nome + " (" + login + ")";
-    }
+        String pessoa = (pessoaNome != null && !pessoaNome.isBlank()) ? pessoaNome : "";
+        String cargo = (nome != null && !nome.isBlank()) ? nome : "";
 
+        if (cargo.isBlank() && perfil != null && perfil.getNome() != null) {
+            cargo = perfil.getNome();
+        }
+
+        if (pessoa.isBlank() && login != null && !login.isBlank()) {
+            pessoa = login; // fallback
+        }
+
+        if (cargo.isBlank()) return pessoa;
+        return pessoa + " (" + cargo + ")";
+    }
 }

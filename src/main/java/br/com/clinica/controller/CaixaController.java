@@ -84,15 +84,11 @@ public class CaixaController {
         configurarTabela();
         configurarTipoItem();
 
-        // >>> AUTOCOMPLETE / PESQUISA (corrigido p/ não “sumir” seleção)
+        // Autocomplete/pesquisa com seleção estável
         configurarPesquisaCombos();
 
         atualizarTotal();
     }
-
-    // -------------------------------------------------------------------------
-    // Inicialização / configuração
-    // -------------------------------------------------------------------------
 
     private void configurarToggleGroup() {
         rbProduto.setToggleGroup(grupoTipoItem);
@@ -105,7 +101,7 @@ public class CaixaController {
         pacientes.setAll(pacienteDAO.listarAtivos());
         cbPaciente.setItems(pacientes);
 
-        // Profissionais
+        // Profissionais (filtrados no DAO)
         profissionais.setAll(usuarioDAO.listarProfissionaisAtivos());
         cbProfissional.setItems(profissionais);
 
@@ -171,9 +167,7 @@ public class CaixaController {
         txtValorUnitario.setDisable(false);
     }
 
-    // -------------------------------------------------------------------------
-    // Pesquisa em Combos (Paciente, Produto, Profissional) — COMMIT/SELEÇÃO FIXA
-    // -------------------------------------------------------------------------
+    // ---------------- Pesquisa em Combos ----------------
 
     private void configurarPesquisaCombos() {
         // Paciente: pesquisa pelo nome
@@ -189,19 +183,12 @@ public class CaixaController {
     private String textoProfissional(Usuario u) {
         if (u == null) return "";
         String pessoa = safe(u.getPessoaNome());
-        String cargo = safe(u.getNome()); // no seu projeto, "nome" é o cargo do profissional
+        String cargo = safe(u.getNome()); // no seu projeto, "nome" é o cargo
         if (pessoa.isBlank() && !safe(u.getLogin()).isBlank()) pessoa = u.getLogin();
         if (cargo.isBlank()) return pessoa;
         return pessoa + " (" + cargo + ")";
     }
 
-    /**
-     * ComboBox pesquisável com seleção estável:
-     * - Filtra enquanto digita
-     * - ENTER confirma o primeiro match
-     * - Clique confirma e FECHA o popup
-     * - Ao perder foco, tenta casar texto com item; se não casar, restaura seleção anterior
-     */
     private <T> void configurarComboPesquisa(ComboBox<T> comboBox,
                                              ObservableList<T> itensOriginais,
                                              Function<T, String> textoFunc) {
@@ -211,7 +198,6 @@ public class CaixaController {
         FilteredList<T> filtrados = new FilteredList<>(itensOriginais, p -> true);
         comboBox.setItems(filtrados);
 
-        // Converter + cells (pra não aparecer login/toString “estranho”)
         StringConverter<T> conv = new StringConverter<>() {
             @Override public String toString(T obj) { return obj == null ? "" : safe(textoFunc.apply(obj)); }
             @Override public T fromString(String s) { return comboBox.getValue(); }
@@ -233,7 +219,6 @@ public class CaixaController {
 
         TextField editor = comboBox.getEditor();
 
-        // Filtra ao digitar (mas sem “quebrar” seleção)
         editor.textProperty().addListener((obs, old, texto) -> {
             T sel = comboBox.getSelectionModel().getSelectedItem();
             if (sel != null && safe(textoFunc.apply(sel)).equals(texto)) return;
@@ -248,7 +233,6 @@ public class CaixaController {
             if (!comboBox.isShowing()) comboBox.show();
         });
 
-        // Clique/seleção pelo mouse: fixa e fecha
         comboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
             if (novo != null) {
                 Platform.runLater(() -> {
@@ -258,7 +242,6 @@ public class CaixaController {
             }
         });
 
-        // ENTER confirma: se tem item filtrado, seleciona o primeiro
         editor.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 confirmarSelecaoOuManter(comboBox, filtrados, textoFunc);
@@ -270,20 +253,18 @@ public class CaixaController {
             }
         });
 
-        // Ao perder foco: tenta casar texto; se não casar, restaura última seleção válida
         editor.focusedProperty().addListener((obs, old, focado) -> {
             if (Boolean.TRUE.equals(focado)) return;
             confirmarSelecaoOuManter(comboBox, filtrados, textoFunc);
             comboBox.hide();
         });
 
-        // Ao esconder popup: não limpar o texto se já existe seleção
         comboBox.setOnHidden(e -> {
             T sel = comboBox.getSelectionModel().getSelectedItem();
             if (sel != null) {
                 editor.setText(conv.toString(sel));
             }
-            filtrados.setPredicate(x -> true); // volta lista completa
+            filtrados.setPredicate(x -> true);
         });
     }
 
@@ -295,13 +276,11 @@ public class CaixaController {
         T atual = comboBox.getSelectionModel().getSelectedItem();
 
         if (digitado.isBlank()) {
-            // se apagou tudo, limpa seleção
             comboBox.getSelectionModel().clearSelection();
             comboBox.getEditor().clear();
             return;
         }
 
-        // 1) tenta match exato (case-insensitive) em TODOS os itens originais
         T exato = null;
         for (T item : filtrados.getSource()) {
             if (safe(textoFunc.apply(item)).equalsIgnoreCase(digitado)) {
@@ -316,7 +295,6 @@ public class CaixaController {
             return;
         }
 
-        // 2) se não achou exato, e tem filtrados, seleciona o primeiro filtrado
         if (!filtrados.isEmpty()) {
             T first = filtrados.get(0);
             comboBox.getSelectionModel().select(first);
@@ -324,7 +302,6 @@ public class CaixaController {
             return;
         }
 
-        // 3) não achou nada: volta para seleção anterior (não “some”)
         if (atual != null) {
             comboBox.getEditor().setText(safe(textoFunc.apply(atual)));
         } else {
@@ -334,9 +311,7 @@ public class CaixaController {
 
     private String safe(String s) { return s == null ? "" : s; }
 
-    // -------------------------------------------------------------------------
-    // Ações de itens
-    // -------------------------------------------------------------------------
+    // ---------------- Itens ----------------
 
     @FXML
     private void onAdicionarItem() {
@@ -428,12 +403,9 @@ public class CaixaController {
 
     private void limparCamposItem() {
         txtDescricaoProcedimento.clear();
-        // mantém quantidade e valor
     }
 
-    // -------------------------------------------------------------------------
-    // Ações da nota
-    // -------------------------------------------------------------------------
+    // ---------------- Nota ----------------
 
     @FXML
     private void onFinalizarNota() {
@@ -458,10 +430,8 @@ public class CaixaController {
             nota.setItens(listaItens);
             nota.recalcularTotais();
 
-            // 1) Salva no banco (nota, itens, movimento, baixa estoque)
             notaDAO.salvarNota(nota);
 
-            // 2) Escolhe onde salvar o PDF
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Salvar nota em PDF");
             fileChooser.getExtensionFilters().add(
@@ -502,7 +472,6 @@ public class CaixaController {
         itensNota.clear();
         atualizarTotal();
         txtObservacao.clear();
-        // mantém paciente, profissional e forma de pagamento selecionados
     }
 
     @FXML
@@ -511,9 +480,7 @@ public class CaixaController {
         stage.close();
     }
 
-    // -------------------------------------------------------------------------
-    // Métodos utilitários de mensagem
-    // -------------------------------------------------------------------------
+    // ---------------- Util ----------------
 
     private void mostrarErro(String titulo, String detalhe) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
