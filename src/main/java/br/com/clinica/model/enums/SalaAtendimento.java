@@ -1,9 +1,10 @@
 package br.com.clinica.model.enums;
 
 public enum SalaAtendimento {
-    SALA_1("Sala 1"),
-    SALA_2("Sala 2"),
-    SALA_3("Sala 3");
+    // Mantém os "names" (SALA_1, SALA_2, SALA_3) para não quebrar registros já salvos no banco.
+    SALA_1("Consultório 1"),
+    SALA_2("Consultório 2"),
+    SALA_3("Sala de Procedimentos");
 
     private final String descricao;
 

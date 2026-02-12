@@ -55,6 +55,63 @@ public class AgendamentoDAO {
         }
     }
 
+    public void atualizar(Agendamento ag) {
+        if (ag.getId() == null) {
+            throw new IllegalArgumentException("Agendamento sem ID para atualizar.");
+        }
+
+        String sql = "UPDATE agendamento SET " +
+                "data = ?, hora_inicio = ?, hora_fim = ?, " +
+                "profissional_id = ?, profissional_nome = ?, " +
+                "paciente_id = ?, paciente_nome = ?, " +
+                "sala = ?, procedimento = ?, observacoes = ?, status = ? " +
+                "WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, ag.getData().toString());
+            ps.setString(2, ag.getHoraInicio().format(HORA_FORMATTER));
+            ps.setString(3, ag.getHoraFim().format(HORA_FORMATTER));
+            ps.setInt(4, ag.getProfissionalId());
+            ps.setString(5, ag.getProfissionalNome());
+
+            if (ag.getPacienteId() != null) {
+                ps.setInt(6, ag.getPacienteId());
+            } else {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            }
+            ps.setString(7, ag.getPacienteNome());
+
+            ps.setString(8, ag.getSala().name());
+            ps.setString(9, ag.getProcedimento());
+            ps.setString(10, ag.getObservacoes());
+            ps.setString(11, ag.getStatus().name());
+
+            ps.setInt(12, ag.getId());
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar agendamento", e);
+        }
+    }
+
+    public void atualizarStatus(Integer id, StatusAgendamento status) {
+        if (id == null) throw new IllegalArgumentException("ID do agendamento é obrigatório.");
+        String sql = "UPDATE agendamento SET status = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status.name());
+            ps.setInt(2, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar status do agendamento", e);
+        }
+    }
+
     public List<Agendamento> listarPorData(LocalDate data) {
         String sql = "SELECT * FROM agendamento WHERE data = ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
@@ -77,7 +134,6 @@ public class AgendamentoDAO {
         return lista;
     }
 
-    // ✅ NOVO: lista por data + profissional
     public List<Agendamento> listarPorDataEProfissional(LocalDate data, int profissionalId) {
         String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
@@ -102,13 +158,26 @@ public class AgendamentoDAO {
     }
 
     public boolean existeConflito(Agendamento ag) {
-        String sql =
+        return existeConflito(ag, null);
+    }
+
+    /**
+     * Verifica conflito de horário:
+     * - mesmo profissional OU mesma sala OU mesmo paciente
+     * - horários se sobrepõem
+     * - ignora status CANCELADO
+     * - opcionalmente ignora um ID (edição/reagendamento)
+     */
+    public boolean existeConflito(Agendamento ag, Integer ignorarId) {
+        String base =
                 "SELECT COUNT(*) FROM agendamento " +
                         "WHERE data = ? " +
                         "AND (profissional_id = ? OR sala = ? OR (paciente_id IS NOT NULL AND paciente_id = ?)) " +
                         "AND hora_inicio < ? " +
                         "AND hora_fim > ? " +
-                        "AND status <> ?";
+                        "AND status <> ? ";
+
+        String sql = (ignorarId != null) ? (base + "AND id <> ?") : base;
 
         String dataStr = ag.getData().toString();
         String horaInicioStr = ag.getHoraInicio().format(HORA_FORMATTER);
@@ -117,19 +186,24 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, dataStr);
-            ps.setInt(2, ag.getProfissionalId());
-            ps.setString(3, ag.getSala().name());
+            int i = 1;
+            ps.setString(i++, dataStr);
+            ps.setInt(i++, ag.getProfissionalId());
+            ps.setString(i++, ag.getSala().name());
 
             if (ag.getPacienteId() != null) {
-                ps.setInt(4, ag.getPacienteId());
+                ps.setInt(i++, ag.getPacienteId());
             } else {
-                ps.setNull(4, java.sql.Types.INTEGER);
+                ps.setNull(i++, java.sql.Types.INTEGER);
             }
 
-            ps.setString(5, horaFimStr);      // hora_inicio < fimNovo
-            ps.setString(6, horaInicioStr);   // hora_fim > inicioNovo
-            ps.setString(7, StatusAgendamento.CANCELADO.name());
+            ps.setString(i++, horaFimStr);      // hora_inicio < fimNovo
+            ps.setString(i++, horaInicioStr);   // hora_fim > inicioNovo
+            ps.setString(i++, StatusAgendamento.CANCELADO.name());
+
+            if (ignorarId != null) {
+                ps.setInt(i, ignorarId);
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
