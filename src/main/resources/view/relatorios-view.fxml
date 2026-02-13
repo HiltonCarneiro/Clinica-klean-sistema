@@ -19,30 +19,30 @@
 
             <TabPane VBox.vgrow="ALWAYS">
 
-                <!-- ===================== ABA: RELATÓRIO DO CAIXA ===================== -->
-                <Tab text="Relatório do Caixa" closable="false">
+                <!-- ===================== ABA: CAIXA ===================== -->
+                <Tab text="Caixa" closable="false">
                     <BorderPane>
                         <top>
-                            <VBox spacing="10" BorderPane.alignment="CENTER">
+                            <VBox spacing="10">
                                 <HBox spacing="10" alignment="CENTER_LEFT">
                                     <Label text="Período:"/>
-                                    <DatePicker fx:id="dtRelInicio"/>
+                                    <DatePicker fx:id="dtCxInicio"/>
                                     <Label text="até"/>
-                                    <DatePicker fx:id="dtRelFim"/>
+                                    <DatePicker fx:id="dtCxFim"/>
 
-                                    <Label text="Agrupar por:"/>
-                                    <ComboBox fx:id="cbAgrupamento" prefWidth="160"/>
-
-                                    <Label text="Profissional:"/>
-                                    <ComboBox fx:id="cbRelProfissional" prefWidth="240"/>
-
-                                    <Button text="Buscar" onAction="#onBuscarRelatorio"/>
-                                    <Button text="Exportar CSV" onAction="#onExportarRelatorioCsv"/>
+                                    <Button text="Buscar" onAction="#onBuscarCaixa"/>
+                                    <Button text="Exportar PDF" onAction="#onExportarCaixaPdf"/>
                                 </HBox>
 
                                 <HBox spacing="16" alignment="CENTER_LEFT">
-                                    <Label text="Total (Entradas):" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="lblRelTotal" text="R$ 0,00"/>
+                                    <Label text="Entradas:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="lblCxEntradas" text="R$ 0,00"/>
+
+                                    <Label text="Saídas:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="lblCxSaidas" text="R$ 0,00"/>
+
+                                    <Label text="Saldo:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="lblCxSaldo" text="R$ 0,00"/>
                                 </HBox>
 
                                 <Separator/>
@@ -50,18 +50,60 @@
                         </top>
 
                         <center>
-                            <TableView fx:id="tblRelatorio" VBox.vgrow="ALWAYS">
+                            <TableView fx:id="tblCaixa" VBox.vgrow="ALWAYS">
                                 <columns>
-                                    <TableColumn fx:id="colRelChave" text="Chave" prefWidth="420"/>
-                                    <TableColumn fx:id="colRelTotal" text="Total (R$)" prefWidth="160"/>
+                                    <TableColumn fx:id="colCxData" text="Data" prefWidth="110"/>
+                                    <TableColumn fx:id="colCxTipo" text="Tipo" prefWidth="90"/>
+                                    <TableColumn fx:id="colCxDescricao" text="Descrição" prefWidth="280"/>
+                                    <TableColumn fx:id="colCxForma" text="Forma" prefWidth="130"/>
+                                    <TableColumn fx:id="colCxValor" text="Valor (R$)" prefWidth="110"/>
+                                    <TableColumn fx:id="colCxPaciente" text="Paciente" prefWidth="220"/>
                                 </columns>
                             </TableView>
                         </center>
                     </BorderPane>
                 </Tab>
 
-                <!-- ===================== ABA: NOTAS (CONSULTA / REIMPRESSÃO) ===================== -->
-                <Tab text="Notas (Consultar / Reimprimir)" closable="false">
+                <!-- ===================== ABA: AGENDAMENTOS ===================== -->
+                <Tab text="Agendamentos" closable="false">
+                    <BorderPane>
+                        <top>
+                            <VBox spacing="10">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Período:"/>
+                                    <DatePicker fx:id="dtAgInicio"/>
+                                    <Label text="até"/>
+                                    <DatePicker fx:id="dtAgFim"/>
+
+                                    <Label text="Profissional:"/>
+                                    <ComboBox fx:id="cbAgProfissional" prefWidth="260"/>
+
+                                    <Button text="Buscar" onAction="#onBuscarAgendamentos"/>
+                                    <Button text="Exportar PDF" onAction="#onExportarAgendamentosPdf"/>
+                                </HBox>
+
+                                <Separator/>
+                            </VBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="tblAgendamentos" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colAgData" text="Data" prefWidth="110"/>
+                                    <TableColumn fx:id="colAgHora" text="Horário" prefWidth="110"/>
+                                    <TableColumn fx:id="colAgProf" text="Profissional" prefWidth="220"/>
+                                    <TableColumn fx:id="colAgSala" text="Sala" prefWidth="120"/>
+                                    <TableColumn fx:id="colAgPaciente" text="Paciente" prefWidth="220"/>
+                                    <TableColumn fx:id="colAgStatus" text="Status" prefWidth="120"/>
+                                    <TableColumn fx:id="colAgProced" text="Procedimento" prefWidth="250"/>
+                                </columns>
+                            </TableView>
+                        </center>
+                    </BorderPane>
+                </Tab>
+
+                <!-- ===================== ABA: NOTAS ===================== -->
+                <Tab text="Notas" closable="false">
                     <BorderPane>
                         <top>
                             <VBox spacing="10">
@@ -81,7 +123,8 @@
                                     <ComboBox fx:id="cbNotaForma" prefWidth="160"/>
 
                                     <Button text="Buscar" onAction="#onBuscarNotas"/>
-                                    <Button text="Reimprimir PDF" onAction="#onReimprimirNota"/>
+                                    <Button text="Exportar PDF (Relatório)" onAction="#onExportarNotasPdf"/>
+                                    <Button text="Reimprimir PDF (Nota)" onAction="#onReimprimirNota"/>
                                 </HBox>
 
                                 <Separator/>

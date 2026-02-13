@@ -1,10 +1,18 @@
 package br.com.clinica.controller;
 
+import br.com.clinica.dao.AgendamentoDAO;
+import br.com.clinica.dao.MovimentoCaixaDAO;
 import br.com.clinica.dao.NotaDAO;
 import br.com.clinica.dao.UsuarioDAO;
+import br.com.clinica.model.Agendamento;
+import br.com.clinica.model.MovimentoCaixa;
 import br.com.clinica.model.Nota;
+import br.com.clinica.model.TipoMovimento;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.service.NotaPdfService;
+import br.com.clinica.service.RelatorioAgendamentosPdfService;
+import br.com.clinica.service.RelatorioCaixaPdfService;
+import br.com.clinica.service.RelatorioNotasPdfService;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,26 +23,44 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.List;
 
 public class RelatoriosController {
 
-    // ===================== ABA RELATÓRIO =====================
-    @FXML private DatePicker dtRelInicio;
-    @FXML private DatePicker dtRelFim;
-    @FXML private ComboBox<String> cbAgrupamento;
-    @FXML private ComboBox<Usuario> cbRelProfissional;
+    // ===================== ABA CAIXA =====================
+    @FXML private DatePicker dtCxInicio;
+    @FXML private DatePicker dtCxFim;
 
-    @FXML private TableView<NotaDAO.RelatorioRow> tblRelatorio;
-    @FXML private TableColumn<NotaDAO.RelatorioRow, String> colRelChave;
-    @FXML private TableColumn<NotaDAO.RelatorioRow, Double> colRelTotal;
+    @FXML private TableView<MovimentoCaixa> tblCaixa;
+    @FXML private TableColumn<MovimentoCaixa, String> colCxData;
+    @FXML private TableColumn<MovimentoCaixa, String> colCxTipo;
+    @FXML private TableColumn<MovimentoCaixa, String> colCxDescricao;
+    @FXML private TableColumn<MovimentoCaixa, String> colCxForma;
+    @FXML private TableColumn<MovimentoCaixa, Double> colCxValor;
+    @FXML private TableColumn<MovimentoCaixa, String> colCxPaciente;
 
-    @FXML private Label lblRelTotal;
+    @FXML private Label lblCxEntradas;
+    @FXML private Label lblCxSaidas;
+    @FXML private Label lblCxSaldo;
 
-    private final ObservableList<NotaDAO.RelatorioRow> relatorioObs = FXCollections.observableArrayList();
+    private final ObservableList<MovimentoCaixa> caixaObs = FXCollections.observableArrayList();
+
+    // ===================== ABA AGENDAMENTOS =====================
+    @FXML private DatePicker dtAgInicio;
+    @FXML private DatePicker dtAgFim;
+    @FXML private ComboBox<Usuario> cbAgProfissional;
+
+    @FXML private TableView<Agendamento> tblAgendamentos;
+    @FXML private TableColumn<Agendamento, String> colAgData;
+    @FXML private TableColumn<Agendamento, String> colAgHora;
+    @FXML private TableColumn<Agendamento, String> colAgProf;
+    @FXML private TableColumn<Agendamento, String> colAgSala;
+    @FXML private TableColumn<Agendamento, String> colAgPaciente;
+    @FXML private TableColumn<Agendamento, String> colAgStatus;
+    @FXML private TableColumn<Agendamento, String> colAgProced;
+
+    private final ObservableList<Agendamento> agObs = FXCollections.observableArrayList();
 
     // ===================== ABA NOTAS =====================
     @FXML private DatePicker dtNotaInicio;
@@ -54,9 +80,15 @@ public class RelatoriosController {
     private final ObservableList<NotaDAO.NotaResumo> notasObs = FXCollections.observableArrayList();
 
     // ===================== DAOs / Services =====================
+    private final MovimentoCaixaDAO movimentoCaixaDAO = new MovimentoCaixaDAO();
+    private final AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
     private final NotaDAO notaDAO = new NotaDAO();
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+
     private final NotaPdfService notaPdfService = new NotaPdfService();
+    private final RelatorioCaixaPdfService relCaixaPdf = new RelatorioCaixaPdfService();
+    private final RelatorioAgendamentosPdfService relAgPdf = new RelatorioAgendamentosPdfService();
+    private final RelatorioNotasPdfService relNotasPdf = new RelatorioNotasPdfService();
 
     private static final String FORMA_TODAS = "TODAS";
 
@@ -65,45 +97,57 @@ public class RelatoriosController {
         LocalDate hoje = LocalDate.now();
 
         // Datas padrão
-        dtRelInicio.setValue(hoje);
-        dtRelFim.setValue(hoje);
+        dtCxInicio.setValue(hoje);
+        dtCxFim.setValue(hoje);
+        dtAgInicio.setValue(hoje);
+        dtAgFim.setValue(hoje);
         dtNotaInicio.setValue(hoje);
         dtNotaFim.setValue(hoje);
 
-        // Agrupamentos
-        cbAgrupamento.setItems(FXCollections.observableArrayList("DIARIO", "MENSAL", "PROFISSIONAL"));
-        cbAgrupamento.getSelectionModel().select("DIARIO");
-
-        // Profissionais (com opção "Todos" via item null)
+        // Profissionais
         List<Usuario> profissionais = usuarioDAO.listarProfissionaisAtivos();
-
         ObservableList<Usuario> profObs = FXCollections.observableArrayList();
-        profObs.add(null); // "Todos"
+        profObs.add(null); // Todos
         profObs.addAll(profissionais);
 
-        cbRelProfissional.setItems(profObs);
+        cbAgProfissional.setItems(profObs);
+        configurarComboProfissionais(cbAgProfissional);
+        cbAgProfissional.getSelectionModel().selectFirst();
+
         cbNotaProfissional.setItems(profObs);
-
-        // Mostrar "Todos" quando for null
-        configurarComboProfissionais(cbRelProfissional);
         configurarComboProfissionais(cbNotaProfissional);
-
-        cbRelProfissional.getSelectionModel().selectFirst();
         cbNotaProfissional.getSelectionModel().selectFirst();
 
-        // Formas de pagamento (sem null pra não virar ObservableList<Object>)
-        ObservableList<String> formas = FXCollections.observableArrayList(
+        // Formas
+        cbNotaForma.setItems(FXCollections.observableArrayList(
                 FORMA_TODAS, "DINHEIRO", "PIX", "CARTAO", "TRANSFERENCIA", "OUTRO"
-        );
-        cbNotaForma.setItems(formas);
+        ));
         cbNotaForma.getSelectionModel().select(FORMA_TODAS);
 
-        // Tabela relatório
-        tblRelatorio.setItems(relatorioObs);
-        colRelChave.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getChave()));
-        colRelTotal.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().getTotal()).asObject());
+        // Caixa
+        tblCaixa.setItems(caixaObs);
+        colCxData.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getData() != null ? c.getValue().getData().toString() : ""));
+        colCxTipo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTipo() != null ? c.getValue().getTipo().name() : ""));
+        colCxDescricao.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDescricao())));
+        colCxForma.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getFormaPagamento())));
+        colCxValor.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().getValor()).asObject());
+        colCxPaciente.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getPacienteNome())));
 
-        // Tabela notas
+        // Agendamentos
+        tblAgendamentos.setItems(agObs);
+        colAgData.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getData() != null ? c.getValue().getData().toString() : ""));
+        colAgHora.setCellValueFactory(c -> new SimpleStringProperty(
+                (c.getValue().getHoraInicio() != null ? c.getValue().getHoraInicio().toString() : "") +
+                        " - " +
+                        (c.getValue().getHoraFim() != null ? c.getValue().getHoraFim().toString() : "")
+        ));
+        colAgProf.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getProfissionalNome())));
+        colAgSala.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getSala() != null ? c.getValue().getSala().getDescricao() : ""));
+        colAgPaciente.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getPacienteNome())));
+        colAgStatus.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus() != null ? c.getValue().getStatus().name() : ""));
+        colAgProced.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getProcedimento())));
+
+        // Notas
         tblNotas.setItems(notasObs);
         colNotaId.setCellValueFactory(c -> new SimpleLongProperty(c.getValue().getId()).asObject());
         colNotaDataHora.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataHoraFmt()));
@@ -112,8 +156,9 @@ public class RelatoriosController {
         colNotaForma.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFormaPagamento()));
         colNotaTotal.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().getTotalLiquido()).asObject());
 
-        // Carregar inicial
-        onBuscarRelatorio();
+        // Inicial
+        onBuscarCaixa();
+        onBuscarAgendamentos();
         onBuscarNotas();
     }
 
@@ -121,105 +166,124 @@ public class RelatoriosController {
         cb.setCellFactory(list -> new ListCell<>() {
             @Override protected void updateItem(Usuario item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else if (item == null) {
-                    setText("Todos");
-                } else {
-                    String pessoa = (item.getPessoaNome() != null && !item.getPessoaNome().isBlank())
-                            ? item.getPessoaNome()
-                            : item.getNome();
-                    setText(pessoa);
-                }
+                if (empty) setText(null);
+                else if (item == null) setText("Todos");
+                else setText(nomeProf(item));
             }
         });
-
         cb.setButtonCell(new ListCell<>() {
             @Override protected void updateItem(Usuario item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else if (item == null) {
-                    setText("Todos");
-                } else {
-                    String pessoa = (item.getPessoaNome() != null && !item.getPessoaNome().isBlank())
-                            ? item.getPessoaNome()
-                            : item.getNome();
-                    setText(pessoa);
-                }
+                if (empty) setText(null);
+                else if (item == null) setText("Todos");
+                else setText(nomeProf(item));
             }
         });
     }
 
-    // ===================== RELATÓRIO =====================
+    private String nomeProf(Usuario u) {
+        if (u == null) return "";
+        String pessoa = (u.getPessoaNome() != null && !u.getPessoaNome().isBlank()) ? u.getPessoaNome() : "";
+        String cargo  = (u.getNome() != null && !u.getNome().isBlank()) ? u.getNome() : "";
+        if (!pessoa.isBlank() && !cargo.isBlank()) return pessoa + " (" + cargo + ")";
+        if (!pessoa.isBlank()) return pessoa;
+        return cargo;
+    }
+
+    // ===================== CAIXA =====================
 
     @FXML
-    private void onBuscarRelatorio() {
+    private void onBuscarCaixa() {
         try {
-            LocalDate ini = dtRelInicio.getValue();
-            LocalDate fim = dtRelFim.getValue();
+            LocalDate ini = dtCxInicio.getValue();
+            LocalDate fim = dtCxFim.getValue();
+            if (ini == null || fim == null) { erro("Período inválido", "Informe data inicial e final."); return; }
+            if (fim.isBefore(ini)) { erro("Período inválido", "A data final não pode ser menor que a inicial."); return; }
 
-            if (ini == null || fim == null) {
-                erro("Período inválido", "Informe data inicial e final.");
-                return;
-            }
-            if (fim.isBefore(ini)) {
-                erro("Período inválido", "A data final não pode ser menor que a inicial.");
-                return;
-            }
+            List<MovimentoCaixa> lista = movimentoCaixaDAO.listarPorPeriodo(ini, fim);
+            caixaObs.setAll(lista);
 
-            String agrup = cbAgrupamento.getValue();
-            Usuario prof = cbRelProfissional.getValue();
-            Integer profissionalId = (prof == null) ? null : prof.getId();
+            double entradas = lista.stream().filter(m -> m.getTipo() == TipoMovimento.ENTRADA).mapToDouble(MovimentoCaixa::getValor).sum();
+            double saidas   = lista.stream().filter(m -> m.getTipo() == TipoMovimento.SAIDA).mapToDouble(MovimentoCaixa::getValor).sum();
+            double saldo = entradas - saidas;
 
-            List<NotaDAO.RelatorioRow> rows = notaDAO.relatorioEntradas(ini, fim, agrup, profissionalId);
-            relatorioObs.setAll(rows);
-
-            double total = rows.stream().mapToDouble(NotaDAO.RelatorioRow::getTotal).sum();
-            lblRelTotal.setText(String.format("R$ %.2f", total));
+            lblCxEntradas.setText(String.format("R$ %.2f", entradas));
+            lblCxSaidas.setText(String.format("R$ %.2f", saidas));
+            lblCxSaldo.setText(String.format("R$ %.2f", saldo));
 
         } catch (Exception e) {
             e.printStackTrace();
-            erro("Erro ao buscar relatório", e.getMessage());
+            erro("Erro ao buscar caixa", e.getMessage());
         }
     }
 
     @FXML
-    private void onExportarRelatorioCsv() {
-        if (relatorioObs.isEmpty()) {
-            aviso("Nada para exportar", "Busque um relatório antes de exportar.");
-            return;
-        }
+    private void onExportarCaixaPdf() {
+        if (caixaObs.isEmpty()) { aviso("Nada para exportar", "Busque um relatório antes de exportar."); return; }
 
         FileChooser fc = new FileChooser();
-        fc.setTitle("Salvar relatório CSV");
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
-        fc.setInitialFileName("relatorio_caixa.csv");
+        fc.setTitle("Salvar relatório do caixa (PDF)");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+        fc.setInitialFileName("relatorio_caixa.pdf");
 
-        File arq = fc.showSaveDialog(tblRelatorio.getScene().getWindow());
-        if (arq == null) return;
+        File destino = fc.showSaveDialog(tblCaixa.getScene().getWindow());
+        if (destino == null) return;
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("chave,total\n");
-            for (NotaDAO.RelatorioRow r : relatorioObs) {
-                sb.append(escapeCsv(r.getChave())).append(",")
-                        .append(String.format("%.2f", r.getTotal()).replace(",", "."))
-                        .append("\n");
-            }
-            Files.writeString(arq.toPath(), sb.toString(), StandardCharsets.UTF_8);
-            aviso("Exportado", "CSV gerado em:\n" + arq.getAbsolutePath());
+            relCaixaPdf.gerar(dtCxInicio.getValue(), dtCxFim.getValue(), caixaObs, destino);
+            aviso("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
-            erro("Erro ao exportar CSV", e.getMessage());
+            erro("Erro ao gerar PDF", e.getMessage());
         }
     }
 
-    private String escapeCsv(String s) {
-        if (s == null) return "";
-        String t = s.replace("\"", "\"\"");
-        if (t.contains(",") || t.contains("\n") || t.contains("\"")) return "\"" + t + "\"";
-        return t;
+    // ===================== AGENDAMENTOS =====================
+
+    @FXML
+    private void onBuscarAgendamentos() {
+        try {
+            LocalDate ini = dtAgInicio.getValue();
+            LocalDate fim = dtAgFim.getValue();
+            if (ini == null || fim == null) { erro("Período inválido", "Informe data inicial e final."); return; }
+            if (fim.isBefore(ini)) { erro("Período inválido", "A data final não pode ser menor que a inicial."); return; }
+
+            Usuario prof = cbAgProfissional.getValue();
+
+            List<Agendamento> lista = (prof == null)
+                    ? agendamentoDAO.listarPorPeriodo(ini, fim)
+                    : agendamentoDAO.listarPorPeriodoEProfissional(ini, fim, prof.getId());
+
+            agObs.setAll(lista);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            erro("Erro ao buscar agendamentos", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onExportarAgendamentosPdf() {
+        if (agObs.isEmpty()) { aviso("Nada para exportar", "Busque um relatório antes de exportar."); return; }
+
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Salvar relatório de agendamentos (PDF)");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+        fc.setInitialFileName("relatorio_agendamentos.pdf");
+
+        File destino = fc.showSaveDialog(tblAgendamentos.getScene().getWindow());
+        if (destino == null) return;
+
+        try {
+            Usuario prof = cbAgProfissional.getValue();
+            String profTxt = (prof == null) ? "" : nomeProf(prof);
+
+            relAgPdf.gerar(dtAgInicio.getValue(), dtAgFim.getValue(), profTxt, agObs, destino);
+            aviso("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            erro("Erro ao gerar PDF", e.getMessage());
+        }
     }
 
     // ===================== NOTAS =====================
@@ -229,15 +293,8 @@ public class RelatoriosController {
         try {
             LocalDate ini = dtNotaInicio.getValue();
             LocalDate fim = dtNotaFim.getValue();
-
-            if (ini == null || fim == null) {
-                erro("Período inválido", "Informe data inicial e final.");
-                return;
-            }
-            if (fim.isBefore(ini)) {
-                erro("Período inválido", "A data final não pode ser menor que a inicial.");
-                return;
-            }
+            if (ini == null || fim == null) { erro("Período inválido", "Informe data inicial e final."); return; }
+            if (fim.isBefore(ini)) { erro("Período inválido", "A data final não pode ser menor que a inicial."); return; }
 
             String pacienteLike = (txtPacienteFiltro.getText() == null) ? "" : txtPacienteFiltro.getText().trim();
 
@@ -257,12 +314,40 @@ public class RelatoriosController {
     }
 
     @FXML
+    private void onExportarNotasPdf() {
+        if (notasObs.isEmpty()) { aviso("Nada para exportar", "Busque um relatório antes de exportar."); return; }
+
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Salvar relatório de notas (PDF)");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+        fc.setInitialFileName("relatorio_notas.pdf");
+
+        File destino = fc.showSaveDialog(tblNotas.getScene().getWindow());
+        if (destino == null) return;
+
+        try {
+            String pacienteLike = (txtPacienteFiltro.getText() == null) ? "" : txtPacienteFiltro.getText().trim();
+
+            Usuario prof = cbNotaProfissional.getValue();
+            String profTxt = (prof == null) ? "" : nomeProf(prof);
+
+            String forma = cbNotaForma.getValue();
+            if (FORMA_TODAS.equals(forma)) forma = "";
+
+            relNotasPdf.gerar(dtNotaInicio.getValue(), dtNotaFim.getValue(),
+                    pacienteLike, profTxt, forma, notasObs, destino);
+
+            aviso("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            erro("Erro ao gerar PDF", e.getMessage());
+        }
+    }
+
+    @FXML
     private void onReimprimirNota() {
         NotaDAO.NotaResumo sel = tblNotas.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            aviso("Selecione uma nota", "Selecione uma nota na tabela para reimprimir.");
-            return;
-        }
+        if (sel == null) { aviso("Selecione uma nota", "Selecione uma nota na tabela para reimprimir."); return; }
 
         try {
             Nota nota = notaDAO.buscarNotaCompleta(sel.getId());
@@ -270,12 +355,7 @@ public class RelatoriosController {
             FileChooser fc = new FileChooser();
             fc.setTitle("Salvar PDF da nota");
             fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-
-            String nomePaciente = (nota.getPaciente() != null && nota.getPaciente().getNome() != null)
-                    ? nota.getPaciente().getNome().replaceAll("[^a-zA-Z0-9_\\- ]", "")
-                    : "nota";
-
-            fc.setInitialFileName("nota_" + nomePaciente + "_ID" + nota.getId() + ".pdf");
+            fc.setInitialFileName("nota_ID" + nota.getId() + ".pdf");
 
             File destino = fc.showSaveDialog(tblNotas.getScene().getWindow());
             if (destino == null) return;
@@ -289,7 +369,9 @@ public class RelatoriosController {
         }
     }
 
-    // ===================== UI helpers =====================
+    // ===================== helpers =====================
+
+    private String nvl(String s) { return s == null ? "" : s; }
 
     private void erro(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
