@@ -3,23 +3,124 @@ package br.com.clinica.database;
 import br.com.clinica.auth.Perfis;
 import br.com.clinica.auth.Permissao;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.EnumSet;
+import java.util.Properties;
 import java.util.Set;
 
 public class DatabaseConfig {
 
-    private static final String URL = "jdbc:sqlite:clinica.db";
+    // Carregado de src/main/resources/db.properties
+    private static String VENDOR;
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
+    private static boolean LOADED = false;
+
+    private DatabaseConfig() {}
+
+    private static synchronized void loadPropsIfNeeded() {
+        if (LOADED) return;
+
+        Properties props = new Properties();
+        try (InputStream in = DatabaseConfig.class.getResourceAsStream("/db.properties")) {
+            if (in != null) {
+                props.load(in);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao carregar /db.properties", e);
+        }
+
+        VENDOR = props.getProperty("db.vendor", "sqlite").trim();
+        URL = props.getProperty("db.url", "jdbc:sqlite:clinica_backup.db").trim();
+        USER = props.getProperty("db.user", "");
+        PASSWORD = props.getProperty("db.password", "");
+
+        if (USER == null) USER = "";
+        if (PASSWORD == null) PASSWORD = "";
+
+        LOADED = true;
+    }
+
+    private static boolean isSqlite() {
+        return VENDOR != null && VENDOR.equalsIgnoreCase("sqlite");
+    }
+
+    private static boolean isPostgres() {
+        return VENDOR != null && VENDOR.equalsIgnoreCase("postgres");
+    }
+
+    private static void ensureSqliteFileDirectory() {
+        if (!isSqlite()) return;
+        if (URL == null) return;
+
+        final String prefix = "jdbc:sqlite:";
+        if (!URL.startsWith(prefix)) return;
+
+        String path = URL.substring(prefix.length()).trim();
+        if (path.isBlank() || ":memory:".equals(path)) return;
+
+        // Normaliza (caso alguém use file:)
+        if (path.startsWith("file:")) path = path.substring("file:".length());
+
+        Path p = Paths.get(path).normalize();
+        Path parent = p.getParent();
+        if (parent != null) {
+            try {
+                Files.createDirectories(parent);
+            } catch (Exception e) {
+                throw new RuntimeException("Não foi possível criar o diretório do SQLite em: " + parent, e);
+            }
+        }
+    }
 
     public static Connection getConnection() throws SQLException {
-        Connection conn = DriverManager.getConnection(URL);
-        try (Statement st = conn.createStatement()) {
-            st.execute("PRAGMA foreign_keys = ON;");
+        loadPropsIfNeeded();
+
+        // Drivers (opcional, mas ajuda)
+        try {
+            if (isPostgres()) Class.forName("org.postgresql.Driver");
+            if (isSqlite()) Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException ignored) {}
+
+        if (isSqlite()) {
+            ensureSqliteFileDirectory();
         }
+
+        Connection conn;
+        if (USER.isBlank()) {
+            conn = DriverManager.getConnection(URL);
+        } else {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        }
+
+        // SQLite: habilita FK
+        if (isSqlite()) {
+            try (Statement st = conn.createStatement()) {
+                st.execute("PRAGMA foreign_keys = ON;");
+            }
+        }
+
         return conn;
     }
 
+    /**
+     * Inicializa o schema do SQLite (desenvolvimento/local).
+     * Para PostgreSQL (nuvem/produção), o recomendado é criar o schema por script/migrations
+     * e aqui apenas retornar.
+     */
     public static void initializeDatabase() {
+        loadPropsIfNeeded();
+
+        // No Postgres: schema deve ser criado por script/migration (não aqui, com SQL de SQLite)
+        if (isPostgres()) {
+            return;
+        }
+
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -112,8 +213,6 @@ public class DatabaseConfig {
             // =========================
             // AGENDAMENTO
             // =========================
-            // Obs: você tem no banco "profissional_nome" e "paciente_nome" (prints),
-            // então mantive aqui também.
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS agendamento (
                     id                INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,7 +251,6 @@ public class DatabaseConfig {
                 );
             """);
 
-            // Índices (igual seus prints)
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_anamnese_agendamento ON anamnese(agendamento_id);");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_anamnese_paciente_data ON anamnese(paciente_id, data_hora);");
 
@@ -161,14 +259,14 @@ public class DatabaseConfig {
             // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS anexo_paciente (
-                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                    paciente_id   INTEGER NOT NULL,
-                    nome_arquivo  TEXT NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    paciente_id     INTEGER NOT NULL,
+                    nome_arquivo    TEXT NOT NULL,
                     caminho_arquivo TEXT NOT NULL,
-                    tamanho_bytes INTEGER,
-                    descricao     TEXT,
-                    data_hora     TEXT NOT NULL,
-                    anamnese_id   INTEGER,
+                    tamanho_bytes   INTEGER,
+                    descricao       TEXT,
+                    data_hora       TEXT NOT NULL,
+                    anamnese_id     INTEGER,
                     FOREIGN KEY (paciente_id) REFERENCES paciente(id),
                     FOREIGN KEY (anamnese_id) REFERENCES anamnese(id)
                 );
@@ -180,14 +278,14 @@ public class DatabaseConfig {
             // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS movimento_caixa (
-                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data           TEXT NOT NULL, -- formato yyyy-MM-dd
-                    descricao      TEXT NOT NULL,
-                    tipo           TEXT NOT NULL, -- ENTRADA/SAIDA
-                    valor          REAL NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data            TEXT NOT NULL, -- formato yyyy-MM-dd
+                    descricao       TEXT NOT NULL,
+                    tipo            TEXT NOT NULL, -- ENTRADA/SAIDA
+                    valor           REAL NOT NULL,
                     forma_pagamento TEXT,
-                    paciente_nome  TEXT,
-                    observacao     TEXT
+                    paciente_nome   TEXT,
+                    observacao      TEXT
                 );
             """);
 
@@ -196,15 +294,15 @@ public class DatabaseConfig {
             // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS nota (
-                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data_hora      TEXT NOT NULL,
-                    id_paciente    INTEGER NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data_hora       TEXT NOT NULL,
+                    id_paciente     INTEGER NOT NULL,
                     id_profissional INTEGER NOT NULL,
                     forma_pagamento TEXT NOT NULL,
-                    total_bruto    REAL NOT NULL,
-                    desconto       REAL NOT NULL DEFAULT 0,
-                    total_liquido  REAL NOT NULL,
-                    observacao     TEXT,
+                    total_bruto     REAL NOT NULL,
+                    desconto        REAL NOT NULL DEFAULT 0,
+                    total_liquido   REAL NOT NULL,
+                    observacao      TEXT,
                     FOREIGN KEY (id_paciente) REFERENCES paciente(id),
                     FOREIGN KEY (id_profissional) REFERENCES usuario(id)
                 );
@@ -215,14 +313,14 @@ public class DatabaseConfig {
             // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS nota_item (
-                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                    id_nota       INTEGER NOT NULL,
-                    tipo_item     TEXT NOT NULL,     -- PRODUTO ou PROCEDIMENTO
-                    id_produto    INTEGER,           -- pode ser null se PROCEDIMENTO
-                    descricao     TEXT NOT NULL,
-                    quantidade    REAL NOT NULL,
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_nota        INTEGER NOT NULL,
+                    tipo_item      TEXT NOT NULL,     -- PRODUTO ou PROCEDIMENTO
+                    id_produto     INTEGER,           -- pode ser null se PROCEDIMENTO
+                    descricao      TEXT NOT NULL,
+                    quantidade     REAL NOT NULL,
                     valor_unitario REAL NOT NULL,
-                    valor_total   REAL NOT NULL,
+                    valor_total    REAL NOT NULL,
                     FOREIGN KEY (id_nota) REFERENCES nota(id),
                     FOREIGN KEY (id_produto) REFERENCES produto(id)
                 );
@@ -240,9 +338,9 @@ public class DatabaseConfig {
     }
 
     private static void seedPerfis(Connection conn) throws SQLException {
+        // SQLite
         String sql = "INSERT OR IGNORE INTO perfil (nome) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            // nomes dos perfis do seu sistema
             String[] perfis = {
                     Perfis.ADMIN,
                     Perfis.RECEPCIONISTA,
@@ -261,7 +359,6 @@ public class DatabaseConfig {
     }
 
     private static void seedPermissoes(Connection conn) throws SQLException {
-        // Busca ids dos perfis
         long idAdmin = idPerfil(conn, Perfis.ADMIN);
         long idRecep = idPerfil(conn, Perfis.RECEPCIONISTA);
         long idEnf = idPerfil(conn, Perfis.ENFERMEIRA);
@@ -270,11 +367,8 @@ public class DatabaseConfig {
         long idPsico = idPerfil(conn, Perfis.PSICOLOGA);
         long idMed = idPerfil(conn, Perfis.MEDICA);
 
-        // Regras iguais ao seu Policy.java:
-        // Admin = tudo
         insertPermissoes(conn, idAdmin, EnumSet.allOf(Permissao.class));
 
-        // Recepcionista (conforme Policy)
         insertPermissoes(conn, idRecep, EnumSet.of(
                 Permissao.ESTOQUE_VER,
                 Permissao.ESTOQUE_CADASTRAR_EDITAR,
@@ -290,7 +384,6 @@ public class DatabaseConfig {
                 Permissao.NOTA_GERAR
         ));
 
-        // Profissionais de saúde (conforme Policy)
         Set<Permissao> profissionalSaude = EnumSet.of(
                 Permissao.AGENDA_VER,
                 Permissao.AGENDA_GERENCIAR,
