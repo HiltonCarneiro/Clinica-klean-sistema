@@ -1,0 +1,84 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-base: #ffffff;
+    -fx-background-color: #ffffff;
+}
+
+/* Topo */
+.top-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e6e6e6;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Botões pequenos (navbar) */
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 13px;
+    -fx-padding: 8 12;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+.nav-btn:hover {
+    -fx-background-color: #eef8f1; /* verde bem clarinho */
+}
+
+/* MenuBar */
+.menu-bar {
+    -fx-background-color: transparent;
+}
+.menu-bar .menu-button:hover,
+.menu-bar .menu-button:showing {
+    -fx-background-color: #eef8f1;
+}
+
+/* Títulos */
+.h1 {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #111827;
+}
+.sub {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6b7280;
+}
+
+/* Cards */
+.card-grid {
+    -fx-padding: 10 0 0 0;
+}
+
+.card-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dfe7e2;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 16;
+    -fx-min-height: 95;
+    -fx-cursor: hand;
+}
+.card-btn:hover {
+    -fx-border-color: #7cc89a;
+    -fx-background-color: #f3fbf6;
+}
+
+/* Texto do card (quando o Button estiver com graphic) */
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+.card-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+/* Label do usuário */
+.user-label {
+    -fx-text-fill: #374151;
+}
+.user-name {
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
