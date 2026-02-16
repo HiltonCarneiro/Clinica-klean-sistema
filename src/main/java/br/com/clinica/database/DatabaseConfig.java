@@ -36,7 +36,9 @@ public class DatabaseConfig {
         }
 
         VENDOR = props.getProperty("db.vendor", "sqlite").trim();
-        URL = props.getProperty("db.url", "jdbc:sqlite:clinica_backup.db").trim();
+        // ✅ fallback correto (banco real), não clinica_backup.db
+        URL = props.getProperty("db.url", "jdbc:sqlite:clinica.db").trim();
+
         USER = props.getProperty("db.user", "");
         PASSWORD = props.getProperty("db.password", "");
 

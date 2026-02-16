@@ -17,13 +17,6 @@ import java.util.List;
  */
 public class ProdutoDAO {
 
-    /**
-     * Lista produtos com filtros opcionais.
-     *
-     * @param incluirInativos     se false, retorna apenas produtos com ativo = 1
-     * @param apenasBaixoEstoque se true, retorna apenas produtos com estoqueAtual <= estoqueMinimo
-     * @param apenasVencendo     se true, retorna apenas produtos com validade próxima (30 dias) ou já vencidos
-     */
     public List<Produto> listar(boolean incluirInativos,
                                 boolean apenasBaixoEstoque,
                                 boolean apenasVencendo) {
@@ -60,9 +53,6 @@ public class ProdutoDAO {
         return produtos;
     }
 
-    /**
-     * Insere ou atualiza um produto.
-     */
     public void salvar(Produto p) {
         if (p.getId() == null) {
             inserir(p);
@@ -97,7 +87,7 @@ public class ProdutoDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             preencherCamposSemId(stmt, p);
-            stmt.setLong(10, p.getId()); // id agora é o parâmetro 10
+            stmt.setLong(10, p.getId());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -105,9 +95,6 @@ public class ProdutoDAO {
         }
     }
 
-    /**
-     * Ativa ou inativa (toggle) um produto.
-     */
     public void ativarDesativar(Produto p) {
         if (p.getId() == null) return;
 
@@ -129,9 +116,6 @@ public class ProdutoDAO {
         }
     }
 
-    /**
-     * Preenche os campos do INSERT/UPDATE (sem o id).
-     */
     private void preencherCamposSemId(PreparedStatement stmt, Produto p) throws SQLException {
         stmt.setString(1, p.getNome());
         stmt.setString(2, p.getTipo() != null ? p.getTipo().toDatabase() : null);
@@ -141,7 +125,7 @@ public class ProdutoDAO {
         stmt.setString(5, p.getLote());
 
         if (p.getValidade() != null) {
-            stmt.setString(6, p.getValidade().toString()); // ISO yyyy-MM-dd
+            stmt.setString(6, p.getValidade().toString());
         } else {
             stmt.setString(6, null);
         }
@@ -204,16 +188,31 @@ public class ProdutoDAO {
     }
 
     /**
-     * Baixa a quantidade informada do estoque do produto.
-     * Usa a mesma Connection da transação da Nota.
+     * Baixa a quantidade do estoque de forma segura (multiusuário).
+     * Se não houver estoque suficiente, lança SQLException (fazendo a transação da Nota dar rollback).
      */
     public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
-        String sql = "UPDATE produto SET estoque_atual = estoque_atual - ? WHERE id = ?";
+        if (idProduto == null) {
+            throw new SQLException("Produto inválido (id nulo).");
+        }
+        if (quantidade <= 0) {
+            throw new SQLException("Quantidade inválida para baixa de estoque: " + quantidade);
+        }
+
+        // ✅ Atômico: só baixa se tiver estoque suficiente
+        String sql = "UPDATE produto " +
+                "   SET estoque_atual = estoque_atual - ? " +
+                " WHERE id = ? AND estoque_atual >= ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, quantidade);
             stmt.setLong(2, idProduto);
-            stmt.executeUpdate();
+            stmt.setDouble(3, quantidade);
+
+            int updated = stmt.executeUpdate();
+            if (updated == 0) {
+                throw new SQLException("Estoque insuficiente para o produto selecionado.");
+            }
         }
     }
 }
