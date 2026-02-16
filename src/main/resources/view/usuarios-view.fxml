@@ -35,6 +35,7 @@
                             <TextField fx:id="txtBuscaUsuario" promptText="login, cargo ou pessoa..." HBox.hgrow="ALWAYS"/>
                             <CheckBox fx:id="chkIncluirInativos" text="Incluir inativos"/>
                             <Button text="Atualizar" onAction="#onAtualizarUsuarios"/>
+                            <Button text="Fazer backup agora" onAction="#onFazerBackupAgora"/>
                             <Button text="Novo" onAction="#onNovoUsuario"/>
                         </HBox>
                     </top>
