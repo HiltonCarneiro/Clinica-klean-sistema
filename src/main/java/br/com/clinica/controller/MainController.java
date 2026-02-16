@@ -4,6 +4,7 @@ import br.com.clinica.auth.AuthGuard;
 import br.com.clinica.auth.Permissao;
 import br.com.clinica.auth.exceptions.AcessoNegadoException;
 import br.com.clinica.auth.exceptions.NaoAutenticadoException;
+import br.com.clinica.session.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,44 +12,55 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class MainController {
 
+    // conecta controller ao main-view.fxml
+    @FXML private VBox homeBox;
+    @FXML private AnchorPane contentPane;
     @FXML private Label lblUsuarioLogado;
 
-    // HOME (tela inicial)
-    @FXML private VBox homeBox;
-
-    // CONTEÚDO (telas carregadas dentro do main)
-    @FXML private AnchorPane contentPane;
+    // histórico guarda o caminho do FXML
+    private final Deque<String> history = new ArrayDeque<>();
 
     private String usuarioLogado;
 
-    // Histórico para VOLTAR: guarda "estado anterior"
-    private static class NavState {
-        final boolean wasHomeVisible;
-        final Parent previousView; // pode ser null se era home
+    @FXML private Button btnBack;
+    @FXML private Button btnForward;
 
-        NavState(boolean wasHomeVisible, Parent previousView) {
-            this.wasHomeVisible = wasHomeVisible;
-            this.previousView = previousView;
-        }
-    }
+    private final Deque<String> backStack = new ArrayDeque<>();
+    private final Deque<String> forwardStack = new ArrayDeque<>();
+    private String currentView = null;
 
-    private final Deque<NavState> history = new ArrayDeque<>();
 
     @FXML
     private void initialize() {
-        // começa na home
         mostrarHome();
+        atualizarUsuarioLogado();
     }
 
-    /**
-     * Chamado pelo LoginController depois de autenticar
-     */
+    private void atualizarUsuarioLogado() {
+        if (Session.getUsuario() != null) {
+            lblUsuarioLogado.setText(Session.getUsuario().getPessoaNome());
+        } else {
+            lblUsuarioLogado.setText("-");
+        }
+        atualizarBotoesNavegacao();
+    }
+
+    private void atualizarBotoesNavegacao() {
+        if (btnBack != null) btnBack.setDisable(backStack.isEmpty());
+        if (btnForward != null) btnForward.setDisable(forwardStack.isEmpty());
+    }
+
+
+
+    /** Chamado pelo LoginController depois de autenticar */
     public void setUsuarioLogado(String usuario) {
         this.usuarioLogado = usuario;
         if (lblUsuarioLogado != null) {
@@ -60,84 +72,52 @@ public class MainController {
 
     @FXML
     private void onInicio() {
-        history.clear();
+        backStack.clear();
+        forwardStack.clear();
+        currentView = null;
         mostrarHome();
+        atualizarBotoesNavegacao();
     }
 
     @FXML
-    private void onVoltar() {
-        if (history.isEmpty()) {
-            // se não tem histórico, volta para home
-            mostrarHome();
-            return;
-        }
+    private void onBack() {
+        if (backStack.isEmpty()) return;
 
-        NavState prev = history.pop();
+        String previous = backStack.pop();
+        if (currentView != null) forwardStack.push(currentView);
 
-        if (prev.wasHomeVisible) {
-            mostrarHome();
-            return;
-        }
-
-        if (prev.previousView != null) {
-            mostrarConteudo(prev.previousView);
-        } else {
-            mostrarHome();
-        }
+        loadView(previous, false);
+        atualizarBotoesNavegacao();
     }
+
+    @FXML
+    private void onForward() {
+        if (forwardStack.isEmpty()) return;
+
+        String next = forwardStack.pop();
+        if (currentView != null) backStack.push(currentView);
+
+        loadView(next, false);
+        atualizarBotoesNavegacao();
+    }
+
 
     // ================== AÇÕES (MENU / HOME) ==================
 
-    @FXML
-    private void onPacientes() {
-        abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER);
-    }
-
-    @FXML
-    private void onAgenda() {
-        abrirTelaNoConteudo("/view/agenda-view.fxml", Permissao.AGENDA_VER);
-    }
-
-    @FXML
-    private void onCaixa() {
-        abrirTelaNoConteudo("/view/caixa-view.fxml", Permissao.FINANCEIRO_VER);
-    }
-
-    @FXML
-    private void onMovimentoCaixa() {
-        abrirTelaNoConteudo("/view/movimento-caixa-view.fxml", Permissao.FINANCEIRO_VER);
-    }
-
-    @FXML
-    private void onEstoque() {
-        abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER);
-    }
-
-    @FXML
-    private void onRelatorios() {
-        abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER);
-        // Se você ainda não tem essa tela, pode manter seu "mostrarInfo(...)"
-    }
-
-    @FXML
-    private void onUsuarios() {
-        abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR);
-    }
+    @FXML private void onPacientes() { abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER); }
+    @FXML private void onAgenda() { abrirTelaNoConteudo("/view/agenda-view.fxml", Permissao.AGENDA_VER); }
+    @FXML private void onCaixa() { abrirTelaNoConteudo("/view/caixa-view.fxml", Permissao.FINANCEIRO_VER); }
+    @FXML private void onMovimentoCaixa() { abrirTelaNoConteudo("/view/movimento-caixa-view.fxml", Permissao.FINANCEIRO_VER); }
+    @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
+    @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
+    @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
 
     // ================== NAVEGAÇÃO INTERNA ==================
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
         try {
             AuthGuard.exigirPermissao(permissao);
-
-            // Salva estado atual no histórico (para VOLTAR)
-            pushHistory();
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent view = loader.load();
-
-            mostrarConteudo(view);
-
+            loadView(fxmlPath, true);
         } catch (NaoAutenticadoException | AcessoNegadoException e) {
             mostrarErro("Acesso negado", e.getMessage());
         } catch (Exception e) {
@@ -146,18 +126,26 @@ public class MainController {
         }
     }
 
-    private void pushHistory() {
-        boolean homeVisivel = homeBox != null && homeBox.isVisible();
-
-        Parent atual = null;
-        if (contentPane != null && !contentPane.getChildren().isEmpty()) {
-            if (contentPane.getChildren().get(0) instanceof Parent p) {
-                atual = p;
+    private void loadView(String fxmlPath, boolean pushHistory) {
+        try {
+            if (pushHistory) {
+                if (currentView != null) backStack.push(currentView);
+                forwardStack.clear();
             }
-        }
 
-        history.push(new NavState(homeVisivel, atual));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = loader.load();
+
+            currentView = fxmlPath;
+            mostrarConteudo(view);
+            atualizarBotoesNavegacao();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            mostrarErro("Erro ao carregar FXML", ex.getMessage());
+        }
     }
+
 
     private void mostrarHome() {
         if (homeBox != null) {
@@ -192,14 +180,6 @@ public class MainController {
     private void mostrarErro(String titulo, String mensagem) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erro");
-        alert.setHeaderText(titulo);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
-    }
-
-    private void mostrarInfo(String titulo, String mensagem) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Info");
         alert.setHeaderText(titulo);
         alert.setContentText(mensagem);
         alert.showAndWait();

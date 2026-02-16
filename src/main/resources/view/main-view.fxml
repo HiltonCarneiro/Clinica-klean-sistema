@@ -8,22 +8,24 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.clinica.controller.MainController">
 
-    <!-- MENU SUPERIOR + BARRA DE NAVEGAÇÃO -->
     <top>
-        <VBox spacing="8">
+        <VBox spacing="8" styleClass="top-bar">
             <padding>
                 <Insets top="10" right="15" bottom="10" left="15"/>
             </padding>
 
             <!-- Barra de navegação -->
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Button text="Início" onAction="#onInicio" />
-                <Button text="Voltar" onAction="#onVoltar" />
+                <Button text="Início" onAction="#onInicio" styleClass="nav-btn"/>
+
+                <Button fx:id="btnBack" text="←" onAction="#onBack" styleClass="nav-btn"/>
+                <Button fx:id="btnForward" text="→" onAction="#onForward" styleClass="nav-btn"/>
+
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Label text="Logado:" style="-fx-text-fill: #444;" />
-                <Label fx:id="lblUsuarioLogado" text="-" style="-fx-font-weight: bold;" />
+                <Label text="Logado:" styleClass="user-label" />
+                <Label fx:id="lblUsuarioLogado" text="-" styleClass="user-name" />
             </HBox>
 
             <Separator/>
@@ -52,71 +54,89 @@
         </VBox>
     </top>
 
-    <!-- CONTEÚDO -->
     <center>
         <StackPane>
-
-            <!-- HOME (tela inicial) -->
-            <VBox fx:id="homeBox" spacing="15">
+            <!-- HOME -->
+            <VBox fx:id="homeBox" spacing="14">
                 <padding>
-                    <Insets top="15" right="20" bottom="20" left="20"/>
+                    <Insets top="18" right="20" bottom="20" left="20"/>
                 </padding>
 
-                <!-- TÍTULOS -->
-                <VBox spacing="5">
-                    <Label text="Clínica Integração"
-                           style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                    <Label text="Selecione uma área para começar"
-                           style="-fx-font-size: 14px; -fx-text-fill: #555555;"/>
+                <VBox spacing="4">
+                    <Label text="Clínica Klean - Saúde Integrativa" styleClass="h1"/>
+                    <Label text="Selecione uma área para começar" styleClass="sub"/>
                 </VBox>
 
-                <!-- CARDS / BOTÕES GRANDES -->
-                <GridPane hgap="15" vgap="15">
+                <GridPane hgap="15" vgap="15" styleClass="card-grid">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="33"/>
                         <ColumnConstraints percentWidth="33"/>
                         <ColumnConstraints percentWidth="33"/>
                     </columnConstraints>
 
-                    <Button text="Pacientes"
-                            onAction="#onPacientes"
-                            GridPane.rowIndex="0" GridPane.columnIndex="0"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onPacientes" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="0" GridPane.columnIndex="0">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Pacientes" styleClass="card-title"/>
+                                <Label text="Cadastro, busca e prontuário" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
 
-                    <Button text="Agenda"
-                            onAction="#onAgenda"
-                            GridPane.rowIndex="0" GridPane.columnIndex="1"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onAgenda" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="0" GridPane.columnIndex="1">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Agenda" styleClass="card-title"/>
+                                <Label text="Consultas e horários" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
 
-                    <Button text="Caixa / Notas"
-                            onAction="#onCaixa"
-                            GridPane.rowIndex="0" GridPane.columnIndex="2"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onCaixa" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="0" GridPane.columnIndex="2">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Caixa / Notas" styleClass="card-title"/>
+                                <Label text="Pagamentos e notas" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
 
-                    <Button text="Movimento Caixa"
-                            onAction="#onMovimentoCaixa"
-                            GridPane.rowIndex="1" GridPane.columnIndex="0"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onMovimentoCaixa" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="1" GridPane.columnIndex="0">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Movimento de Caixa" styleClass="card-title"/>
+                                <Label text="Entradas, saídas e fechamento" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
 
-                    <Button text="Estoque"
-                            onAction="#onEstoque"
-                            GridPane.rowIndex="1" GridPane.columnIndex="1"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onEstoque" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Estoque" styleClass="card-title"/>
+                                <Label text="Itens, validade e consumo" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
 
-                    <Button text="Usuários &amp; Perfis"
-                            onAction="#onUsuarios"
-                            GridPane.rowIndex="1" GridPane.columnIndex="2"
-                            maxWidth="Infinity" maxHeight="80"
-                            style="-fx-font-size: 16px; -fx-padding: 15;"/>
+                    <Button onAction="#onUsuarios" maxWidth="Infinity" styleClass="card-btn"
+                            GridPane.rowIndex="1" GridPane.columnIndex="2">
+                        <graphic>
+                            <VBox spacing="4">
+                                <Label text="Usuários &amp; Perfis" styleClass="card-title"/>
+                                <Label text="Permissões e acessos" styleClass="card-desc"/>
+                            </VBox>
+                        </graphic>
+                    </Button>
                 </GridPane>
             </VBox>
 
-            <!-- Aqui as telas (agenda/paciente/estoque/caixa...) serão carregadas -->
+            <!-- Conteúdo carregado -->
             <AnchorPane fx:id="contentPane" visible="false" managed="false"/>
         </StackPane>
     </center>
