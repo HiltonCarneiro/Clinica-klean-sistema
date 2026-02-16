@@ -103,7 +103,8 @@ public class MainController {
     @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
     @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
-
+    @FXML
+    private void onAuditoria() {abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER);}
     // ================== NAVEGAÇÃO INTERNA ==================
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {

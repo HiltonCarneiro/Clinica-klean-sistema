@@ -3,16 +3,16 @@ package br.com.clinica.dao;
 import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.Produto;
 import br.com.clinica.model.TipoProduto;
+import br.com.clinica.session.Session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProdutoDAO {
+
+    private final AuditLogDAO audit = new AuditLogDAO();
 
     public List<Produto> listar(boolean incluirInativos,
                                 boolean apenasBaixoEstoque,
@@ -54,10 +54,18 @@ public class ProdutoDAO {
                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             preencherCamposSemId(stmt, p);
             stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) p.setId(rs.getLong(1));
+            }
+
+            audit.registrarAuto("CRIAR", "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome() + ", tipo=" + (p.getTipo() != null ? p.getTipo().name() : "null"));
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir produto", e);
@@ -77,6 +85,10 @@ public class ProdutoDAO {
             stmt.setLong(10, p.getId());
             stmt.executeUpdate();
 
+            audit.registrarAuto("EDITAR", "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome() + ", estoque=" + p.getEstoqueAtual() + ", ativo=" + p.isAtivo());
+
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao atualizar produto", e);
         }
@@ -94,7 +106,13 @@ public class ProdutoDAO {
             stmt.setInt(1, novoStatus ? 1 : 0);
             stmt.setLong(2, p.getId());
             stmt.executeUpdate();
+
             p.setAtivo(novoStatus);
+
+            audit.registrarAuto(novoStatus ? "ATIVAR" : "INATIVAR",
+                    "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome());
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao alterar status do produto", e);
@@ -113,10 +131,10 @@ public class ProdutoDAO {
         else stmt.setString(6, null);
 
         if (p.getPrecoCusto() != null) stmt.setDouble(7, p.getPrecoCusto());
-        else stmt.setNull(7, java.sql.Types.REAL);
+        else stmt.setNull(7, Types.REAL);
 
         if (p.getPrecoVenda() != null) stmt.setDouble(8, p.getPrecoVenda());
-        else stmt.setNull(8, java.sql.Types.REAL);
+        else stmt.setNull(8, Types.REAL);
 
         stmt.setInt(9, p.isAtivo() ? 1 : 0);
     }
@@ -152,7 +170,7 @@ public class ProdutoDAO {
         return !validade.isAfter(LocalDate.now().plusDays(30));
     }
 
-    // ✅ multiusuário safe + anti-estoque negativo
+    // ✅ baixa segura (não deixa estoque negativo)
     public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
         if (idProduto == null) throw new SQLException("Produto inválido.");
         if (quantidade <= 0) throw new SQLException("Quantidade inválida para baixa de estoque.");
@@ -167,9 +185,7 @@ public class ProdutoDAO {
             stmt.setDouble(3, quantidade);
 
             int updated = stmt.executeUpdate();
-            if (updated == 0) {
-                throw new SQLException("Estoque insuficiente para o produto selecionado.");
-            }
+            if (updated == 0) throw new SQLException("Estoque insuficiente para o produto selecionado.");
         }
     }
 }

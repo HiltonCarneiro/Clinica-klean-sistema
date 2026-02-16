@@ -6,12 +6,18 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public final class Policy {
-    private Policy() {}
+    private Policy() {
+    }
 
     private static final PerfilPermissaoDAO dao = new PerfilPermissaoDAO();
 
     public static boolean temPermissao(Integer perfilId, String nomePerfil, Permissao permissao) {
         if (permissao == null) return false;
+
+        // Auditoria: SOMENTE ADMIN (mesmo que esteja marcado na tabela)
+        if (permissao == Permissao.AUDITORIA_VER) {
+            return nomePerfil != null && nomePerfil.trim().equalsIgnoreCase(Perfis.ADMIN);
+        }
 
         // Admin sempre tudo
         if (nomePerfil != null && nomePerfil.trim().equalsIgnoreCase(Perfis.ADMIN)) {

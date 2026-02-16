@@ -283,6 +283,22 @@ public class DatabaseConfig {
                 );
             """);
 
+
+          // AUDITORIA
+
+            stmt.execute("""
+    CREATE TABLE IF NOT EXISTS auditoria (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        data_hora     TEXT NOT NULL,        -- ISO (ex: 2026-02-16T20:15:10)
+        usuario_login TEXT,                 -- login do usuário logado
+        usuario_nome  TEXT,                 -- pessoa_nome (se tiver)
+        acao          TEXT NOT NULL,         -- ex: LOGIN_OK, PERFIL_CRIADO, etc
+        entidade      TEXT,                 -- ex: USUARIO, PERFIL, PERMISSAO
+        entidade_id   TEXT,                 -- id/texto
+        detalhes      TEXT                  -- texto livre (json/text)
+    );
+""");
+
             // ✅ AUDIT_LOG (novo)
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS audit_log (
@@ -305,6 +321,8 @@ public class DatabaseConfig {
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inicializar banco: " + e.getMessage(), e);
         }
+
+
     }
 
     private static void seedPerfis(Connection conn) throws SQLException {

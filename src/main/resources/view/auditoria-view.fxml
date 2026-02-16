@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.AuditoriaController">
+
+    <children>
+        <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10"
+              AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
+
+            <HBox spacing="10">
+                <Label text="Auditoria do Sistema" styleClass="h1"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Atualizar" onAction="#onAtualizar"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Mostrar últimos:"/>
+                <ComboBox fx:id="cbLimite" prefWidth="140"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtFiltro" promptText="Filtrar (ação, usuário, entidade...)" prefWidth="360"/>
+            </HBox>
+
+            <TableView fx:id="tblAuditoria" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="70"/>
+                    <TableColumn fx:id="colDataHora" text="Data/Hora" prefWidth="190"/>
+                    <TableColumn fx:id="colUsuario" text="Usuário" prefWidth="260"/>
+                    <TableColumn fx:id="colAcao" text="Ação" prefWidth="160"/>
+                    <TableColumn fx:id="colEntidade" text="Entidade" prefWidth="140"/>
+                    <TableColumn fx:id="colEntidadeId" text="Entidade ID" prefWidth="120"/>
+                    <TableColumn fx:id="colDetalhes" text="Detalhes" prefWidth="500"/>
+                </columns>
+            </TableView>
+
+            <Label fx:id="lblStatus"/>
+        </VBox>
+    </children>
+</AnchorPane>

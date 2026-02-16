@@ -87,9 +87,8 @@ public class PacienteController {
 
     private void configurarTabela() {
         if (colNome != null) colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        if (colCpf != null) colCpf.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().getCpf())));
-        if (colTelefone != null) colTelefone.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().getTelefone())));
-
+        if (colCpf != null) colCpf.setCellValueFactory(c -> new SimpleStringProperty(ValidationUtils.formatCpf(safe(c.getValue().getCpf()))));
+        if (colTelefone != null) colTelefone.setCellValueFactory(c -> new SimpleStringProperty(ValidationUtils.formatPhoneBr(safe(c.getValue().getTelefone()))));
         if (colDataNascimento != null) {
             colDataNascimento.setCellValueFactory(c -> {
                 LocalDate dt = c.getValue().getDataNascimento();
@@ -210,11 +209,29 @@ public class PacienteController {
             if (field == txtCep && atualizandoCep) return change;
             if (field == txtTelefone && atualizandoTelefone) return change;
 
+            String oldText = change.getControlText();
             String newText = change.getControlNewText();
-            int caretInNewText = change.getCaretPosition();
 
-            // Quantos dígitos existiriam antes do caret no "texto novo"?
-            int digitsBeforeCaret = contarDigitos(newText, caretInNewText);
+            int oldCaret = change.getCaretPosition();
+
+            // Quantos dígitos existiam antes do caret no texto antigo?
+            int oldDigitsBeforeCaret = contarDigitos(oldText, oldCaret);
+
+            // Quantos dígitos existirão antes do caret no texto novo?
+            int digitsBeforeCaret = contarDigitos(newText, change.getCaretPosition());
+
+            boolean isDeletion = change.isDeleted() && change.getText().isEmpty();
+
+            // Se o usuário tentou apagar um separador (nenhum dígito some), então apagamos o dígito anterior
+            if (isDeletion && digitsBeforeCaret == oldDigitsBeforeCaret && oldDigitsBeforeCaret > 0) {
+                String rawDigits = apenasDigitos(newText);
+                if (rawDigits.length() >= oldDigitsBeforeCaret) {
+                    // remove o dígito anterior ao caret (na contagem de dígitos)
+                    rawDigits = rawDigits.substring(0, oldDigitsBeforeCaret - 1) + rawDigits.substring(oldDigitsBeforeCaret);
+                    newText = rawDigits;
+                    digitsBeforeCaret = oldDigitsBeforeCaret - 1;
+                }
+            }
 
             // Formata (o formatter já limpa e limita)
             String formatted = formatterFn.apply(newText);
@@ -225,12 +242,11 @@ public class PacienteController {
 
             // aplica substituindo tudo
             change.setText(formatted);
-            change.setRange(0, change.getControlText().length());
+            change.setRange(0, oldText.length());
             change.setCaretPosition(caret);
             change.setAnchor(caret);
             return change;
-        }));
-    }
+        }));}
 
     private int contarDigitos(String text, int upToIndexExclusive) {
         if (text == null) return 0;
@@ -344,7 +360,8 @@ public class PacienteController {
             return;
         }
 
-        if (!ValidationUtils.isValidCpf(cpf)) {
+        // CPF: opcional. Se informar, precisa ser válido.
+        if (!cpf.isBlank() && !ValidationUtils.isValidCpf(cpf)) {
             lblMensagem.setText("CPF inválido.");
             return;
         }
@@ -354,7 +371,8 @@ public class PacienteController {
             return;
         }
 
-        if (!ValidationUtils.isValidPhoneBr(telefone)) {
+        // Telefone: opcional. Se informar, precisa ser válido.
+        if (!telefone.isBlank() && !ValidationUtils.isValidPhoneBr(telefone)) {
             lblMensagem.setText("Telefone inválido. Informe DDD + número (10 ou 11 dígitos).");
             return;
         }
@@ -390,47 +408,54 @@ public class PacienteController {
             lblMensagem.setText("Responsável legal é obrigatório para menores de 18 anos.");
             return;
         }
+        try {
 
-        if (pacienteSelecionado == null) {
-            Paciente p = new Paciente();
-            p.setNome(nome);
-            p.setCpf(ValidationUtils.formatCpf(cpf));
-            p.setDataNascimento(dataNascimento);
-            p.setTelefone(ValidationUtils.formatPhoneBr(telefone));
+            if (pacienteSelecionado == null) {
+                Paciente p = new Paciente();
+                p.setNome(nome);
+                p.setCpf(apenasDigitosOuNull(cpf));
+                p.setDataNascimento(dataNascimento);
+                p.setTelefone(apenasDigitosOuNull(telefone));
 
-            p.setRua(rua);
-            p.setNumero(numero);
-            p.setBairro(bairro);
-            p.setCidade(cidade);
-            p.setCep(ValidationUtils.formatCep(cep));
-            p.setUf(uf);
-            p.setResponsavelLegal(responsavel.isBlank() ? null : responsavel);
-            p.setAtivo(true);
+                p.setRua(rua);
+                p.setNumero(numero);
+                p.setBairro(bairro);
+                p.setCidade(cidade);
+                p.setCep(apenasDigitosOuNull(cep));
+                p.setUf(uf);
+                p.setResponsavelLegal(responsavel.isBlank() ? null : responsavel);
+                p.setAtivo(true);
 
-            pacienteDAO.salvar(p);
-            lblMensagem.setText("Paciente salvo com sucesso.");
-        } else {
-            pacienteSelecionado.setNome(nome);
-            pacienteSelecionado.setCpf(ValidationUtils.formatCpf(cpf));
-            pacienteSelecionado.setDataNascimento(dataNascimento);
-            pacienteSelecionado.setTelefone(ValidationUtils.formatPhoneBr(telefone));
+                pacienteDAO.salvar(p);
+                lblMensagem.setText("Paciente salvo com sucesso.");
+            } else {
+                pacienteSelecionado.setNome(nome);
+                pacienteSelecionado.setCpf(apenasDigitosOuNull(cpf));
+                pacienteSelecionado.setDataNascimento(dataNascimento);
+                pacienteSelecionado.setTelefone(apenasDigitosOuNull(telefone));
 
-            pacienteSelecionado.setRua(rua);
-            pacienteSelecionado.setNumero(numero);
-            pacienteSelecionado.setBairro(bairro);
-            pacienteSelecionado.setCidade(cidade);
-            pacienteSelecionado.setCep(ValidationUtils.formatCep(cep));
-            pacienteSelecionado.setUf(uf);
-            pacienteSelecionado.setResponsavelLegal(responsavel.isBlank() ? null : responsavel);
+                pacienteSelecionado.setRua(rua);
+                pacienteSelecionado.setNumero(numero);
+                pacienteSelecionado.setBairro(bairro);
+                pacienteSelecionado.setCidade(cidade);
+                pacienteSelecionado.setCep(apenasDigitosOuNull(cep));
+                pacienteSelecionado.setUf(uf);
+                pacienteSelecionado.setResponsavelLegal(responsavel.isBlank() ? null : responsavel);
 
-            pacienteDAO.atualizar(pacienteSelecionado);
-            lblMensagem.setText("Paciente atualizado com sucesso.");
+                pacienteDAO.atualizar(pacienteSelecionado);
+                lblMensagem.setText("Paciente atualizado com sucesso.");
+            }
+
+            limparFormulario();
+            carregarPacientes();
+            atualizarBotoesAtivo(null);
+            tablePacientes.getSelectionModel().clearSelection();
+
+        } catch (RuntimeException ex) {
+            // Mostra mensagem amigável sem derrubar a tela
+            String msg = ex.getMessage();
+            lblMensagem.setText(msg != null && !msg.isBlank() ? msg : "Não foi possível salvar o paciente.");
         }
-
-        limparFormulario();
-        carregarPacientes();
-        atualizarBotoesAtivo(null);
-        tablePacientes.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -591,5 +616,22 @@ public class PacienteController {
         if (aspas2 == -1) return null;
 
         return json.substring(aspas1 + 1, aspas2);
+    }
+
+    // =========================
+    // Helpers de normalização
+    // =========================
+    private static String apenasDigitos(String s) {
+        if (s == null) return "";
+        return s.replaceAll("\\D", "");
+    }
+
+    /**
+     * Retorna apenas dígitos ou null se vazio.
+     * Útil para salvar CPF/telefone/CEP como NULL (evita UNIQUE com string vazia).
+     */
+    private static String apenasDigitosOuNull(String s) {
+        String d = apenasDigitos(s);
+        return (d == null || d.isBlank()) ? null : d;
     }
 }

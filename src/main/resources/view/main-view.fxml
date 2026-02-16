@@ -47,6 +47,7 @@
 
                 <Menu text="Administração">
                     <MenuItem text="Usuários &amp; Perfis" onAction="#onUsuarios"/>
+                    <MenuItem text="Auditoria" onAction="#onAuditoria"/>
                 </Menu>
             </MenuBar>
         </VBox>

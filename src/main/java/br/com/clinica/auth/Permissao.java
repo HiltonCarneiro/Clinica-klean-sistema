@@ -16,6 +16,9 @@ public enum Permissao {
     // Usuários
     USUARIO_GERENCIAR,
 
+    // Auditoria (somente admin)
+    AUDITORIA_VER,
+
     // Agenda
     AGENDA_VER,
     AGENDA_GERENCIAR,
