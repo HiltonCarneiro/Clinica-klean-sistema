@@ -12,9 +12,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO de acesso à tabela 'produto'.
- */
 public class ProdutoDAO {
 
     public List<Produto> listar(boolean incluirInativos,
@@ -22,9 +19,7 @@ public class ProdutoDAO {
                                 boolean apenasVencendo) {
 
         String sql = "SELECT * FROM produto";
-        if (!incluirInativos) {
-            sql += " WHERE ativo = 1";
-        }
+        if (!incluirInativos) sql += " WHERE ativo = 1";
 
         List<Produto> produtos = new ArrayList<>();
 
@@ -35,13 +30,8 @@ public class ProdutoDAO {
             while (rs.next()) {
                 Produto p = mapRow(rs);
 
-                if (apenasBaixoEstoque && p.getEstoqueAtual() > p.getEstoqueMinimo()) {
-                    continue;
-                }
-
-                if (apenasVencendo && !isVencendo(p)) {
-                    continue;
-                }
+                if (apenasBaixoEstoque && p.getEstoqueAtual() > p.getEstoqueMinimo()) continue;
+                if (apenasVencendo && !isVencendo(p)) continue;
 
                 produtos.add(p);
             }
@@ -54,11 +44,8 @@ public class ProdutoDAO {
     }
 
     public void salvar(Produto p) {
-        if (p.getId() == null) {
-            inserir(p);
-        } else {
-            atualizar(p);
-        }
+        if (p.getId() == null) inserir(p);
+        else atualizar(p);
     }
 
     private void inserir(Produto p) {
@@ -99,7 +86,6 @@ public class ProdutoDAO {
         if (p.getId() == null) return;
 
         boolean novoStatus = !p.isAtivo();
-
         String sql = "UPDATE produto SET ativo = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -108,7 +94,6 @@ public class ProdutoDAO {
             stmt.setInt(1, novoStatus ? 1 : 0);
             stmt.setLong(2, p.getId());
             stmt.executeUpdate();
-
             p.setAtivo(novoStatus);
 
         } catch (SQLException e) {
@@ -124,30 +109,20 @@ public class ProdutoDAO {
         stmt.setDouble(4, p.getEstoqueMinimo());
         stmt.setString(5, p.getLote());
 
-        if (p.getValidade() != null) {
-            stmt.setString(6, p.getValidade().toString());
-        } else {
-            stmt.setString(6, null);
-        }
+        if (p.getValidade() != null) stmt.setString(6, p.getValidade().toString());
+        else stmt.setString(6, null);
 
-        if (p.getPrecoCusto() != null) {
-            stmt.setDouble(7, p.getPrecoCusto());
-        } else {
-            stmt.setNull(7, java.sql.Types.REAL);
-        }
+        if (p.getPrecoCusto() != null) stmt.setDouble(7, p.getPrecoCusto());
+        else stmt.setNull(7, java.sql.Types.REAL);
 
-        if (p.getPrecoVenda() != null) {
-            stmt.setDouble(8, p.getPrecoVenda());
-        } else {
-            stmt.setNull(8, java.sql.Types.REAL);
-        }
+        if (p.getPrecoVenda() != null) stmt.setDouble(8, p.getPrecoVenda());
+        else stmt.setNull(8, java.sql.Types.REAL);
 
         stmt.setInt(9, p.isAtivo() ? 1 : 0);
     }
 
     private Produto mapRow(ResultSet rs) throws SQLException {
         Produto p = new Produto();
-
         p.setId(rs.getLong("id"));
         p.setNome(rs.getString("nome"));
 
@@ -159,50 +134,32 @@ public class ProdutoDAO {
         p.setLote(rs.getString("lote"));
 
         String validadeStr = rs.getString("validade");
-        if (validadeStr != null && !validadeStr.isBlank()) {
-            p.setValidade(LocalDate.parse(validadeStr));
-        }
+        if (validadeStr != null && !validadeStr.isBlank()) p.setValidade(LocalDate.parse(validadeStr));
 
         Object precoCustoObj = rs.getObject("preco_custo");
-        if (precoCustoObj != null) {
-            p.setPrecoCusto(rs.getDouble("preco_custo"));
-        }
+        if (precoCustoObj != null) p.setPrecoCusto(rs.getDouble("preco_custo"));
 
         Object precoVendaObj = rs.getObject("preco_venda");
-        if (precoVendaObj != null) {
-            p.setPrecoVenda(rs.getDouble("preco_venda"));
-        }
+        if (precoVendaObj != null) p.setPrecoVenda(rs.getDouble("preco_venda"));
 
         p.setAtivo(rs.getInt("ativo") == 1);
-
         return p;
     }
 
     private boolean isVencendo(Produto p) {
         LocalDate validade = p.getValidade();
         if (validade == null) return false;
-
-        LocalDate hoje = LocalDate.now();
-        LocalDate limite = hoje.plusDays(30);
-        return !validade.isAfter(limite);
+        return !validade.isAfter(LocalDate.now().plusDays(30));
     }
 
-    /**
-     * Baixa a quantidade do estoque de forma segura (multiusuário).
-     * Se não houver estoque suficiente, lança SQLException (fazendo a transação da Nota dar rollback).
-     */
+    // ✅ multiusuário safe + anti-estoque negativo
     public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
-        if (idProduto == null) {
-            throw new SQLException("Produto inválido (id nulo).");
-        }
-        if (quantidade <= 0) {
-            throw new SQLException("Quantidade inválida para baixa de estoque: " + quantidade);
-        }
+        if (idProduto == null) throw new SQLException("Produto inválido.");
+        if (quantidade <= 0) throw new SQLException("Quantidade inválida para baixa de estoque.");
 
-        // ✅ Atômico: só baixa se tiver estoque suficiente
         String sql = "UPDATE produto " +
-                "   SET estoque_atual = estoque_atual - ? " +
-                " WHERE id = ? AND estoque_atual >= ?";
+                "SET estoque_atual = estoque_atual - ? " +
+                "WHERE id = ? AND estoque_atual >= ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, quantidade);

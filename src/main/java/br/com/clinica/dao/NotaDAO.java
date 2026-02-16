@@ -14,15 +14,11 @@ public class NotaDAO {
 
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private final MovimentoCaixaDAO movimentoCaixaDAO = new MovimentoCaixaDAO();
+    private final AuditLogDAO auditLogDAO = new AuditLogDAO();
 
     private static final DateTimeFormatter DH_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public void salvarNota(Nota nota) {
-        if (nota == null) throw new RuntimeException("Nota inválida.");
-        if (nota.getPaciente() == null || nota.getPaciente().getId() == null) throw new RuntimeException("Paciente inválido.");
-        if (nota.getProfissional() == null) throw new RuntimeException("Profissional inválido.");
-        if (nota.getItens() == null || nota.getItens().isEmpty()) throw new RuntimeException("A nota precisa ter pelo menos 1 item.");
-
         String sqlNota = "INSERT INTO nota " +
                 "(data_hora, id_paciente, id_profissional, forma_pagamento, total_bruto, desconto, total_liquido, observacao) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -83,7 +79,6 @@ public class NotaDAO {
 
                     stmtItem.addBatch();
 
-                    // ✅ baixa estoque segura
                     if (item.getTipoItem() == TipoItemNota.PRODUTO
                             && item.getProduto() != null
                             && item.getProduto().getId() != null) {
@@ -95,8 +90,11 @@ public class NotaDAO {
 
             // 3) registrar movimento caixa (entrada)
             MovimentoCaixa mov = new MovimentoCaixa();
-            // ✅ usa a data da nota
-            mov.setData(nota.getDataHora() != null ? nota.getDataHora().toLocalDate() : LocalDate.now());
+            LocalDate dataMov = (nota.getDataHora() != null)
+                    ? nota.getDataHora().toLocalDate()
+                    : LocalDate.now();
+
+            mov.setData(dataMov);
             mov.setDescricao("Recebimento - Nota " + idNota);
             mov.setTipo(TipoMovimento.ENTRADA);
             mov.setValor(nota.getTotalLiquido());
@@ -106,6 +104,19 @@ public class NotaDAO {
 
             movimentoCaixaDAO.registrar(conn, mov);
 
+            // 4) audit log (quem criou a nota)
+            String detalhes = "paciente=" + nota.getPaciente().getNome()
+                    + ", total=" + nota.getTotalLiquido()
+                    + ", forma=" + nota.getFormaPagamento();
+
+            auditLogDAO.registrar(conn,
+                    nota.getProfissional().getId(),
+                    "CRIAR",
+                    "NOTA",
+                    String.valueOf(idNota),
+                    detalhes
+            );
+
             conn.commit();
 
         } catch (Exception e) {
@@ -113,8 +124,7 @@ public class NotaDAO {
                 try { conn.rollback(); } catch (SQLException ignored) {}
             }
 
-            String msg = e.getMessage() != null ? e.getMessage() : "Erro desconhecido.";
-            // ✅ mensagem mais amigável quando for estoque
+            String msg = (e.getMessage() != null) ? e.getMessage() : "Erro desconhecido.";
             if (msg.toLowerCase().contains("estoque insuficiente")) {
                 throw new RuntimeException("Não foi possível finalizar: estoque insuficiente para um ou mais produtos.", e);
             }
