@@ -21,7 +21,6 @@
                 <Button fx:id="btnBack" text="←" onAction="#onBack" styleClass="nav-btn"/>
                 <Button fx:id="btnForward" text="→" onAction="#onForward" styleClass="nav-btn"/>
 
-
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <Label text="Logado:" styleClass="user-label" />
@@ -36,10 +35,9 @@
                     <MenuItem text="Pacientes" onAction="#onPacientes"/>
                 </Menu>
 
-                <Menu text="Movimentações">
+                <Menu text="Operações">
                     <MenuItem text="Agenda" onAction="#onAgenda"/>
                     <MenuItem text="Caixa / Notas" onAction="#onCaixa"/>
-                    <MenuItem text="Movimento de Caixa" onAction="#onMovimentoCaixa"/>
                     <MenuItem text="Estoque" onAction="#onEstoque"/>
                 </Menu>
 
@@ -104,16 +102,6 @@
                         </graphic>
                     </Button>
 
-                    <Button onAction="#onMovimentoCaixa" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="1" GridPane.columnIndex="0">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Movimento de Caixa" styleClass="card-title"/>
-                                <Label text="Entradas, saídas e fechamento" styleClass="card-desc"/>
-                            </VBox>
-                        </graphic>
-                    </Button>
-
                     <Button onAction="#onEstoque" maxWidth="Infinity" styleClass="card-btn"
                             GridPane.rowIndex="1" GridPane.columnIndex="1">
                         <graphic>
@@ -136,7 +124,7 @@
                 </GridPane>
             </VBox>
 
-            <!-- Conteúdo carregado -->
+            <!-- CONTEÚDO DINÂMICO -->
             <AnchorPane fx:id="contentPane" visible="false" managed="false"/>
         </StackPane>
     </center>

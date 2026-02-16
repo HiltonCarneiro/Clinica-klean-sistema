@@ -25,9 +25,6 @@ public class MainController {
     @FXML private AnchorPane contentPane;
     @FXML private Label lblUsuarioLogado;
 
-    // histórico guarda o caminho do FXML
-    private final Deque<String> history = new ArrayDeque<>();
-
     private String usuarioLogado;
 
     @FXML private Button btnBack;
@@ -36,7 +33,6 @@ public class MainController {
     private final Deque<String> backStack = new ArrayDeque<>();
     private final Deque<String> forwardStack = new ArrayDeque<>();
     private String currentView = null;
-
 
     @FXML
     private void initialize() {
@@ -57,8 +53,6 @@ public class MainController {
         if (btnBack != null) btnBack.setDisable(backStack.isEmpty());
         if (btnForward != null) btnForward.setDisable(forwardStack.isEmpty());
     }
-
-
 
     /** Chamado pelo LoginController depois de autenticar */
     public void setUsuarioLogado(String usuario) {
@@ -101,13 +95,11 @@ public class MainController {
         atualizarBotoesNavegacao();
     }
 
-
     // ================== AÇÕES (MENU / HOME) ==================
 
     @FXML private void onPacientes() { abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER); }
     @FXML private void onAgenda() { abrirTelaNoConteudo("/view/agenda-view.fxml", Permissao.AGENDA_VER); }
     @FXML private void onCaixa() { abrirTelaNoConteudo("/view/caixa-view.fxml", Permissao.FINANCEIRO_VER); }
-    @FXML private void onMovimentoCaixa() { abrirTelaNoConteudo("/view/movimento-caixa-view.fxml", Permissao.FINANCEIRO_VER); }
     @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
     @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
@@ -145,7 +137,6 @@ public class MainController {
             mostrarErro("Erro ao carregar FXML", ex.getMessage());
         }
     }
-
 
     private void mostrarHome() {
         if (homeBox != null) {
