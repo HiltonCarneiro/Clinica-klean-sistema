@@ -19,15 +19,43 @@
 
             <GridPane hgap="10" vgap="10">
                 <Label text="Usuário:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtUsuario" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <!-- Enter aqui já tenta logar -->
+                <TextField fx:id="txtUsuario"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"
+                           onAction="#onEntrar"/>
 
                 <Label text="Senha:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <PasswordField fx:id="txtSenha" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <!-- Campo de senha com botão "olho" -->
+                <HBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT">
+                    <StackPane HBox.hgrow="ALWAYS">
+                        <!-- Enter aqui já tenta logar -->
+                        <PasswordField fx:id="txtSenha" onAction="#onEntrar"/>
+                        <!-- Campo visível (fica escondido por padrão) -->
+                        <TextField fx:id="txtSenhaVisivel" onAction="#onEntrar" visible="false" managed="false"/>
+                    </StackPane>
+
+                    <Button fx:id="btnToggleSenha"
+                            text="👁"
+                            onAction="#onToggleSenha"
+                            focusTraversable="false"
+                            prefWidth="36"
+                            prefHeight="26">
+                        <tooltip>
+                            <Tooltip text="Mostrar/ocultar senha"/>
+                        </tooltip>
+                    </Button>
+                </HBox>
             </GridPane>
 
             <Label fx:id="lblErro" textFill="red"/>
 
-            <Button text="Entrar" onAction="#onEntrar" prefWidth="120"/>
+            <!-- defaultButton = Enter aciona este botão -->
+            <Button text="Entrar"
+                    onAction="#onEntrar"
+                    defaultButton="true"
+                    prefWidth="120"/>
         </VBox>
     </center>
 
