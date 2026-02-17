@@ -20,6 +20,8 @@ import java.util.Deque;
 
 public class MainController {
 
+    private static final String HOME = "__HOME__";
+
     // conecta controller ao main-view.fxml
     @FXML private VBox homeBox;
     @FXML private AnchorPane contentPane;
@@ -86,8 +88,11 @@ public class MainController {
         String previous = backStack.pop();
         if (currentView != null) forwardStack.push(currentView);
 
-        loadView(previous, false);
-        atualizarBotoesNavegacao();
+        if (HOME.equals(previous)) {
+            mostrarHome(); // isso já seta currentView=HOME e atualiza botões
+        } else {
+            loadView(previous, false);
+        }
     }
 
     @FXML
@@ -97,9 +102,13 @@ public class MainController {
         String next = forwardStack.pop();
         if (currentView != null) backStack.push(currentView);
 
-        loadView(next, false);
-        atualizarBotoesNavegacao();
+        if (HOME.equals(next)) {
+            mostrarHome();
+        } else {
+            loadView(next, false);
+        }
     }
+
 
 
     // ================== AÇÕES (MENU / HOME) ==================
@@ -157,6 +166,8 @@ public class MainController {
             contentPane.setVisible(false);
             contentPane.setManaged(false);
         }
+        currentView = HOME;
+        atualizarBotoesNavegacao();
     }
 
     private void mostrarConteudo(Parent view) {
