@@ -31,7 +31,7 @@ public class AuditoriaController {
 
     @FXML
     public void initialize() {
-        // 🔒 garante admin-only via permissão
+        // garante admin-only via permissão
         AuthGuard.exigirPermissao(Permissao.AUDITORIA_VER);
 
         cbLimite.setItems(FXCollections.observableArrayList(100, 200, 500, 1000, 2000));

@@ -618,9 +618,7 @@ public class PacienteController {
         return json.substring(aspas1 + 1, aspas2);
     }
 
-    // =========================
     // Helpers de normalização
-    // =========================
     private static String apenasDigitos(String s) {
         if (s == null) return "";
         return s.replaceAll("\\D", "");

@@ -2,9 +2,7 @@ package br.com.clinica.model;
 
 import java.time.LocalDate;
 
-/**
- * Entidade de produto / insumo de estoque.
- */
+
 public class Produto {
 
     private Long id;

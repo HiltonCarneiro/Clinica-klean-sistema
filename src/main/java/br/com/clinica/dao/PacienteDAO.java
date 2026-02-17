@@ -230,9 +230,7 @@ public class PacienteDAO {
         }
     }
 
-    // =========================
     // Helpers
-    // =========================
 
     private boolean cpfJaExisteParaOutro(Connection conn, Long idAtual, String cpfNorm) throws SQLException {
         if (cpfNorm == null || cpfNorm.isBlank()) return false;

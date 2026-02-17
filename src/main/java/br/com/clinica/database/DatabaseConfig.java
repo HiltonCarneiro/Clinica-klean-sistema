@@ -299,7 +299,7 @@ public class DatabaseConfig {
     );
 """);
 
-            // ✅ AUDIT_LOG (novo)
+            // AUDIT_LOG
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS audit_log (
                     id           INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -105,7 +105,7 @@ public class MainController {
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
     @FXML
     private void onAuditoria() {abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER);}
-    // ================== NAVEGAÇÃO INTERNA ==================
+    // NAVEGAÇÃO INTERNA
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
         try {
@@ -167,7 +167,7 @@ public class MainController {
         contentPane.setManaged(true);
     }
 
-    // ================== ALERTAS ==================
+    // ALERTAS
 
     private void mostrarErro(String titulo, String mensagem) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

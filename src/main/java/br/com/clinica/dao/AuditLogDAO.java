@@ -20,7 +20,7 @@ public class AuditLogDAO {
         public String detalhes;
     }
 
-    // Registra usando a Connection da transação (quando existir)
+    // Registra usando a Connection da transação
     public void registrar(Connection conn,
                           Integer usuarioId,
                           String acao,
@@ -53,7 +53,6 @@ public class AuditLogDAO {
             registrar(c, uid, acao, entidade, entidadeId, detalhes);
         } catch (SQLException e) {
             // auditoria nunca deve quebrar a operação principal
-            // (se quiser, depois a gente loga isso em arquivo)
         }
     }
 

@@ -84,11 +84,11 @@ public class AnamneseController {
         cbTipo.valueProperty().addListener((obs, old, tipo) -> atualizarVisibilidadeBotoes(tipo));
         atualizarVisibilidadeBotoes(cbTipo.getValue());
 
-        // ✅ ANEXOS: aqui é o que faltava bater com o seu FXML
+        // ANEXOS
         colAnexoData.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
 
-        // ✅ Mostra o nome do arquivo
+        // Mostra o nome do arquivo
         colAnexoArquivo.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getNomeArquivo()));
 
@@ -265,7 +265,7 @@ public class AnamneseController {
         taObservacoes.clear();
     }
 
-    // ================= ANEXOS =================
+    // ANEXOS
 
     @FXML
     private void onAnexarPdf() {
@@ -372,7 +372,7 @@ public class AnamneseController {
         btnRemoverPdf.setDisable(!temSel);
     }
 
-    // ================= HELPERS =================
+    // HELPERS
 
     private void setInfo(String msg) {
         lblInfo.setText(msg == null ? "" : msg);

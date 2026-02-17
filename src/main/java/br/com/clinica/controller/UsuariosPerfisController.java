@@ -93,7 +93,7 @@ public class UsuariosPerfisController {
         montarChecklist();
     }
 
-    // ===================== Usuários =====================
+    // Usuários
 
     @FXML private void onAtualizarUsuarios() { atualizarUsuarios(); }
 
@@ -206,7 +206,7 @@ public class UsuariosPerfisController {
         lblMsgUsuarioForm.setText("");
     }
 
-    // ===================== Perfis =====================
+    // Perfis
 
     @FXML private void onAtualizarPerfis() { atualizarPerfis(); }
 
@@ -250,7 +250,7 @@ public class UsuariosPerfisController {
         cbPerfilPermissoes.setItems(obs);
     }
 
-    // ===================== Permissões =====================
+    // Permissões
 
     private void montarChecklist() {
         boxPermissoes.getChildren().clear();

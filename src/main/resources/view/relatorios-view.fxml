@@ -19,7 +19,7 @@
 
             <TabPane VBox.vgrow="ALWAYS">
 
-                <!-- ===================== ABA: CAIXA ===================== -->
+                <!-- ABA: CAIXA -->
                 <Tab text="Caixa" closable="false">
                     <BorderPane>
                         <top>
@@ -64,7 +64,7 @@
                     </BorderPane>
                 </Tab>
 
-                <!-- ===================== ABA: AGENDAMENTOS ===================== -->
+                <!--ABA: AGENDAMENTOS -->
                 <Tab text="Agendamentos" closable="false">
                     <BorderPane>
                         <top>
@@ -102,7 +102,7 @@
                     </BorderPane>
                 </Tab>
 
-                <!-- ===================== ABA: NOTAS ===================== -->
+                <!-- ABA: NOTAS -->
                 <Tab text="Notas" closable="false">
                     <BorderPane>
                         <top>

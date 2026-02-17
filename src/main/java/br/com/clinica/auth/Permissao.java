@@ -28,7 +28,7 @@ public enum Permissao {
     NOTA_GERAR,
     RELATORIOS_VER,
 
-    // Prontuário (futuro)
+    // Prontuário
     PRONTUARIO_VER,
     PRONTUARIO_CRIAR,
     PRONTUARIO_EDITAR_PROPRIO

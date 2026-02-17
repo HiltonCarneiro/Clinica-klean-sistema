@@ -22,7 +22,7 @@
     <center>
         <TabPane>
 
-            <!-- =================== USUÁRIOS =================== -->
+            <!-- USUÁRIOS -->
             <Tab text="Usuários" closable="false">
                 <BorderPane>
                     <top>
@@ -112,7 +112,7 @@
                 </BorderPane>
             </Tab>
 
-            <!-- =================== PERFIS =================== -->
+            <!-- PERFIS -->
             <Tab text="Perfis" closable="false">
                 <BorderPane>
                     <padding>
@@ -149,7 +149,7 @@
                 </BorderPane>
             </Tab>
 
-            <!-- =================== PERMISSÕES =================== -->
+            <!-- PERMISSÕES -->
             <Tab text="Permissões" closable="false">
                 <BorderPane>
                     <padding>

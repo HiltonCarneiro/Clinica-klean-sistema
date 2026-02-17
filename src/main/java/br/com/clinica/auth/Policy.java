@@ -14,7 +14,7 @@ public final class Policy {
     public static boolean temPermissao(Integer perfilId, String nomePerfil, Permissao permissao) {
         if (permissao == null) return false;
 
-        // Auditoria: SOMENTE ADMIN (mesmo que esteja marcado na tabela)
+        // Auditoria: SOMENTE ADMIN
         if (permissao == Permissao.AUDITORIA_VER) {
             return nomePerfil != null && nomePerfil.trim().equalsIgnoreCase(Perfis.ADMIN);
         }

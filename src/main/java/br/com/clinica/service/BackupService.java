@@ -14,7 +14,7 @@ public class BackupService {
     private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private static final Preferences PREFS = Preferences.userRoot().node("br.com.clinica.backup");
 
-    // Pasta padrão (pode trocar depois por uma configuração)
+    // Pasta padrão
     private static Path pastaBackupsPadrao() {
         return Paths.get(System.getProperty("user.home"), "ClinicaIntegracao", "backups");
     }
@@ -42,7 +42,7 @@ public class BackupService {
             String nome = "backup_" + LocalDateTime.now().format(TS) + ".db";
             Path arquivo = pastaDestino.resolve(nome);
 
-            // ✅ Snapshot consistente usando SQLite VACUUM INTO
+            // Snapshot consistente usando SQLite VACUUM INTO
             // (melhor do que copiar arquivo na mão)
             try (var conn = DatabaseConfig.getConnection();
                  var stmt = conn.createStatement()) {

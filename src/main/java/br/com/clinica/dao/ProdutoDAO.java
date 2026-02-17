@@ -170,7 +170,7 @@ public class ProdutoDAO {
         return !validade.isAfter(LocalDate.now().plusDays(30));
     }
 
-    // ✅ baixa segura (não deixa estoque negativo)
+    // baixa segura (não deixa estoque negativo)
     public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
         if (idProduto == null) throw new SQLException("Produto inválido.");
         if (quantidade <= 0) throw new SQLException("Quantidade inválida para baixa de estoque.");
