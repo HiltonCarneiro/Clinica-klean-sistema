@@ -3,31 +3,112 @@ package br.com.clinica.database;
 import br.com.clinica.auth.Perfis;
 import br.com.clinica.auth.Permissao;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.EnumSet;
+import java.util.Properties;
 import java.util.Set;
 
 public class DatabaseConfig {
 
-    private static final String URL = "jdbc:sqlite:clinica.db";
+    private static String VENDOR;
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
+    private static boolean LOADED = false;
+
+    private DatabaseConfig() {}
+
+    private static synchronized void loadPropsIfNeeded() {
+        if (LOADED) return;
+
+        Properties props = new Properties();
+        try (InputStream in = DatabaseConfig.class.getResourceAsStream("/db.properties")) {
+            if (in != null) props.load(in);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao carregar /db.properties", e);
+        }
+
+        VENDOR = props.getProperty("db.vendor", "sqlite").trim();
+        URL = props.getProperty("db.url", "jdbc:sqlite:clinica.db").trim();
+        USER = props.getProperty("db.user", "");
+        PASSWORD = props.getProperty("db.password", "");
+
+        if (USER == null) USER = "";
+        if (PASSWORD == null) PASSWORD = "";
+
+        LOADED = true;
+    }
+
+    private static boolean isSqlite() {
+        return VENDOR != null && VENDOR.equalsIgnoreCase("sqlite");
+    }
+
+    private static boolean isPostgres() {
+        return VENDOR != null && VENDOR.equalsIgnoreCase("postgres");
+    }
+
+    private static void ensureSqliteFileDirectory() {
+        if (!isSqlite()) return;
+        if (URL == null) return;
+
+        final String prefix = "jdbc:sqlite:";
+        if (!URL.startsWith(prefix)) return;
+
+        String path = URL.substring(prefix.length()).trim();
+        if (path.isBlank() || ":memory:".equals(path)) return;
+
+        if (path.startsWith("file:")) path = path.substring("file:".length());
+
+        Path p = Paths.get(path).normalize();
+        Path parent = p.getParent();
+        if (parent != null) {
+            try {
+                Files.createDirectories(parent);
+            } catch (Exception e) {
+                throw new RuntimeException("Não foi possível criar o diretório do SQLite em: " + parent, e);
+            }
+        }
+    }
 
     public static Connection getConnection() throws SQLException {
-        Connection conn = DriverManager.getConnection(URL);
-        try (Statement st = conn.createStatement()) {
-            st.execute("PRAGMA foreign_keys = ON;");
+        loadPropsIfNeeded();
+
+        try {
+            if (isPostgres()) Class.forName("org.postgresql.Driver");
+            if (isSqlite()) Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException ignored) {}
+
+        if (isSqlite()) ensureSqliteFileDirectory();
+
+        Connection conn = USER.isBlank()
+                ? DriverManager.getConnection(URL)
+                : DriverManager.getConnection(URL, USER, PASSWORD);
+
+        if (isSqlite()) {
+            try (Statement st = conn.createStatement()) {
+                st.execute("PRAGMA foreign_keys = ON;");
+            }
         }
+
         return conn;
     }
 
     public static void initializeDatabase() {
+        loadPropsIfNeeded();
+
+        // Em Postgres (nuvem), crie schema via migrations/scripts
+        if (isPostgres()) return;
+
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
             stmt.execute("PRAGMA foreign_keys = ON;");
 
-            // =========================
             // PERFIL
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS perfil (
                     id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,15 +116,13 @@ public class DatabaseConfig {
                 );
             """);
 
-            // =========================
             // USUARIO
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS usuario (
                     id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome        TEXT NOT NULL,            -- CARGO (ex: ENFERMEIRA)
-                    pessoa_nome TEXT,                     -- Nome da pessoa
-                    login       TEXT NOT NULL UNIQUE,     -- login (ex: patricia.goncalo)
+                    nome        TEXT NOT NULL,
+                    pessoa_nome TEXT,
+                    login       TEXT NOT NULL UNIQUE,
                     senha       TEXT NOT NULL,
                     ativo       INTEGER NOT NULL DEFAULT 1,
                     perfil_id   INTEGER NOT NULL,
@@ -51,14 +130,10 @@ public class DatabaseConfig {
                 );
             """);
 
-            // Migração: se banco antigo não tinha pessoa_nome
-            try {
-                stmt.execute("ALTER TABLE usuario ADD COLUMN pessoa_nome TEXT;");
-            } catch (SQLException ignored) {}
+            try { stmt.execute("ALTER TABLE usuario ADD COLUMN pessoa_nome TEXT;"); }
+            catch (SQLException ignored) {}
 
-            // =========================
             // PERFIL_PERMISSAO
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS perfil_permissao (
                     perfil_id INTEGER NOT NULL,
@@ -68,9 +143,7 @@ public class DatabaseConfig {
                 );
             """);
 
-            // =========================
             // PACIENTE
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS paciente (
                     id                INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,14 +163,12 @@ public class DatabaseConfig {
                 );
             """);
 
-            // =========================
             // PRODUTO
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS produto (
                     id             INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome           TEXT NOT NULL,
-                    tipo           TEXT NOT NULL,         -- enum TipoProduto name()
+                    tipo           TEXT NOT NULL,
                     unidade        TEXT,
                     estoque_atual  REAL NOT NULL DEFAULT 0,
                     estoque_minimo REAL NOT NULL DEFAULT 0,
@@ -109,11 +180,7 @@ public class DatabaseConfig {
                 );
             """);
 
-            // =========================
             // AGENDAMENTO
-            // =========================
-            // Obs: você tem no banco "profissional_nome" e "paciente_nome" (prints),
-            // então mantive aqui também.
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS agendamento (
                     id                INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,9 +200,7 @@ public class DatabaseConfig {
                 );
             """);
 
-            // =========================
             // ANAMNESE
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS anamnese (
                     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -151,98 +216,118 @@ public class DatabaseConfig {
                     FOREIGN KEY (profissional_id) REFERENCES usuario(id)
                 );
             """);
-
-            // Índices (igual seus prints)
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_anamnese_agendamento ON anamnese(agendamento_id);");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_anamnese_paciente_data ON anamnese(paciente_id, data_hora);");
 
-            // =========================
             // ANEXO_PACIENTE
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS anexo_paciente (
-                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                    paciente_id   INTEGER NOT NULL,
-                    nome_arquivo  TEXT NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    paciente_id     INTEGER NOT NULL,
+                    nome_arquivo    TEXT NOT NULL,
                     caminho_arquivo TEXT NOT NULL,
-                    tamanho_bytes INTEGER,
-                    descricao     TEXT,
-                    data_hora     TEXT NOT NULL,
-                    anamnese_id   INTEGER,
+                    tamanho_bytes   INTEGER,
+                    descricao       TEXT,
+                    data_hora       TEXT NOT NULL,
+                    anamnese_id     INTEGER,
                     FOREIGN KEY (paciente_id) REFERENCES paciente(id),
                     FOREIGN KEY (anamnese_id) REFERENCES anamnese(id)
                 );
             """);
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_anexo_paciente_paciente ON anexo_paciente(paciente_id);");
 
-            // =========================
             // MOVIMENTO_CAIXA
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS movimento_caixa (
-                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data           TEXT NOT NULL, -- formato yyyy-MM-dd
-                    descricao      TEXT NOT NULL,
-                    tipo           TEXT NOT NULL, -- ENTRADA/SAIDA
-                    valor          REAL NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data            TEXT NOT NULL,
+                    descricao       TEXT NOT NULL,
+                    tipo            TEXT NOT NULL,
+                    valor           REAL NOT NULL,
                     forma_pagamento TEXT,
-                    paciente_nome  TEXT,
-                    observacao     TEXT
+                    paciente_nome   TEXT,
+                    observacao      TEXT
                 );
             """);
 
-            // =========================
             // NOTA
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS nota (
-                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data_hora      TEXT NOT NULL,
-                    id_paciente    INTEGER NOT NULL,
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data_hora       TEXT NOT NULL,
+                    id_paciente     INTEGER NOT NULL,
                     id_profissional INTEGER NOT NULL,
                     forma_pagamento TEXT NOT NULL,
-                    total_bruto    REAL NOT NULL,
-                    desconto       REAL NOT NULL DEFAULT 0,
-                    total_liquido  REAL NOT NULL,
-                    observacao     TEXT,
+                    total_bruto     REAL NOT NULL,
+                    desconto        REAL NOT NULL DEFAULT 0,
+                    total_liquido   REAL NOT NULL,
+                    observacao      TEXT,
                     FOREIGN KEY (id_paciente) REFERENCES paciente(id),
                     FOREIGN KEY (id_profissional) REFERENCES usuario(id)
                 );
             """);
 
-            // =========================
             // NOTA_ITEM
-            // =========================
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS nota_item (
-                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                    id_nota       INTEGER NOT NULL,
-                    tipo_item     TEXT NOT NULL,     -- PRODUTO ou PROCEDIMENTO
-                    id_produto    INTEGER,           -- pode ser null se PROCEDIMENTO
-                    descricao     TEXT NOT NULL,
-                    quantidade    REAL NOT NULL,
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_nota        INTEGER NOT NULL,
+                    tipo_item      TEXT NOT NULL,
+                    id_produto     INTEGER,
+                    descricao      TEXT NOT NULL,
+                    quantidade     REAL NOT NULL,
                     valor_unitario REAL NOT NULL,
-                    valor_total   REAL NOT NULL,
+                    valor_total    REAL NOT NULL,
                     FOREIGN KEY (id_nota) REFERENCES nota(id),
                     FOREIGN KEY (id_produto) REFERENCES produto(id)
                 );
             """);
 
-            // =========================
-            // SEED (perfis + permissões)
-            // =========================
+
+          // AUDITORIA
+
+            stmt.execute("""
+    CREATE TABLE IF NOT EXISTS auditoria (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        data_hora     TEXT NOT NULL,        -- ISO (ex: 2026-02-16T20:15:10)
+        usuario_login TEXT,                 -- login do usuário logado
+        usuario_nome  TEXT,                 -- pessoa_nome (se tiver)
+        acao          TEXT NOT NULL,         -- ex: LOGIN_OK, PERFIL_CRIADO, etc
+        entidade      TEXT,                 -- ex: USUARIO, PERFIL, PERMISSAO
+        entidade_id   TEXT,                 -- id/texto
+        detalhes      TEXT                  -- texto livre (json/text)
+    );
+""");
+
+            // AUDIT_LOG
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS audit_log (
+                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data_hora    TEXT NOT NULL,
+                    usuario_id   INTEGER,
+                    acao         TEXT NOT NULL,
+                    entidade     TEXT NOT NULL,
+                    entidade_id  TEXT,
+                    detalhes     TEXT,
+                    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+                );
+            """);
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_audit_log_data ON audit_log(data_hora);");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_audit_log_entidade ON audit_log(entidade, entidade_id);");
+
             seedPerfis(conn);
             seedPermissoes(conn);
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inicializar banco: " + e.getMessage(), e);
         }
+
+
     }
 
     private static void seedPerfis(Connection conn) throws SQLException {
         String sql = "INSERT OR IGNORE INTO perfil (nome) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            // nomes dos perfis do seu sistema
             String[] perfis = {
                     Perfis.ADMIN,
                     Perfis.RECEPCIONISTA,
@@ -252,7 +337,6 @@ public class DatabaseConfig {
                     Perfis.PSICOLOGA,
                     Perfis.MEDICA
             };
-
             for (String p : perfis) {
                 ps.setString(1, p);
                 ps.executeUpdate();
@@ -261,7 +345,6 @@ public class DatabaseConfig {
     }
 
     private static void seedPermissoes(Connection conn) throws SQLException {
-        // Busca ids dos perfis
         long idAdmin = idPerfil(conn, Perfis.ADMIN);
         long idRecep = idPerfil(conn, Perfis.RECEPCIONISTA);
         long idEnf = idPerfil(conn, Perfis.ENFERMEIRA);
@@ -270,11 +353,8 @@ public class DatabaseConfig {
         long idPsico = idPerfil(conn, Perfis.PSICOLOGA);
         long idMed = idPerfil(conn, Perfis.MEDICA);
 
-        // Regras iguais ao seu Policy.java:
-        // Admin = tudo
         insertPermissoes(conn, idAdmin, EnumSet.allOf(Permissao.class));
 
-        // Recepcionista (conforme Policy)
         insertPermissoes(conn, idRecep, EnumSet.of(
                 Permissao.ESTOQUE_VER,
                 Permissao.ESTOQUE_CADASTRAR_EDITAR,
@@ -290,7 +370,6 @@ public class DatabaseConfig {
                 Permissao.NOTA_GERAR
         ));
 
-        // Profissionais de saúde (conforme Policy)
         Set<Permissao> profissionalSaude = EnumSet.of(
                 Permissao.AGENDA_VER,
                 Permissao.AGENDA_GERENCIAR,

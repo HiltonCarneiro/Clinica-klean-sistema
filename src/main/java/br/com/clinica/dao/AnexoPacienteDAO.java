@@ -54,14 +54,8 @@ public class AnexoPacienteDAO {
         public File getFile() { return new File(caminhoArquivo); }
     }
 
-    // =========================================================
     // Inserir / Listar / Remover
-    // =========================================================
 
-    /**
-     * Compatível com seu banco:
-     * anexo_paciente(paciente_id, anamnese, nome_arquivo, caminho_arquivo, tamanho_bytes, descricao, data_hora)
-     */
     public long anexarPdf(Long pacienteId, Integer anamneseId, File arquivoPdf, String descricao) {
         if (pacienteId == null) throw new IllegalArgumentException("pacienteId é obrigatório");
         if (arquivoPdf == null) throw new IllegalArgumentException("Arquivo é obrigatório");

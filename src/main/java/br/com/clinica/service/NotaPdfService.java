@@ -40,16 +40,16 @@ public class NotaPdfService {
                 float y = page.getMediaBox().getHeight() - margin;
                 float startX = margin;
 
-                // ===== LOGO =====
+                // LOGO
                 y -= 10;
                 y = desenharLogo(document, content, startX, y);
                 y -= 20;
 
-                // ===== NOME DA CLÍNICA (sem endereço/telefone) =====
+                // NOME DA CLÍNICA (sem endereço/telefone)
                 y = escreverLinha(content, startX, y, 16, true, "Klean Saúde Integrativa");
                 y -= 10;
 
-                // ===== TÍTULO E DADOS GERAIS =====
+                // TÍTULO E DADOS GERAIS
                 y = escreverLinha(content, startX, y, 14, true, "RECIBO / NOTA DE ATENDIMENTO");
                 y = escreverLinha(content, startX, y, 10, false,
                         "Data/Hora: " + nota.getDataHora().format(DATA_HORA_FORMATTER));
@@ -64,7 +64,7 @@ public class NotaPdfService {
                 desenharLinhaHorizontal(content, startX, pageWidth - margin, y);
                 y -= 15;
 
-                // ===== CABEÇALHO DA TABELA =====
+                // CABEÇALHO DA TABELA
                 float colItemX = startX;
                 float colDescX = startX + 60;
                 float colQtdX  = startX + 330;
@@ -81,13 +81,13 @@ public class NotaPdfService {
                 desenharLinhaHorizontal(content, startX, pageWidth - margin, y);
                 y -= 14;
 
-                // ===== ITENS =====
+                // ITENS
                 int index = 1;
                 for (NotaItem item : nota.getItens()) {
                     // ITEM: apenas o número (1, 2, 3...)
                     escreverTexto(content, colItemX, y, 10, false, String.valueOf(index));
 
-                    // DESCRIÇÃO: "Produto: X" ou "Procedimento: Y" (formato C)
+                    // DESCRIÇÃO: "Produto: X" ou "Procedimento: Y"
                     String tipo = (item.getTipoItem() == TipoItemNota.PRODUTO)
                             ? "Produto" : "Procedimento";
                     String descricaoFinal = tipo + ": " + item.getDescricao();
@@ -109,7 +109,7 @@ public class NotaPdfService {
                 desenharLinhaHorizontal(content, startX, pageWidth - margin, y);
                 y -= 18;
 
-                // ===== TOTAIS =====
+                // TOTAIS
                 escreverTexto(content, colUnitX, y, 11, false,
                         String.format("Subtotal: R$ %.2f", nota.getTotalBruto()));
                 y -= 14;
@@ -117,14 +117,14 @@ public class NotaPdfService {
                         String.format("TOTAL: R$ %.2f", nota.getTotalLiquido()));
                 y -= 24;
 
-                // ===== OBSERVAÇÕES =====
+                // OBSERVAÇÕES
                 if (nota.getObservacao() != null && !nota.getObservacao().isBlank()) {
                     y = escreverLinha(content, startX, y, 11, true, "Observações:");
                     y = escreverLinha(content, startX, y, 10, false, nota.getObservacao());
                     y -= 10;
                 }
 
-                // ===== ASSINATURA =====
+                // ASSINATURA
                 y -= 20;
                 escreverTexto(content, startX, y, 10, false,
                         "__________________________________________");
@@ -137,7 +137,7 @@ public class NotaPdfService {
         }
     }
 
-    // ================== HELPERS ==================
+    // HELPERS
 
     private float desenharLogo(PDDocument document,
                                PDPageContentStream content,

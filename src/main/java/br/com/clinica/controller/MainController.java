@@ -20,15 +20,10 @@ import java.util.Deque;
 
 public class MainController {
 
-    private static final String HOME = "__HOME__";
-
     // conecta controller ao main-view.fxml
     @FXML private VBox homeBox;
     @FXML private AnchorPane contentPane;
     @FXML private Label lblUsuarioLogado;
-
-    // histórico guarda o caminho do FXML
-    private final Deque<String> history = new ArrayDeque<>();
 
     private String usuarioLogado;
 
@@ -38,7 +33,6 @@ public class MainController {
     private final Deque<String> backStack = new ArrayDeque<>();
     private final Deque<String> forwardStack = new ArrayDeque<>();
     private String currentView = null;
-
 
     @FXML
     private void initialize() {
@@ -59,8 +53,6 @@ public class MainController {
         if (btnBack != null) btnBack.setDisable(backStack.isEmpty());
         if (btnForward != null) btnForward.setDisable(forwardStack.isEmpty());
     }
-
-
 
     /** Chamado pelo LoginController depois de autenticar */
     public void setUsuarioLogado(String usuario) {
@@ -88,11 +80,8 @@ public class MainController {
         String previous = backStack.pop();
         if (currentView != null) forwardStack.push(currentView);
 
-        if (HOME.equals(previous)) {
-            mostrarHome(); // isso já seta currentView=HOME e atualiza botões
-        } else {
-            loadView(previous, false);
-        }
+        loadView(previous, false);
+        atualizarBotoesNavegacao();
     }
 
     @FXML
@@ -102,26 +91,21 @@ public class MainController {
         String next = forwardStack.pop();
         if (currentView != null) backStack.push(currentView);
 
-        if (HOME.equals(next)) {
-            mostrarHome();
-        } else {
-            loadView(next, false);
-        }
+        loadView(next, false);
+        atualizarBotoesNavegacao();
     }
-
-
 
     // ================== AÇÕES (MENU / HOME) ==================
 
     @FXML private void onPacientes() { abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER); }
     @FXML private void onAgenda() { abrirTelaNoConteudo("/view/agenda-view.fxml", Permissao.AGENDA_VER); }
     @FXML private void onCaixa() { abrirTelaNoConteudo("/view/caixa-view.fxml", Permissao.FINANCEIRO_VER); }
-    @FXML private void onMovimentoCaixa() { abrirTelaNoConteudo("/view/movimento-caixa-view.fxml", Permissao.FINANCEIRO_VER); }
     @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
     @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
-
-    // ================== NAVEGAÇÃO INTERNA ==================
+    @FXML
+    private void onAuditoria() {abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER);}
+    // NAVEGAÇÃO INTERNA
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
         try {
@@ -155,7 +139,6 @@ public class MainController {
         }
     }
 
-
     private void mostrarHome() {
         if (homeBox != null) {
             homeBox.setVisible(true);
@@ -166,8 +149,6 @@ public class MainController {
             contentPane.setVisible(false);
             contentPane.setManaged(false);
         }
-        currentView = HOME;
-        atualizarBotoesNavegacao();
     }
 
     private void mostrarConteudo(Parent view) {
@@ -186,7 +167,7 @@ public class MainController {
         contentPane.setManaged(true);
     }
 
-    // ================== ALERTAS ==================
+    // ALERTAS
 
     private void mostrarErro(String titulo, String mensagem) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

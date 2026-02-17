@@ -93,7 +93,7 @@ public class UsuariosPerfisController {
         montarChecklist();
     }
 
-    // ===================== Usuários =====================
+    // Usuários
 
     @FXML private void onAtualizarUsuarios() { atualizarUsuarios(); }
 
@@ -206,7 +206,7 @@ public class UsuariosPerfisController {
         lblMsgUsuarioForm.setText("");
     }
 
-    // ===================== Perfis =====================
+    // Perfis
 
     @FXML private void onAtualizarPerfis() { atualizarPerfis(); }
 
@@ -250,7 +250,7 @@ public class UsuariosPerfisController {
         cbPerfilPermissoes.setItems(obs);
     }
 
-    // ===================== Permissões =====================
+    // Permissões
 
     private void montarChecklist() {
         boxPermissoes.getChildren().clear();
@@ -298,4 +298,30 @@ public class UsuariosPerfisController {
     // utils
     private String safe(String s) { return s == null ? "" : s; }
     private String safeTrim(String s) { return s == null ? "" : s.trim(); }
+
+    @FXML
+    private void onFazerBackupAgora() {
+        try {
+            var r = br.com.clinica.service.BackupService.fazerBackupAgora(
+                    java.nio.file.Paths.get(System.getProperty("user.home"), "ClinicaIntegracao", "backups")
+            );
+
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    r.ok ? javafx.scene.control.Alert.AlertType.INFORMATION
+                            : javafx.scene.control.Alert.AlertType.ERROR
+            );
+            alert.setTitle("Backup do Sistema");
+            alert.setHeaderText(r.ok ? "Backup concluído" : "Falha ao gerar backup");
+            alert.setContentText(r.mensagem + (r.arquivo != null ? "\nArquivo: " + r.arquivo.toAbsolutePath() : ""));
+            alert.showAndWait();
+
+        } catch (Exception e) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Backup do Sistema");
+            alert.setHeaderText("Erro inesperado");
+            alert.setContentText("Não foi possível gerar o backup.\n" + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
 }

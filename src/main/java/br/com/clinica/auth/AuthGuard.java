@@ -25,7 +25,6 @@ public final class AuthGuard {
         if (perfil != null) {
             perfilNome = perfil.getNome();
             if (perfil.getId() != null) {
-                // Perfil.id é Long no seu model
                 perfilId = Math.toIntExact(perfil.getId());
             }
         }

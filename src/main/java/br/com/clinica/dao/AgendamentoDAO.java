@@ -90,7 +90,7 @@ public class AgendamentoDAO {
         return lista;
     }
 
-    // ✅ NOVO: período (todos)
+    // período (todos)
     public List<Agendamento> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
         String sql = "SELECT * FROM agendamento WHERE date(data) BETWEEN ? AND ? ORDER BY data, hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
@@ -111,7 +111,7 @@ public class AgendamentoDAO {
         return lista;
     }
 
-    // ✅ NOVO: período + profissional
+    // período + profissional
     public List<Agendamento> listarPorPeriodoEProfissional(LocalDate inicio, LocalDate fim, int profissionalId) {
         String sql = "SELECT * FROM agendamento " +
                 "WHERE date(data) BETWEEN ? AND ? AND profissional_id = ? " +

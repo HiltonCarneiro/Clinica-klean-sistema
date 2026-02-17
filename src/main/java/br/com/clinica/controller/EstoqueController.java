@@ -129,7 +129,7 @@ public class EstoqueController {
         atualizarLista();
     }
 
-    // ===================== AÇÕES =====================
+    // AÇÕES
 
     @FXML
     private void onNovo() {
@@ -188,7 +188,7 @@ public class EstoqueController {
         aplicarFiltroBusca();
     }
 
-    // ===================== LISTA / BUSCA =====================
+    // LISTA / BUSCA
 
     private void atualizarLista() {
         boolean incluirInativos = chkMostrarInativos != null && chkMostrarInativos.isSelected();
@@ -221,7 +221,7 @@ public class EstoqueController {
         return s == null ? "" : s.toLowerCase();
     }
 
-    // ===================== FORM =====================
+    // FORM
 
     private void limparFormulario() {
         selecionado = null;
@@ -254,7 +254,7 @@ public class EstoqueController {
         txtLote.setText(p.getLote());
 
         dpValidade.setValue(p.getValidade());
-        // garante editor bonitinho
+
         dpValidade.getEditor().setText(p.getValidade() != null ? p.getValidade().format(DATA_BR) : "");
 
         txtPrecoCusto.setText(formatarMoedaInput(p.getPrecoCusto()));
@@ -302,7 +302,7 @@ public class EstoqueController {
         return p;
     }
 
-    // ===================== MÁSCARAS / FORMATOS =====================
+    // MÁSCARAS / FORMATOS
 
     private void configurarDatePickerBR(DatePicker dp) {
         dp.setPromptText("dd/MM/aaaa");

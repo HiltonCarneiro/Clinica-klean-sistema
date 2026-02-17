@@ -14,12 +14,9 @@ public class NotaDAO {
 
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private final MovimentoCaixaDAO movimentoCaixaDAO = new MovimentoCaixaDAO();
+    private final AuditLogDAO auditLogDAO = new AuditLogDAO();
 
     private static final DateTimeFormatter DH_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-    // =====================================================================================
-    // SALVAR (transação: nota + itens + baixa estoque + movimento caixa)
-    // =====================================================================================
 
     public void salvarNota(Nota nota) {
         String sqlNota = "INSERT INTO nota " +
@@ -82,7 +79,6 @@ public class NotaDAO {
 
                     stmtItem.addBatch();
 
-                    // ✅ seu ProdutoDAO exige (conn, idProduto, quantidade)
                     if (item.getTipoItem() == TipoItemNota.PRODUTO
                             && item.getProduto() != null
                             && item.getProduto().getId() != null) {
@@ -94,7 +90,11 @@ public class NotaDAO {
 
             // 3) registrar movimento caixa (entrada)
             MovimentoCaixa mov = new MovimentoCaixa();
-            mov.setData(LocalDate.now());
+            LocalDate dataMov = (nota.getDataHora() != null)
+                    ? nota.getDataHora().toLocalDate()
+                    : LocalDate.now();
+
+            mov.setData(dataMov);
             mov.setDescricao("Recebimento - Nota " + idNota);
             mov.setTipo(TipoMovimento.ENTRADA);
             mov.setValor(nota.getTotalLiquido());
@@ -102,8 +102,20 @@ public class NotaDAO {
             mov.setPacienteNome(nota.getPaciente().getNome());
             mov.setObservacao(nota.getObservacao());
 
-            // ✅ seu MovimentoCaixaDAO usa registrar(conn, mov)
             movimentoCaixaDAO.registrar(conn, mov);
+
+            // 4) audit log (quem criou a nota)
+            String detalhes = "paciente=" + nota.getPaciente().getNome()
+                    + ", total=" + nota.getTotalLiquido()
+                    + ", forma=" + nota.getFormaPagamento();
+
+            auditLogDAO.registrar(conn,
+                    nota.getProfissional().getId(),
+                    "CRIAR",
+                    "NOTA",
+                    String.valueOf(idNota),
+                    detalhes
+            );
 
             conn.commit();
 
@@ -111,7 +123,13 @@ public class NotaDAO {
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ignored) {}
             }
-            throw new RuntimeException("Erro ao salvar nota: " + e.getMessage(), e);
+
+            String msg = (e.getMessage() != null) ? e.getMessage() : "Erro desconhecido.";
+            if (msg.toLowerCase().contains("estoque insuficiente")) {
+                throw new RuntimeException("Não foi possível finalizar: estoque insuficiente para um ou mais produtos.", e);
+            }
+
+            throw new RuntimeException("Erro ao salvar nota: " + msg, e);
 
         } finally {
             if (conn != null) {
@@ -123,9 +141,7 @@ public class NotaDAO {
         }
     }
 
-    // =====================================================================================
     // CONSULTA / REIMPRESSÃO
-    // =====================================================================================
 
     public static class NotaResumo {
         private final long id;
@@ -261,9 +277,7 @@ public class NotaDAO {
             psNota.setLong(1, idNota);
 
             try (ResultSet rs = psNota.executeQuery()) {
-                if (!rs.next()) {
-                    throw new RuntimeException("Nota não encontrada: ID " + idNota);
-                }
+                if (!rs.next()) return null;
 
                 Nota nota = new Nota();
                 nota.setId(rs.getLong("id"));
@@ -285,120 +299,40 @@ public class NotaDAO {
                 u.setPessoaNome(rs.getString("u_pessoa"));
                 nota.setProfissional(u);
 
-                List<NotaItem> itens = new ArrayList<>();
                 try (PreparedStatement psItens = c.prepareStatement(sqlItens)) {
                     psItens.setLong(1, idNota);
+
+                    List<NotaItem> itens = new ArrayList<>();
                     try (ResultSet ri = psItens.executeQuery()) {
                         while (ri.next()) {
-                            NotaItem it = new NotaItem();
-                            it.setId(ri.getLong("id"));
-                            it.setTipoItem(TipoItemNota.valueOf(ri.getString("tipo_item")));
-                            it.setDescricao(ri.getString("descricao"));
-                            it.setQuantidade(ri.getDouble("quantidade"));
-                            it.setValorUnitario(ri.getDouble("valor_unitario"));
-                            it.setValorTotal(ri.getDouble("valor_total"));
+                            NotaItem item = new NotaItem();
+                            item.setId(ri.getLong("id"));
+                            item.setTipoItem(TipoItemNota.valueOf(ri.getString("tipo_item")));
 
                             long idProd = ri.getLong("id_produto");
                             if (!ri.wasNull()) {
                                 Produto pr = new Produto();
                                 pr.setId(idProd);
                                 pr.setNome(ri.getString("produto_nome"));
-                                it.setProduto(pr);
+                                item.setProduto(pr);
                             }
 
-                            itens.add(it);
+                            item.setDescricao(ri.getString("descricao"));
+                            item.setQuantidade(ri.getDouble("quantidade"));
+                            item.setValorUnitario(ri.getDouble("valor_unitario"));
+                            item.setValorTotal(ri.getDouble("valor_total"));
+
+                            itens.add(item);
                         }
                     }
+                    nota.setItens(itens);
                 }
 
-                nota.setItens(itens);
-                nota.recalcularTotais();
                 return nota;
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar nota completa", e);
-        }
-    }
-
-    // =====================================================================================
-    // RELATÓRIO (entradas por NOTA)
-    // =====================================================================================
-
-    public static class RelatorioRow {
-        private final String chave;
-        private final double total;
-
-        public RelatorioRow(String chave, double total) {
-            this.chave = chave;
-            this.total = total;
-        }
-
-        public String getChave() { return chave; }
-        public double getTotal() { return total; }
-    }
-
-    public List<RelatorioRow> relatorioEntradas(LocalDate inicio, LocalDate fim, String agrupamento, Integer profissionalId) {
-        String agrup = (agrupamento == null || agrupamento.isBlank()) ? "DIARIO" : agrupamento.trim().toUpperCase();
-
-        String selectGroup;
-        String groupBy;
-        String orderBy;
-
-        switch (agrup) {
-            case "MENSAL" -> {
-                selectGroup = "substr(n.data_hora, 1, 7) AS chave";
-                groupBy = "substr(n.data_hora, 1, 7)";
-                orderBy = "chave ASC";
-            }
-            case "PROFISSIONAL" -> {
-                selectGroup = "CASE WHEN u.pessoa_nome IS NOT NULL AND trim(u.pessoa_nome) <> '' THEN u.pessoa_nome ELSE u.nome END AS chave";
-                groupBy = "chave";
-                orderBy = "chave ASC";
-            }
-            default -> {
-                selectGroup = "substr(n.data_hora, 1, 10) AS chave";
-                groupBy = "substr(n.data_hora, 1, 10)";
-                orderBy = "chave ASC";
-            }
-        }
-
-        StringBuilder sql = new StringBuilder("""
-            SELECT %s,
-                   SUM(n.total_liquido) AS total
-              FROM nota n
-              JOIN usuario u ON u.id = n.id_profissional
-             WHERE substr(n.data_hora, 1, 10) BETWEEN ? AND ?
-        """.formatted(selectGroup));
-
-        List<Object> params = new ArrayList<>();
-        params.add(inicio.toString());
-        params.add(fim.toString());
-
-        if (profissionalId != null) {
-            sql.append(" AND n.id_profissional = ? ");
-            params.add(profissionalId);
-        }
-
-        sql.append(" GROUP BY ").append(groupBy);
-        sql.append(" ORDER BY ").append(orderBy);
-
-        List<RelatorioRow> out = new ArrayList<>();
-
-        try (Connection c = DatabaseConfig.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql.toString())) {
-
-            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    out.add(new RelatorioRow(rs.getString("chave"), rs.getDouble("total")));
-                }
-            }
-            return out;
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao gerar relatório", e);
+            throw new RuntimeException("Erro ao buscar nota", e);
         }
     }
 }

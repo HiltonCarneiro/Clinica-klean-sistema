@@ -16,6 +16,9 @@ public enum Permissao {
     // Usuários
     USUARIO_GERENCIAR,
 
+    // Auditoria (somente admin)
+    AUDITORIA_VER,
+
     // Agenda
     AGENDA_VER,
     AGENDA_GERENCIAR,
@@ -25,7 +28,7 @@ public enum Permissao {
     NOTA_GERAR,
     RELATORIOS_VER,
 
-    // Prontuário (futuro)
+    // Prontuário
     PRONTUARIO_VER,
     PRONTUARIO_CRIAR,
     PRONTUARIO_EDITAR_PROPRIO

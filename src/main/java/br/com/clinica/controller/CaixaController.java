@@ -27,19 +27,19 @@ import java.util.function.Function;
 
 public class CaixaController {
 
-    // === Controles da parte superior ===
+    // Controles da parte superior
     @FXML private ComboBox<Paciente> cbPaciente;
     @FXML private ComboBox<Usuario> cbProfissional;
     @FXML private ComboBox<String> cbFormaPagamento;
     @FXML private TextArea txtObservacao;
 
-    // === Controles de tipo de item ===
+    // Controles de tipo de item
     @FXML private RadioButton rbProduto;
     @FXML private RadioButton rbProcedimento;
 
     private final ToggleGroup grupoTipoItem = new ToggleGroup();
 
-    // === Controles de dados do item ===
+    // Controles de dados do item
     @FXML private ComboBox<Produto> cbProduto;
     @FXML private TextField txtDescricaoProcedimento;
     @FXML private TextField txtQuantidade;
@@ -48,7 +48,7 @@ public class CaixaController {
     @FXML private Button btnAdicionarItem;
     @FXML private Button btnRemoverItem;
 
-    // === Tabela de itens ===
+    // Tabela de itens
     @FXML private TableView<NotaItem> tblItens;
     @FXML private TableColumn<NotaItem, String> colDescricao;
     @FXML private TableColumn<NotaItem, String> colTipo;
@@ -60,7 +60,7 @@ public class CaixaController {
     @FXML private Button btnFinalizar;
     @FXML private Button btnFechar;
 
-    // === DAOs ===
+    // DAOs
     private final PacienteDAO pacienteDAO = new PacienteDAO();
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -84,7 +84,7 @@ public class CaixaController {
         configurarTabela();
         configurarTipoItem();
 
-        // Autocomplete/pesquisa com seleção estável
+        // Autocomplete/pesquisa
         configurarPesquisaCombos();
 
         atualizarTotal();
@@ -167,7 +167,7 @@ public class CaixaController {
         txtValorUnitario.setDisable(false);
     }
 
-    // ---------------- Pesquisa em Combos ----------------
+    // Pesquisa em Combos
 
     private void configurarPesquisaCombos() {
         // Paciente: pesquisa pelo nome
@@ -311,7 +311,7 @@ public class CaixaController {
 
     private String safe(String s) { return s == null ? "" : s; }
 
-    // ---------------- Itens ----------------
+    // Itens
 
     @FXML
     private void onAdicionarItem() {
@@ -405,7 +405,7 @@ public class CaixaController {
         txtDescricaoProcedimento.clear();
     }
 
-    // ---------------- Nota ----------------
+    // Nota
 
     @FXML
     private void onFinalizarNota() {
@@ -480,8 +480,7 @@ public class CaixaController {
         stage.close();
     }
 
-    // ---------------- Util ----------------
-
+    // Util
     private void mostrarErro(String titulo, String detalhe) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erro");

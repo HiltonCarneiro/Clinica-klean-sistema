@@ -11,9 +11,6 @@ import java.util.List;
 
 public class MovimentoCaixaDAO {
 
-    /**
-     * Usado quando já existe uma Connection aberta (por exemplo dentro de uma transação da Nota).
-     */
     public void registrar(Connection conn, MovimentoCaixa mov) throws SQLException {
         String sql = "INSERT INTO movimento_caixa " +
                 "(data, descricao, tipo, valor, forma_pagamento, paciente_nome, observacao) " +
@@ -31,10 +28,6 @@ public class MovimentoCaixaDAO {
         }
     }
 
-    /**
-     * Versão conveniente caso você queira registrar um movimento isolado,
-     * fora do fluxo da Nota.
-     */
     public void registrar(MovimentoCaixa mov) {
         try (Connection conn = DatabaseConfig.getConnection()) {
             registrar(conn, mov);
@@ -43,9 +36,6 @@ public class MovimentoCaixaDAO {
         }
     }
 
-    /**
-     * Lista movimentos de caixa entre duas datas (inclusive).
-     */
     public List<MovimentoCaixa> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
         List<MovimentoCaixa> lista = new ArrayList<>();
 

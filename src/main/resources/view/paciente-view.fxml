@@ -55,8 +55,11 @@
                 <TextField fx:id="txtRua" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                 <!-- Número -->
-                <TextField fx:id="txtNumero" />
-                <CheckBox fx:id="chkSemNumero" text="Sem número" onAction="#onToggleSemNumero"/>
+                <Label text="Número:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <HBox spacing="8" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                    <TextField fx:id="txtNumero" promptText="Ex: 123" HBox.hgrow="ALWAYS"/>
+                    <CheckBox fx:id="chkSemNumero" text="Sem número" onAction="#onToggleSemNumero"/>
+                </HBox>
 
                 <!-- Bairro -->
                 <Label text="Bairro:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>

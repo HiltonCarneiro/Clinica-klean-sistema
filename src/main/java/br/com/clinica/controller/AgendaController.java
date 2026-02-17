@@ -33,7 +33,7 @@ public class AgendaController {
     private static final Locale LOCALE_PT_BR = Locale.forLanguageTag("pt-BR");
     private static final DateTimeFormatter HORA_FORMATTER = DateTimeFormatter.ofPattern("HH:mm", LOCALE_PT_BR);
 
-    // ✅ Regras fixas da clínica
+    // Regras fixas da clínica
     private static final LocalTime HORA_ABERTURA = LocalTime.of(7, 0);
     private static final LocalTime HORA_FECHAMENTO = LocalTime.of(19, 0);
     private static final LocalTime ALMOCO_INICIO = LocalTime.of(12, 0);
@@ -108,9 +108,7 @@ public class AgendaController {
         carregarAgendaDoDia();
     }
 
-    // ==========================
     // MÁSCARAS DE HORÁRIO
-    // ==========================
     private void configurarMascarasHorario() {
         txtHoraInicio.setTextFormatter(criarTextFormatterHora());
         txtHoraFim.setTextFormatter(criarTextFormatterHora());
@@ -184,7 +182,7 @@ public class AgendaController {
         }
     }
 
-    // ✅ Validação central de horários permitidos
+    // Validação central de horários permitidos
     private boolean horarioPermitido(LocalTime inicio, LocalTime fim) {
         // dentro de 07:00 a 19:00
         if (inicio.isBefore(HORA_ABERTURA)) return false;
@@ -195,9 +193,9 @@ public class AgendaController {
         return !intersectaAlmoco;
     }
 
-    // ==========================
+
     // SUGESTÕES DO PROCEDIMENTO
-    // ==========================
+
     private void configurarSugestaoProcedimento() {
         sugestoesMenu.setAutoHide(true);
 
@@ -251,9 +249,8 @@ public class AgendaController {
         }
     }
 
-    // ==========================
     // PERFIL
-    // ==========================
+
     private boolean podeVerTodos() {
         Usuario logado = Session.getUsuario();
         if (logado == null || logado.getPerfil() == null || logado.getPerfil().getNome() == null) return true;
@@ -276,9 +273,8 @@ public class AgendaController {
         }
     }
 
-    // ==========================
     // AÇÕES
-    // ==========================
+
     @FXML
     private void onNovo() {
         lblMensagem.setText("");
@@ -439,3 +435,4 @@ public class AgendaController {
         cbPaciente.getSelectionModel().clearSelection();
     }
 }
+

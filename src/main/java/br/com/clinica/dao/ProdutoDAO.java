@@ -3,35 +3,23 @@ package br.com.clinica.dao;
 import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.Produto;
 import br.com.clinica.model.TipoProduto;
+import br.com.clinica.session.Session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO de acesso à tabela 'produto'.
- */
 public class ProdutoDAO {
 
-    /**
-     * Lista produtos com filtros opcionais.
-     *
-     * @param incluirInativos     se false, retorna apenas produtos com ativo = 1
-     * @param apenasBaixoEstoque se true, retorna apenas produtos com estoqueAtual <= estoqueMinimo
-     * @param apenasVencendo     se true, retorna apenas produtos com validade próxima (30 dias) ou já vencidos
-     */
+    private final AuditLogDAO audit = new AuditLogDAO();
+
     public List<Produto> listar(boolean incluirInativos,
                                 boolean apenasBaixoEstoque,
                                 boolean apenasVencendo) {
 
         String sql = "SELECT * FROM produto";
-        if (!incluirInativos) {
-            sql += " WHERE ativo = 1";
-        }
+        if (!incluirInativos) sql += " WHERE ativo = 1";
 
         List<Produto> produtos = new ArrayList<>();
 
@@ -42,13 +30,8 @@ public class ProdutoDAO {
             while (rs.next()) {
                 Produto p = mapRow(rs);
 
-                if (apenasBaixoEstoque && p.getEstoqueAtual() > p.getEstoqueMinimo()) {
-                    continue;
-                }
-
-                if (apenasVencendo && !isVencendo(p)) {
-                    continue;
-                }
+                if (apenasBaixoEstoque && p.getEstoqueAtual() > p.getEstoqueMinimo()) continue;
+                if (apenasVencendo && !isVencendo(p)) continue;
 
                 produtos.add(p);
             }
@@ -60,15 +43,9 @@ public class ProdutoDAO {
         return produtos;
     }
 
-    /**
-     * Insere ou atualiza um produto.
-     */
     public void salvar(Produto p) {
-        if (p.getId() == null) {
-            inserir(p);
-        } else {
-            atualizar(p);
-        }
+        if (p.getId() == null) inserir(p);
+        else atualizar(p);
     }
 
     private void inserir(Produto p) {
@@ -77,10 +54,18 @@ public class ProdutoDAO {
                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             preencherCamposSemId(stmt, p);
             stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) p.setId(rs.getLong(1));
+            }
+
+            audit.registrarAuto("CRIAR", "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome() + ", tipo=" + (p.getTipo() != null ? p.getTipo().name() : "null"));
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir produto", e);
@@ -97,22 +82,22 @@ public class ProdutoDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             preencherCamposSemId(stmt, p);
-            stmt.setLong(10, p.getId()); // id agora é o parâmetro 10
+            stmt.setLong(10, p.getId());
             stmt.executeUpdate();
+
+            audit.registrarAuto("EDITAR", "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome() + ", estoque=" + p.getEstoqueAtual() + ", ativo=" + p.isAtivo());
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao atualizar produto", e);
         }
     }
 
-    /**
-     * Ativa ou inativa (toggle) um produto.
-     */
     public void ativarDesativar(Produto p) {
         if (p.getId() == null) return;
 
         boolean novoStatus = !p.isAtivo();
-
         String sql = "UPDATE produto SET ativo = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -124,14 +109,16 @@ public class ProdutoDAO {
 
             p.setAtivo(novoStatus);
 
+            audit.registrarAuto(novoStatus ? "ATIVAR" : "INATIVAR",
+                    "PRODUTO",
+                    String.valueOf(p.getId()),
+                    "nome=" + p.getNome());
+
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao alterar status do produto", e);
         }
     }
 
-    /**
-     * Preenche os campos do INSERT/UPDATE (sem o id).
-     */
     private void preencherCamposSemId(PreparedStatement stmt, Produto p) throws SQLException {
         stmt.setString(1, p.getNome());
         stmt.setString(2, p.getTipo() != null ? p.getTipo().toDatabase() : null);
@@ -140,30 +127,20 @@ public class ProdutoDAO {
         stmt.setDouble(4, p.getEstoqueMinimo());
         stmt.setString(5, p.getLote());
 
-        if (p.getValidade() != null) {
-            stmt.setString(6, p.getValidade().toString()); // ISO yyyy-MM-dd
-        } else {
-            stmt.setString(6, null);
-        }
+        if (p.getValidade() != null) stmt.setString(6, p.getValidade().toString());
+        else stmt.setString(6, null);
 
-        if (p.getPrecoCusto() != null) {
-            stmt.setDouble(7, p.getPrecoCusto());
-        } else {
-            stmt.setNull(7, java.sql.Types.REAL);
-        }
+        if (p.getPrecoCusto() != null) stmt.setDouble(7, p.getPrecoCusto());
+        else stmt.setNull(7, Types.REAL);
 
-        if (p.getPrecoVenda() != null) {
-            stmt.setDouble(8, p.getPrecoVenda());
-        } else {
-            stmt.setNull(8, java.sql.Types.REAL);
-        }
+        if (p.getPrecoVenda() != null) stmt.setDouble(8, p.getPrecoVenda());
+        else stmt.setNull(8, Types.REAL);
 
         stmt.setInt(9, p.isAtivo() ? 1 : 0);
     }
 
     private Produto mapRow(ResultSet rs) throws SQLException {
         Produto p = new Produto();
-
         p.setId(rs.getLong("id"));
         p.setNome(rs.getString("nome"));
 
@@ -175,45 +152,40 @@ public class ProdutoDAO {
         p.setLote(rs.getString("lote"));
 
         String validadeStr = rs.getString("validade");
-        if (validadeStr != null && !validadeStr.isBlank()) {
-            p.setValidade(LocalDate.parse(validadeStr));
-        }
+        if (validadeStr != null && !validadeStr.isBlank()) p.setValidade(LocalDate.parse(validadeStr));
 
         Object precoCustoObj = rs.getObject("preco_custo");
-        if (precoCustoObj != null) {
-            p.setPrecoCusto(rs.getDouble("preco_custo"));
-        }
+        if (precoCustoObj != null) p.setPrecoCusto(rs.getDouble("preco_custo"));
 
         Object precoVendaObj = rs.getObject("preco_venda");
-        if (precoVendaObj != null) {
-            p.setPrecoVenda(rs.getDouble("preco_venda"));
-        }
+        if (precoVendaObj != null) p.setPrecoVenda(rs.getDouble("preco_venda"));
 
         p.setAtivo(rs.getInt("ativo") == 1);
-
         return p;
     }
 
     private boolean isVencendo(Produto p) {
         LocalDate validade = p.getValidade();
         if (validade == null) return false;
-
-        LocalDate hoje = LocalDate.now();
-        LocalDate limite = hoje.plusDays(30);
-        return !validade.isAfter(limite);
+        return !validade.isAfter(LocalDate.now().plusDays(30));
     }
 
-    /**
-     * Baixa a quantidade informada do estoque do produto.
-     * Usa a mesma Connection da transação da Nota.
-     */
+    // baixa segura (não deixa estoque negativo)
     public void baixarEstoque(Connection conn, Long idProduto, double quantidade) throws SQLException {
-        String sql = "UPDATE produto SET estoque_atual = estoque_atual - ? WHERE id = ?";
+        if (idProduto == null) throw new SQLException("Produto inválido.");
+        if (quantidade <= 0) throw new SQLException("Quantidade inválida para baixa de estoque.");
+
+        String sql = "UPDATE produto " +
+                "SET estoque_atual = estoque_atual - ? " +
+                "WHERE id = ? AND estoque_atual >= ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, quantidade);
             stmt.setLong(2, idProduto);
-            stmt.executeUpdate();
+            stmt.setDouble(3, quantidade);
+
+            int updated = stmt.executeUpdate();
+            if (updated == 0) throw new SQLException("Estoque insuficiente para o produto selecionado.");
         }
     }
 }

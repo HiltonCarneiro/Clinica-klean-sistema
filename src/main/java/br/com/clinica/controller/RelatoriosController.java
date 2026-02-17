@@ -28,7 +28,7 @@ import java.util.List;
 
 public class RelatoriosController {
 
-    // ===================== ABA CAIXA =====================
+    // ABA CAIXA
     @FXML private DatePicker dtCxInicio;
     @FXML private DatePicker dtCxFim;
 
@@ -46,7 +46,7 @@ public class RelatoriosController {
 
     private final ObservableList<MovimentoCaixa> caixaObs = FXCollections.observableArrayList();
 
-    // ===================== ABA AGENDAMENTOS =====================
+    // ABA AGENDAMENTOS
     @FXML private DatePicker dtAgInicio;
     @FXML private DatePicker dtAgFim;
     @FXML private ComboBox<Usuario> cbAgProfissional;
@@ -62,7 +62,7 @@ public class RelatoriosController {
 
     private final ObservableList<Agendamento> agObs = FXCollections.observableArrayList();
 
-    // ===================== ABA NOTAS =====================
+    // ABA NOTAS
     @FXML private DatePicker dtNotaInicio;
     @FXML private DatePicker dtNotaFim;
     @FXML private TextField txtPacienteFiltro;
@@ -79,7 +79,7 @@ public class RelatoriosController {
 
     private final ObservableList<NotaDAO.NotaResumo> notasObs = FXCollections.observableArrayList();
 
-    // ===================== DAOs / Services =====================
+    // DAOs / Services
     private final MovimentoCaixaDAO movimentoCaixaDAO = new MovimentoCaixaDAO();
     private final AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
     private final NotaDAO notaDAO = new NotaDAO();
@@ -190,7 +190,7 @@ public class RelatoriosController {
         return cargo;
     }
 
-    // ===================== CAIXA =====================
+    // CAIXA
 
     @FXML
     private void onBuscarCaixa() {
@@ -238,7 +238,7 @@ public class RelatoriosController {
         }
     }
 
-    // ===================== AGENDAMENTOS =====================
+    // AGENDAMENTOS
 
     @FXML
     private void onBuscarAgendamentos() {
@@ -286,7 +286,7 @@ public class RelatoriosController {
         }
     }
 
-    // ===================== NOTAS =====================
+    // NOTAS
 
     @FXML
     private void onBuscarNotas() {
@@ -369,7 +369,7 @@ public class RelatoriosController {
         }
     }
 
-    // ===================== helpers =====================
+    // helpers
 
     private String nvl(String s) { return s == null ? "" : s; }
 

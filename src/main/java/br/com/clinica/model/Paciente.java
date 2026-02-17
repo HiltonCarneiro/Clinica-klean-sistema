@@ -12,10 +12,10 @@ public class Paciente {
     private String responsavelLegal;
     private boolean ativo = true;
 
-    // Endereço COMPLETO (campo que você usa na tela hoje)
+    // Endereço COMPLETO
     private String endereco;
 
-    // Endereço detalhado (campos novos – opcionais)
+    // Endereço detalhado
     private String rua;
     private String numero;
     private String bairro;

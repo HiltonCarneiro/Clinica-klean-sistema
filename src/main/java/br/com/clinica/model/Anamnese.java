@@ -4,7 +4,7 @@ public class Anamnese {
 
     private Integer id;
 
-    // paciente.id no seu projeto é Long
+    // paciente.id
     private Long pacienteId;
 
     // agendamento.id é Integer (pode ser nulo)
