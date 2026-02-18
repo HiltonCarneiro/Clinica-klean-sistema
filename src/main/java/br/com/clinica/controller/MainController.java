@@ -13,9 +13,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
-
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.MenuBar;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -25,7 +27,23 @@ public class MainController {
 
     private static final String HOME = "__HOME__";
 
+    @FXML private MenuBar menuBarTop;
+
     @FXML private ImageView imgLogoHome;
+
+    @FXML private Menu menuCadastros;
+    @FXML private Menu menuOperacoes;
+    @FXML private Menu menuRelatorios;
+    @FXML private Menu menuAdministracao;
+
+    @FXML private MenuItem miPacientes;
+    @FXML private MenuItem miAgenda;
+    @FXML private MenuItem miCaixa;
+    @FXML private MenuItem miEstoque;
+    @FXML private MenuItem miRelatorios;
+    @FXML private MenuItem miUsuarios;
+    @FXML private MenuItem miAuditoria;
+
 
     @FXML private Button btnCardPacientes;
     @FXML private Button btnCardAgenda;
@@ -52,6 +70,7 @@ public class MainController {
         mostrarHome();
         atualizarUsuarioLogado();
         aplicarPermissoesHome();
+        aplicarPermissoesMenu();
 
         //carregar a imagem
         var logoUrl = getClass().getResource("/images/logo-klean.png");
@@ -76,6 +95,58 @@ public class MainController {
         if (btnBack != null) btnBack.setDisable(backStack.isEmpty());
         if (btnForward != null) btnForward.setDisable(forwardStack.isEmpty());
     }
+
+    private void aplicarPermissoesMenu() {
+        if (menuBarTop == null) return;
+
+        // remove menus que você não quer que apareçam nunca
+        if (menuAdministracao != null) menuBarTop.getMenus().remove(menuAdministracao);
+
+        // dentro de Operações, deixa SÓ Agenda
+        removerItem(menuOperacoes, miCaixa);
+        removerItem(menuOperacoes, miEstoque);
+
+
+        // aplica permissão: se não tiver acesso, remove o menu inteiro
+        if (!temPermissao(Permissao.PACIENTE_VER)) removerMenu(menuCadastros);
+        if (!temPermissao(Permissao.AGENDA_VER)) removerMenu(menuOperacoes);
+        if (!temPermissao(Permissao.RELATORIOS_VER)) removerMenu(menuRelatorios);
+
+        // se sobrou menu vazio por algum motivo, remove também
+        removerMenuSeVazio(menuCadastros);
+        removerMenuSeVazio(menuOperacoes);
+        removerMenuSeVazio(menuRelatorios);
+    }
+
+
+    private boolean temPermissao(Permissao permissao) {
+        try {
+            AuthGuard.exigirPermissao(permissao);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void removerItem(Menu menu, MenuItem item) {
+        if (menu != null && item != null) {
+            menu.getItems().remove(item);
+        }
+    }
+
+    private void removerMenu(Menu menu) {
+        if (menuBarTop != null && menu != null) {
+            menuBarTop.getMenus().remove(menu);
+        }
+    }
+
+    private void removerMenuSeVazio(Menu menu) {
+        if (menu == null) return;
+        if (menu.getItems() == null || menu.getItems().isEmpty()) {
+            removerMenu(menu);
+        }
+    }
+
 
     /** Chamado pelo LoginController depois de autenticar */
     public void setUsuarioLogado(String usuario) {
@@ -223,7 +294,6 @@ public class MainController {
         btn.setVisible(pode);
         btn.setManaged(pode);
     }
-
 
 
     // ALERTAS

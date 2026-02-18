@@ -32,26 +32,27 @@
             <Separator/>
 
             <!-- Menu -->
-            <MenuBar>
-                <Menu text="Cadastros">
-                    <MenuItem text="Pacientes" onAction="#onPacientes"/>
+            <MenuBar fx:id="menuBarTop">
+                <Menu fx:id="menuCadastros" text="Cadastros">
+                    <MenuItem fx:id="miPacientes" text="Pacientes" onAction="#onPacientes"/>
                 </Menu>
 
-                <Menu text="Operações">
-                    <MenuItem text="Agenda" onAction="#onAgenda"/>
-                    <MenuItem text="Caixa / Notas" onAction="#onCaixa"/>
-                    <MenuItem text="Estoque" onAction="#onEstoque"/>
+                <Menu fx:id="menuOperacoes" text="Operações">
+                    <MenuItem fx:id="miAgenda" text="Agenda" onAction="#onAgenda"/>
+                    <MenuItem fx:id="miCaixa" text="Caixa / Notas" onAction="#onCaixa"/>
+                    <MenuItem fx:id="miEstoque" text="Estoque" onAction="#onEstoque"/>
                 </Menu>
 
-                <Menu text="Relatórios">
-                    <MenuItem text="Relatórios Gerais" onAction="#onRelatorios"/>
+                <Menu fx:id="menuRelatorios" text="Relatórios">
+                    <MenuItem fx:id="miRelatorios" text="Relatórios Gerais" onAction="#onRelatorios"/>
                 </Menu>
 
-                <Menu text="Administração">
-                    <MenuItem text="Usuários &amp; Perfis" onAction="#onUsuarios"/>
-                    <MenuItem text="Auditoria" onAction="#onAuditoria"/>
+                <Menu fx:id="menuAdministracao" text="Administração">
+                    <MenuItem fx:id="miUsuarios" text="Usuários &amp; Perfis" onAction="#onUsuarios"/>
+                    <MenuItem fx:id="miAuditoria" text="Auditoria" onAction="#onAuditoria"/>
                 </Menu>
             </MenuBar>
+
         </VBox>
     </top>
 

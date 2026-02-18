@@ -39,14 +39,57 @@
     -fx-cursor: default;
 }
 
-/* MenuBar */
+/*MENU BAR (mais vivo)*/
 .menu-bar {
     -fx-background-color: transparent;
+    -fx-padding: 2 0 0 0;
 }
-.menu-bar .menu-button:hover,
-.menu-bar .menu-button:showing {
-    -fx-background-color: #eef8f1;
+
+.menu-bar .menu {
+    -fx-padding: 6 10;
 }
+
+.menu-bar .menu .label {
+    -fx-text-fill: #14532d;
+    -fx-font-weight: 700;
+    -fx-opacity: 1;      /*evita ficar apagando*/
+}
+
+.menu-bar .menu:hover,
+.menu-bar .menu:showing {
+    -fx-background-color: #e7f7ee;
+    -fx-background-radius: 10;
+}
+
+.menu-bar .menu:hover .label,
+.menu-bar .menu:showing .label {
+    -fx-text-fill: #0f3d22;
+    -fx-opacity: 1;
+}
+
+/* dropdown */
+.context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0.2, 0, 4);
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: #111827;
+    -fx-font-weight: 600;
+    -fx-opacity: 1;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #e7f7ee;
+    -fx-background-radius: 10;
+}
+
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: #14532d;
+}
+
 
 /* Títulos */
 .h1 {
