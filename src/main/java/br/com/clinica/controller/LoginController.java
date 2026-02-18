@@ -13,8 +13,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class LoginController {
+
+    @FXML private ImageView imgLogoLogin;
 
     @FXML private TextField txtUsuario;
 
@@ -40,7 +44,15 @@ public class LoginController {
             txtSenhaVisivel.setManaged(false);
         }
         senhaVisivel = false;
+
         if (lblErro != null) lblErro.setText("");
+        var logoUrl = getClass().getResource("/images/logo-klean.png");
+        if (logoUrl != null && imgLogoLogin != null) {
+            imgLogoLogin.setImage(new Image(logoUrl.toExternalForm()));
+        } else {
+            System.out.println("Logo não encontrada: /images/logo-klean.png");
+        }
+
     }
 
     @FXML

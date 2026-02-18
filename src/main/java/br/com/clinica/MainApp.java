@@ -23,18 +23,19 @@ public class MainApp extends Application {
 
         //carrega tela de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
-        Parent root = loader.load();
+        Scene scene = new Scene(loader.load(), 900, 560);
 
-        Scene scene = new Scene(root, 1000, 650);
+        var cssUrl = getClass().getResource("/styles/app.css");
+        if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 
-        stage.setTitle("Clínica Klean - Saúde Integrativa | Sistema");
+        stage.setTitle("Clínica Klean - Saúde Integrativa | Login");
         stage.setScene(scene);
         stage.setResizable(true);
         stage.centerOnScreen();
         stage.show();
     }
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         launch(args);
     }
 }
