@@ -13,15 +13,30 @@
 
 /* Botões pequenos (navbar) */
 .nav-btn {
-    -fx-background-color: transparent;
-    -fx-text-fill: #1f2937;
+    -fx-background-color: #f3fbf6;
+    -fx-border-color: #7cc89a;
+    -fx-border-width: 1;
+    -fx-text-fill: #14532d;
     -fx-font-size: 13px;
-    -fx-padding: 8 12;
-    -fx-background-radius: 10;
+    -fx-font-weight: 700;
+    -fx-padding: 8 14;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
     -fx-cursor: hand;
 }
+
 .nav-btn:hover {
-    -fx-background-color: #eef8f1; /* verde bem clarinho */
+    -fx-background-color: #e7f7ee;
+    -fx-border-color: #4fb979;
+}
+
+.nav-btn:pressed {
+    -fx-background-color: #d9f2e3;
+}
+
+.nav-btn:disabled {
+    -fx-opacity: 0.55;
+    -fx-cursor: default;
 }
 
 /* MenuBar */
@@ -51,28 +66,41 @@
 
 .card-btn {
     -fx-background-color: #ffffff;
-    -fx-border-color: #dfe7e2;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-padding: 16;
-    -fx-min-height: 95;
+    -fx-border-color: #bfe6cf;
+    -fx-border-width: 1;
+    -fx-border-radius: 18;
+    -fx-background-radius: 18;
+    -fx-padding: 18;
+    -fx-min-height: 105;
     -fx-cursor: hand;
-}
-.card-btn:hover {
-    -fx-border-color: #7cc89a;
-    -fx-background-color: #f3fbf6;
+
+    /* sombra suave */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0.25, 0, 2);
 }
 
+.card-btn:hover {
+    -fx-border-color: #4fb979;
+    -fx-background-color: #f5fcf8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 16, 0.25, 0, 4);
+}
+
+.card-btn:pressed {
+    -fx-background-color: #eef8f1;
+}
+
+
 /* Texto do card (quando o Button estiver com graphic) */
-.card-title {
-    -fx-font-size: 15px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #111827;
+.label.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
 }
-.card-desc {
+
+.label.card-desc {
     -fx-font-size: 12px;
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: #64748b;
 }
+
 
 /* Label do usuário */
 .user-label {

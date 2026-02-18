@@ -12,7 +12,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        // 🔹 Backup automático diário (1 por dia)
+        //backup automático diário (1 por dia)
         try {
             BackupService.BackupResult r = BackupService.backupDiarioSeNecessario();
             System.out.println("[Backup] " + r.mensagem + (r.arquivo != null ? " -> " + r.arquivo : ""));
@@ -21,7 +21,7 @@ public class MainApp extends Application {
             System.err.println("[Backup] Falha ao executar backup automático: " + e.getMessage());
         }
 
-        // 🔹 Carrega tela de login
+        //carrega tela de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
         Parent root = loader.load();
 

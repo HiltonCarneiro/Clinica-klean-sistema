@@ -14,11 +14,24 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class MainController {
+
+    private static final String HOME = "__HOME__";
+
+    @FXML private ImageView imgLogoHome;
+
+    @FXML private Button btnCardPacientes;
+    @FXML private Button btnCardAgenda;
+    @FXML private Button btnCardCaixa;
+    @FXML private Button btnCardEstoque;
+    @FXML private Button btnCardUsuarios;
 
     // conecta controller ao main-view.fxml
     @FXML private VBox homeBox;
@@ -38,6 +51,16 @@ public class MainController {
     private void initialize() {
         mostrarHome();
         atualizarUsuarioLogado();
+        aplicarPermissoesHome();
+
+        //carregar a imagem
+        var logoUrl = getClass().getResource("/images/logo-klean.png");
+        if (logoUrl != null && imgLogoHome != null) {
+            imgLogoHome.setImage(new Image(logoUrl.toExternalForm()));
+        } else {
+            System.out.println("Logo não encontrada ou ImageView null (imgLogoHome).");
+        }
+
     }
 
     private void atualizarUsuarioLogado() {
@@ -80,8 +103,11 @@ public class MainController {
         String previous = backStack.pop();
         if (currentView != null) forwardStack.push(currentView);
 
-        loadView(previous, false);
-        atualizarBotoesNavegacao();
+        if (HOME.equals(previous)) {
+            mostrarHome(); // isso já seta currentView=HOME e atualiza botões
+        } else {
+            loadView(previous, false);
+        }
     }
 
     @FXML
@@ -91,9 +117,13 @@ public class MainController {
         String next = forwardStack.pop();
         if (currentView != null) backStack.push(currentView);
 
-        loadView(next, false);
-        atualizarBotoesNavegacao();
+        if (HOME.equals(next)) {
+            mostrarHome();
+        } else {
+            loadView(next, false);
+        }
     }
+
 
     // ================== AÇÕES (MENU / HOME) ==================
 
@@ -105,6 +135,7 @@ public class MainController {
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
     @FXML
     private void onAuditoria() {abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER);}
+
     // NAVEGAÇÃO INTERNA
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
@@ -149,6 +180,8 @@ public class MainController {
             contentPane.setVisible(false);
             contentPane.setManaged(false);
         }
+        currentView = HOME;
+        atualizarBotoesNavegacao();
     }
 
     private void mostrarConteudo(Parent view) {
@@ -167,8 +200,33 @@ public class MainController {
         contentPane.setManaged(true);
     }
 
-    // ALERTAS
+    private void aplicarPermissoesHome() {
+        aplicarPermissao(btnCardPacientes, Permissao.PACIENTE_VER);
+        aplicarPermissao(btnCardAgenda, Permissao.AGENDA_VER);
+        aplicarPermissao(btnCardCaixa, Permissao.FINANCEIRO_VER);
+        aplicarPermissao(btnCardEstoque, Permissao.ESTOQUE_VER);
+        aplicarPermissao(btnCardUsuarios, Permissao.USUARIO_GERENCIAR);
+    }
 
+    private void aplicarPermissao(Button btn, Permissao permissao) {
+        if (btn == null) return;
+
+        boolean pode;
+
+        try {
+            AuthGuard.exigirPermissao(permissao);
+            pode = true;
+        } catch (Exception e) {
+            pode = false;
+        }
+
+        btn.setVisible(pode);
+        btn.setManaged(pode);
+    }
+
+
+
+    // ALERTAS
     private void mostrarErro(String titulo, String mensagem) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erro");

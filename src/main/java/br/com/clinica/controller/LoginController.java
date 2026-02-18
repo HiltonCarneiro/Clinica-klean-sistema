@@ -114,6 +114,15 @@ public class LoginController {
             Parent root = loader.load();
 
             Scene scene = new Scene(root, 1100, 720);
+
+            //css seguro:
+            var cssUrl = getClass().getResource("/styles/app.css");
+            if (cssUrl != null) {
+                scene.getStylesheets().add(cssUrl.toExternalForm());
+            } else {
+                System.out.println("CSS NÃO ENCONTRADO: /styles/app.css");
+            }
+
             stage.setTitle("Clínica Klean - Saúde Integrativa | Sistema");
             stage.setScene(scene);
             stage.setResizable(true);

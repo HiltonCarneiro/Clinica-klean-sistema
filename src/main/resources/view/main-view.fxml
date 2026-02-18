@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -16,6 +17,7 @@
 
             <!-- Barra de navegação -->
             <HBox spacing="10" alignment="CENTER_LEFT">
+
                 <Button text="Início" onAction="#onInicio" styleClass="nav-btn"/>
 
                 <Button fx:id="btnBack" text="←" onAction="#onBack" styleClass="nav-btn"/>
@@ -54,27 +56,38 @@
     </top>
 
     <center>
-        <StackPane>
+        <StackPane alignment="TOP_CENTER">
+
             <!-- HOME -->
-            <VBox fx:id="homeBox" spacing="14">
+            <VBox fx:id="homeBox" spacing="18" alignment="TOP_CENTER">
                 <padding>
                     <Insets top="18" right="20" bottom="20" left="20"/>
                 </padding>
 
-                <VBox spacing="4">
+                <!-- LOGO acima do título -->
+                <VBox alignment="CENTER" spacing="8">
+                    <ImageView fx:id="imgLogoHome"
+                               opacity="0.95"
+                               fitHeight="110"
+                               preserveRatio="true"
+                               smooth="true"/>
+
                     <Label text="Clínica Klean - Saúde Integrativa" styleClass="h1"/>
                     <Label text="Selecione uma área para começar" styleClass="sub"/>
                 </VBox>
 
-                <GridPane hgap="15" vgap="15" styleClass="card-grid">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="33"/>
-                        <ColumnConstraints percentWidth="33"/>
-                        <ColumnConstraints percentWidth="33"/>
-                    </columnConstraints>
+                <!-- TILEPANE (reorganiza automático quando cards somem) -->
+                <TilePane fx:id="homeTiles"
+                          alignment="CENTER"
+                          hgap="18" vgap="18"
+                          prefColumns="3"
+                          prefTileWidth="260"
+                          prefTileHeight="120">
 
-                    <Button onAction="#onPacientes" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <Button fx:id="btnCardPacientes"
+                            onAction="#onPacientes"
+                            prefWidth="260" prefHeight="120"
+                            styleClass="card-btn">
                         <graphic>
                             <VBox spacing="4">
                                 <Label text="Pacientes" styleClass="card-title"/>
@@ -83,8 +96,10 @@
                         </graphic>
                     </Button>
 
-                    <Button onAction="#onAgenda" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <Button fx:id="btnCardAgenda"
+                            onAction="#onAgenda"
+                            prefWidth="260" prefHeight="120"
+                            styleClass="card-btn">
                         <graphic>
                             <VBox spacing="4">
                                 <Label text="Agenda" styleClass="card-title"/>
@@ -93,8 +108,10 @@
                         </graphic>
                     </Button>
 
-                    <Button onAction="#onCaixa" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <Button fx:id="btnCardCaixa"
+                            onAction="#onCaixa"
+                            prefWidth="260" prefHeight="120"
+                            styleClass="card-btn">
                         <graphic>
                             <VBox spacing="4">
                                 <Label text="Caixa / Notas" styleClass="card-title"/>
@@ -103,8 +120,10 @@
                         </graphic>
                     </Button>
 
-                    <Button onAction="#onEstoque" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <Button fx:id="btnCardEstoque"
+                            onAction="#onEstoque"
+                            prefWidth="260" prefHeight="120"
+                            styleClass="card-btn">
                         <graphic>
                             <VBox spacing="4">
                                 <Label text="Estoque" styleClass="card-title"/>
@@ -113,8 +132,10 @@
                         </graphic>
                     </Button>
 
-                    <Button onAction="#onUsuarios" maxWidth="Infinity" styleClass="card-btn"
-                            GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <Button fx:id="btnCardUsuarios"
+                            onAction="#onUsuarios"
+                            prefWidth="260" prefHeight="120"
+                            styleClass="card-btn">
                         <graphic>
                             <VBox spacing="4">
                                 <Label text="Usuários &amp; Perfis" styleClass="card-title"/>
@@ -122,11 +143,13 @@
                             </VBox>
                         </graphic>
                     </Button>
-                </GridPane>
+
+                </TilePane>
             </VBox>
 
             <!-- CONTEÚDO DINÂMICO -->
             <AnchorPane fx:id="contentPane" visible="false" managed="false"/>
+
         </StackPane>
     </center>
 
