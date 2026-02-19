@@ -17,7 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class LoginController {
-
+//teste
     @FXML private ImageView imgLogoLogin;
 
     @FXML private TextField txtUsuario;
