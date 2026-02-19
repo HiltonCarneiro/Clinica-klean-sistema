@@ -53,6 +53,7 @@ public class AgendaController {
     @FXML private TextField txtProcedimento;
     @FXML private TextArea txtObservacoes;
     @FXML private Label lblMensagem;
+    @FXML private Button btnFinalizarConsulta;
 
     @FXML private TableView<Agendamento> tbAgenda;
     @FXML private TableColumn<Agendamento, String> colHora;
@@ -105,7 +106,29 @@ public class AgendaController {
         );
 
         aplicarRegraDeVisaoPorPerfil();
+        configurarBotaoFinalizarConsulta();
+
         carregarAgendaDoDia();
+    }
+
+    private void configurarBotaoFinalizarConsulta() {
+        if (btnFinalizarConsulta == null) return;
+
+        btnFinalizarConsulta.setDisable(true);
+
+        tbAgenda.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel == null) {
+                btnFinalizarConsulta.setDisable(true);
+                return;
+            }
+
+            StatusAgendamento st = newSel.getStatus();
+            boolean podeFinalizar = st != null
+                    && st != StatusAgendamento.CONCLUIDO
+                    && st != StatusAgendamento.CANCELADO;
+
+            btnFinalizarConsulta.setDisable(!podeFinalizar);
+        });
     }
 
     // MÁSCARAS DE HORÁRIO
@@ -193,9 +216,7 @@ public class AgendaController {
         return !intersectaAlmoco;
     }
 
-
     // SUGESTÕES DO PROCEDIMENTO
-
     private void configurarSugestaoProcedimento() {
         sugestoesMenu.setAutoHide(true);
 
@@ -210,47 +231,43 @@ public class AgendaController {
 
         txtProcedimento.focusedProperty().addListener((obs, old, focado) -> {
             if (!Boolean.TRUE.equals(focado)) {
-                String norm = procedimentoDAO.normalizar(txtProcedimento.getText());
-                txtProcedimento.setText(norm);
                 sugestoesMenu.hide();
+            } else {
+                Platform.runLater(this::atualizarSugestoes);
             }
         });
     }
 
     private void atualizarSugestoes() {
-        String digitado = txtProcedimento.getText() == null ? "" : txtProcedimento.getText().trim();
-
-        if (digitado.isEmpty()) {
-            sugestoesMenu.hide();
-            return;
-        }
-
+        String digitado = txtProcedimento.getText() != null ? txtProcedimento.getText().trim() : "";
         SalaAtendimento sala = cbSala.getValue();
-        List<String> sugestoes = procedimentoDAO.sugerir(digitado, sala, 8);
 
+        sugestoesMenu.getItems().clear();
+
+        if (sala == null) return;
+
+        // ASSINATURA REAL DO SEU DAO: sugerir(String, SalaAtendimento, int)
+        List<String> sugestoes = procedimentoDAO.sugerir(digitado, sala, 8);
         if (sugestoes.isEmpty()) {
             sugestoesMenu.hide();
             return;
         }
 
-        sugestoesMenu.getItems().clear();
         for (String s : sugestoes) {
-            MenuItem mi = new MenuItem(s);
-            mi.setOnAction(e -> {
+            MenuItem item = new MenuItem(s);
+            item.setOnAction(e -> {
                 txtProcedimento.setText(s);
-                txtProcedimento.positionCaret(s.length());
                 sugestoesMenu.hide();
             });
-            sugestoesMenu.getItems().add(mi);
+            sugestoesMenu.getItems().add(item);
         }
 
         if (!sugestoesMenu.isShowing()) {
-            Platform.runLater(() -> sugestoesMenu.show(txtProcedimento, Side.BOTTOM, 0, 0));
+            sugestoesMenu.show(txtProcedimento, Side.BOTTOM, 0, 0);
         }
     }
 
-    // PERFIL
-
+    // REGRAS DE VISÃO POR PERFIL (profissional vê só o dele)
     private boolean podeVerTodos() {
         Usuario logado = Session.getUsuario();
         if (logado == null || logado.getPerfil() == null || logado.getPerfil().getNome() == null) return true;
@@ -263,64 +280,50 @@ public class AgendaController {
         if (!podeVerTodos()) {
             Usuario logado = Session.getUsuario();
             if (logado != null) {
-                cbProfissional.setItems(FXCollections.observableArrayList(logado));
-                cbProfissional.getSelectionModel().select(logado);
-                cbProfissional.setDisable(true);
+                cbProfissional.setValue(logado);
             }
-        } else {
-            cbProfissional.setDisable(false);
-            cbProfissional.getSelectionModel().clearSelection();
+            cbProfissional.setDisable(true);
         }
     }
 
-    // AÇÕES
-
     @FXML
     private void onNovo() {
-        lblMensagem.setText("");
         limparFormulario();
+        lblMensagem.setText("");
     }
 
     @FXML
     private void onSalvar() {
         try {
-            lblMensagem.setText("");
-
             LocalDate data = dpData.getValue();
-            if (data == null) {
-                lblMensagem.setText("Informe a data.");
-                return;
-            }
-
+            Usuario profissional = cbProfissional.getValue();
+            Paciente paciente = cbPaciente.getValue();
+            SalaAtendimento sala = cbSala.getValue();
             LocalTime horaInicio = parseHora(txtHoraInicio.getText());
             LocalTime horaFim = parseHora(txtHoraFim.getText());
 
+            if (data == null) {
+                lblMensagem.setText("Selecione uma data.");
+                return;
+            }
+            if (profissional == null) {
+                lblMensagem.setText("Selecione um profissional.");
+                return;
+            }
+            if (sala == null) {
+                lblMensagem.setText("Selecione uma sala.");
+                return;
+            }
             if (horaInicio == null || horaFim == null) {
-                lblMensagem.setText("Informe hora início e hora fim em HH:mm (ex: 08:00).");
+                lblMensagem.setText("Informe horários válidos (HH:mm).");
                 return;
             }
             if (!horaFim.isAfter(horaInicio)) {
-                lblMensagem.setText("Hora fim deve ser depois da hora início.");
+                lblMensagem.setText("Hora fim deve ser maior que hora início.");
                 return;
             }
-
-            // ✅ aplica regra de horário + almoço
             if (!horarioPermitido(horaInicio, horaFim)) {
-                lblMensagem.setText("Horário inválido: permitido 07:00–19:00 e almoço 12:00–13:00.");
-                return;
-            }
-
-            SalaAtendimento sala = cbSala.getValue();
-            if (sala == null) {
-                lblMensagem.setText("Selecione a sala.");
-                return;
-            }
-
-            Paciente paciente = cbPaciente.getValue();
-
-            Usuario profissional = podeVerTodos() ? cbProfissional.getValue() : Session.getUsuario();
-            if (profissional == null) {
-                lblMensagem.setText("Selecione o profissional.");
+                lblMensagem.setText("Horário inválido: fora do expediente ou durante almoço (12:00-13:00).");
                 return;
             }
 
@@ -427,6 +430,50 @@ public class AgendaController {
         }
     }
 
+    @FXML
+    private void onFinalizarConsulta() {
+        Agendamento selecionado = tbAgenda.getSelectionModel().getSelectedItem();
+        if (selecionado == null) {
+            lblMensagem.setText("Selecione um agendamento para finalizar a consulta.");
+            return;
+        }
+        if (selecionado.getId() == null) {
+            lblMensagem.setText("Agendamento inválido (sem ID).");
+            return;
+        }
+
+        StatusAgendamento st = selecionado.getStatus();
+        if (st == StatusAgendamento.CONCLUIDO) {
+            lblMensagem.setText("Este agendamento já está concluído.");
+            return;
+        }
+        if (st == StatusAgendamento.CANCELADO) {
+            lblMensagem.setText("Este agendamento está cancelado e não pode ser finalizado.");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Finalizar consulta");
+        alert.setHeaderText("Deseja finalizar a consulta?");
+        String paciente = (selecionado.getPacienteNome() == null || selecionado.getPacienteNome().isBlank())
+                ? "(sem paciente)"
+                : selecionado.getPacienteNome();
+        alert.setContentText("Paciente: " + paciente + "\nHorário: " +
+                selecionado.getHoraInicio().format(HORA_FORMATTER) + " - " +
+                selecionado.getHoraFim().format(HORA_FORMATTER));
+
+        if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        try {
+            agendamentoDAO.finalizarConsulta(selecionado.getId());
+            lblMensagem.setText("Consulta finalizada com sucesso.");
+            carregarAgendaDoDia();
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensagem.setText("Erro ao finalizar consulta: " + e.getMessage());
+        }
+    }
+
     private void limparFormulario() {
         txtHoraInicio.clear();
         txtHoraFim.clear();
@@ -435,4 +482,3 @@ public class AgendaController {
         cbPaciente.getSelectionModel().clearSelection();
     }
 }
-

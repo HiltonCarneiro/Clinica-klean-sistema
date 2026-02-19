@@ -53,13 +53,16 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorData(LocalDate data) {
-        String sql = "SELECT * FROM agendamento WHERE data = ? ORDER BY hora_inicio";
+        // ✅ agora NÃO traz CONCLUIDO (assim finalizado some da agenda)
+        String sql = "SELECT * FROM agendamento WHERE data = ? AND status <> ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, data.toString());
+            ps.setString(2, StatusAgendamento.CONCLUIDO.name());
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) lista.add(mapearAgendamento(rs));
             }
@@ -71,7 +74,8 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorDataEProfissional(LocalDate data, int profissionalId) {
-        String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? ORDER BY hora_inicio";
+        // ✅ agora NÃO traz CONCLUIDO
+        String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? AND status <> ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -79,6 +83,7 @@ public class AgendamentoDAO {
 
             ps.setString(1, data.toString());
             ps.setInt(2, profissionalId);
+            ps.setString(3, StatusAgendamento.CONCLUIDO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) lista.add(mapearAgendamento(rs));
@@ -90,9 +95,61 @@ public class AgendamentoDAO {
         return lista;
     }
 
-    // período (todos)
+    public void atualizarStatus(int agendamentoId, StatusAgendamento status) {
+        String sql = "UPDATE agendamento SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status.name());
+            ps.setInt(2, agendamentoId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar status do agendamento", e);
+        }
+    }
+
+    public void finalizarConsulta(int agendamentoId) {
+        atualizarStatus(agendamentoId, StatusAgendamento.CONCLUIDO);
+    }
+
+    public boolean existeConflito(Agendamento ag) {
+        String sql = "SELECT COUNT(1) " +
+                "FROM agendamento " +
+                "WHERE data = ? AND status <> ? " +
+                "AND ( (profissional_id = ?) OR (sala = ?) OR (paciente_id = ?) ) " +
+                "AND (hora_inicio < ? AND hora_fim > ?)";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, ag.getData().toString());
+            ps.setString(2, StatusAgendamento.CANCELADO.name());
+            ps.setInt(3, ag.getProfissionalId());
+            ps.setString(4, ag.getSala().name());
+
+            if (ag.getPacienteId() != null) ps.setInt(5, ag.getPacienteId());
+            else ps.setNull(5, java.sql.Types.INTEGER);
+
+            ps.setString(6, ag.getHoraFim().format(HORA_FORMATTER));
+            ps.setString(7, ag.getHoraInicio().format(HORA_FORMATTER));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar conflito de agenda", e);
+        }
+
+        return false;
+    }
+
     public List<Agendamento> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
-        String sql = "SELECT * FROM agendamento WHERE date(data) BETWEEN ? AND ? ORDER BY data, hora_inicio";
+        String sql = "SELECT * FROM agendamento " +
+                "WHERE date(data) BETWEEN ? AND ? " +
+                "AND status <> ? " +
+                "ORDER BY data, hora_inicio";
+
         List<Agendamento> lista = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -100,9 +157,12 @@ public class AgendamentoDAO {
 
             ps.setString(1, inicio.toString());
             ps.setString(2, fim.toString());
+            ps.setString(3, StatusAgendamento.CONCLUIDO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) lista.add(mapearAgendamento(rs));
+                while (rs.next()) {
+                    lista.add(mapearAgendamento(rs));
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao listar agendamentos por período", e);
@@ -111,10 +171,11 @@ public class AgendamentoDAO {
         return lista;
     }
 
-    // período + profissional
-    public List<Agendamento> listarPorPeriodoEProfissional(LocalDate inicio, LocalDate fim, int profissionalId) {
+    public List<Agendamento> listarPorPeriodoEProfissional(LocalDate inicio, LocalDate fim, Integer profissionalId) {
         String sql = "SELECT * FROM agendamento " +
-                "WHERE date(data) BETWEEN ? AND ? AND profissional_id = ? " +
+                "WHERE date(data) BETWEEN ? AND ? " +
+                "AND profissional_id = ? " +
+                "AND status <> ? " +
                 "ORDER BY data, hora_inicio";
 
         List<Agendamento> lista = new ArrayList<>();
@@ -125,52 +186,18 @@ public class AgendamentoDAO {
             ps.setString(1, inicio.toString());
             ps.setString(2, fim.toString());
             ps.setInt(3, profissionalId);
+            ps.setString(4, StatusAgendamento.CONCLUIDO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) lista.add(mapearAgendamento(rs));
+                while (rs.next()) {
+                    lista.add(mapearAgendamento(rs));
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao listar agendamentos por período e profissional", e);
         }
 
         return lista;
-    }
-
-    public boolean existeConflito(Agendamento ag) {
-        String sql =
-                "SELECT COUNT(*) FROM agendamento " +
-                        "WHERE data = ? " +
-                        "AND (profissional_id = ? OR sala = ? OR (paciente_id IS NOT NULL AND paciente_id = ?)) " +
-                        "AND hora_inicio < ? " +
-                        "AND hora_fim > ? " +
-                        "AND status <> ?";
-
-        String dataStr = ag.getData().toString();
-        String horaInicioStr = ag.getHoraInicio().format(HORA_FORMATTER);
-        String horaFimStr = ag.getHoraFim().format(HORA_FORMATTER);
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, dataStr);
-            ps.setInt(2, ag.getProfissionalId());
-            ps.setString(3, ag.getSala().name());
-
-            if (ag.getPacienteId() != null) ps.setInt(4, ag.getPacienteId());
-            else ps.setNull(4, java.sql.Types.INTEGER);
-
-            ps.setString(5, horaFimStr);
-            ps.setString(6, horaInicioStr);
-            ps.setString(7, StatusAgendamento.CANCELADO.name());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao verificar conflito de agenda", e);
-        }
-
-        return false;
     }
 
     private Agendamento mapearAgendamento(ResultSet rs) throws SQLException {

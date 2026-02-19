@@ -81,6 +81,12 @@
                 <Button text="Novo" onAction="#onNovo"/>
                 <Button text="Salvar" onAction="#onSalvar"/>
                 <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento"/>
+
+                <!-- ✅ NOVO BOTÃO -->
+                <Button fx:id="btnFinalizarConsulta"
+                        text="Finalizar consulta"
+                        onAction="#onFinalizarConsulta"/>
+
                 <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
                 <Label fx:id="lblMensagem"
                        textFill="#008007"
@@ -98,10 +104,10 @@
 
             <TableView fx:id="tbAgenda" prefHeight="400.0">
                 <columns>
-                    <TableColumn fx:id="colHora" text="Horário" prefWidth="140.0"/>
-                    <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="200.0"/>
-                    <TableColumn fx:id="colSala" text="Sala" prefWidth="120.0"/>
-                    <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="200.0"/>
+                    <TableColumn fx:id="colHora" text="Horário" prefWidth="120.0"/>
+                    <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="160.0"/>
+                    <TableColumn fx:id="colSala" text="Sala" prefWidth="140.0"/>
+                    <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="220.0"/>
                     <TableColumn fx:id="colStatus" text="Status" prefWidth="120.0"/>
                 </columns>
             </TableView>

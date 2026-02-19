@@ -36,6 +36,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
-##ignorar dbs
+# Ignorar bancos SQLite
 *.db
