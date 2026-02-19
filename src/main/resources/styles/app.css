@@ -39,14 +39,57 @@
     -fx-cursor: default;
 }
 
-/* MenuBar */
+/*MENU BAR (mais vivo)*/
 .menu-bar {
     -fx-background-color: transparent;
+    -fx-padding: 2 0 0 0;
 }
-.menu-bar .menu-button:hover,
-.menu-bar .menu-button:showing {
-    -fx-background-color: #eef8f1;
+
+.menu-bar .menu {
+    -fx-padding: 6 10;
 }
+
+.menu-bar .menu .label {
+    -fx-text-fill: #14532d;
+    -fx-font-weight: 700;
+    -fx-opacity: 1;      /*evita ficar apagando*/
+}
+
+.menu-bar .menu:hover,
+.menu-bar .menu:showing {
+    -fx-background-color: #e7f7ee;
+    -fx-background-radius: 10;
+}
+
+.menu-bar .menu:hover .label,
+.menu-bar .menu:showing .label {
+    -fx-text-fill: #0f3d22;
+    -fx-opacity: 1;
+}
+
+/* dropdown */
+.context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0.2, 0, 4);
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: #111827;
+    -fx-font-weight: 600;
+    -fx-opacity: 1;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #e7f7ee;
+    -fx-background-radius: 10;
+}
+
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: #14532d;
+}
+
 
 /* Títulos */
 .h1 {
@@ -101,12 +144,138 @@
     -fx-text-fill: #64748b;
 }
 
-
-/* Label do usuário */
-.user-label {
-    -fx-text-fill: #374151;
+/* parte de login */
+.login-root {
+    -fx-background-color: #f6fbf8; /* branco com verde bem suave */
 }
-.user-name {
+
+
+/* título */
+.login-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f5132; /* verde escuro */
+}
+
+/* labels */
+.login-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+/* inputs */
+.login-field {
+    -fx-font-size: 14px;
+    -fx-padding: 9 12;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #cfe7d8;
+}
+
+/* foco verde bonito */
+.login-field:focused {
+    -fx-border-color: #22c55e;
+    -fx-effect: dropshadow(gaussian, rgba(34,197,94,0.25), 14, 0.25, 0, 0);
+}
+
+/* botão olho */
+.login-eye {
+    -fx-background-color: #f1fbf5;
+    -fx-border-color: #9ad9b2;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 9 10;
+    -fx-cursor: hand;
+}
+.login-eye:hover {
+    -fx-background-color: #e6f8ee;
+    -fx-border-color: #5ecb85;
+}
+
+/* botão entrar */
+.login-button {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 14;
+    -fx-padding: 10 0 10 0;
+    -fx-cursor: hand;
+}
+.login-button:hover {
+    -fx-background-color: #16a34a;
+}
+
+/* erro */
+.login-error {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 12px;
     -fx-font-weight: 700;
-    -fx-text-fill: #111827;
+}
+
+/* =========================
+   Pacientes - tela de escolha
+   ========================= */
+
+.paciente-escolha-root {
+    -fx-padding: 30 20 30 20;
+    -fx-background-color: rgba(34, 197, 94, 0.04);
+    -fx-background-radius: 18;
+}
+
+/* Títulos */
+.page-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.page-subtitle {
+    -fx-font-size: 17px;
+    -fx-text-fill: #64748b;
+}
+
+/* Seção */
+.section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 6 0 2 0;
+}
+
+.hint-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+    -fx-padding: 8 0 0 0;
+}
+
+/* Cards-botão */
+.choice-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+
+    -fx-border-width: 1.2;
+    -fx-border-color: rgba(34, 197, 94, 0.35);
+
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+
+    -fx-cursor: hand;
+
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 14, 0.2, 0, 6);
+}
+
+/* Hover/press (mais “vivo”) */
+.choice-card:hover {
+    -fx-border-color: rgba(34, 197, 94, 0.75);
+    -fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.18), 18, 0.25, 0, 8);
+}
+
+.choice-card:pressed {
+    -fx-translate-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.12), 10, 0.2, 0, 4);
 }

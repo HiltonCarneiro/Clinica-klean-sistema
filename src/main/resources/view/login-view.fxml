@@ -3,60 +3,74 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.LoginController">
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="br.com.clinica.controller.LoginController"
+           styleClass="login-root">
 
-    <center>
-        <VBox alignment="CENTER" spacing="10">
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
+    <VBox spacing="16" alignment="CENTER" styleClass="login-card">
 
-            <Label text="Clínica Integração - Login"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <!-- LOGO -->
+        <ImageView fx:id="imgLogoLogin"
+                   fitHeight="84"
+                   preserveRatio="true"
+                   smooth="true"
+                   opacity="0.95"/>
 
-            <GridPane hgap="10" vgap="10">
-                <Label text="Usuário:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <!-- TÍTULO -->
+        <Label text="Clínica Klean - Saúde Integrativa"
+               styleClass="login-title"/>
 
-                <!-- Enter aqui já tenta logar -->
-                <TextField fx:id="txtUsuario"
-                           GridPane.rowIndex="0" GridPane.columnIndex="1"
-                           onAction="#onEntrar"/>
+        <!-- FORM -->
+        <GridPane hgap="12" vgap="12" alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints minWidth="76" halignment="RIGHT"/>
+                <ColumnConstraints minWidth="300" hgrow="NEVER"/>
+                <ColumnConstraints minWidth="44" halignment="CENTER"/>
+            </columnConstraints>
 
-                <Label text="Senha:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <!-- USUÁRIO -->
+            <Label text="Usuário:" styleClass="login-label"
+                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
 
-                <!-- Campo de senha com botão "olho" -->
-                <HBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT">
-                    <StackPane HBox.hgrow="ALWAYS">
-                        <!-- Enter aqui já tenta logar -->
-                        <PasswordField fx:id="txtSenha" onAction="#onEntrar"/>
-                        <!-- Campo visível (fica escondido por padrão) -->
-                        <TextField fx:id="txtSenhaVisivel" onAction="#onEntrar" visible="false" managed="false"/>
-                    </StackPane>
+            <TextField fx:id="txtUsuario"
+                       prefWidth="300"
+                       styleClass="login-field"
+                       GridPane.rowIndex="0" GridPane.columnIndex="1"
+                       GridPane.columnSpan="2"/>
 
-                    <Button fx:id="btnToggleSenha"
-                            text="👁"
-                            onAction="#onToggleSenha"
-                            focusTraversable="false"
-                            prefWidth="36"
-                            prefHeight="26">
-                        <tooltip>
-                            <Tooltip text="Mostrar/ocultar senha"/>
-                        </tooltip>
-                    </Button>
-                </HBox>
-            </GridPane>
+            <!-- SENHA -->
+            <Label text="Senha:" styleClass="login-label"
+                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
 
-            <Label fx:id="lblErro" textFill="red"/>
+            <PasswordField fx:id="txtSenha"
+                           prefWidth="300"
+                           styleClass="login-field"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <!-- defaultButton = Enter aciona este botão -->
-            <Button text="Entrar"
-                    onAction="#onEntrar"
-                    defaultButton="true"
-                    prefWidth="120"/>
-        </VBox>
-    </center>
+            <TextField fx:id="txtSenhaVisivel"
+                       prefWidth="300"
+                       styleClass="login-field"
+                       visible="false"
+                       managed="false"
+                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-</BorderPane>
+            <Button fx:id="btnToggleSenha"
+                    text="👁"
+                    onAction="#onToggleSenha"
+                    styleClass="login-eye"
+                    prefWidth="44"
+                    GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+        </GridPane>
+
+        <Label fx:id="lblErro" styleClass="login-error"/>
+
+        <Button text="Entrar"
+                onAction="#onEntrar"
+                prefWidth="220"
+                styleClass="login-button"/>
+
+    </VBox>
+</StackPane>

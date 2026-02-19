@@ -14,7 +14,7 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
 
-            <Label text="Agenda - Clínica de Integração"
+            <Label text="Agenda | Clínica Klean - Saúde Integrativa"
                    style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
             <GridPane hgap="10.0" vgap="8.0">
@@ -83,7 +83,7 @@
                 <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento"/>
                 <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
                 <Label fx:id="lblMensagem"
-                       textFill="red"
+                       textFill="#008007"
                        style="-fx-font-weight: bold;"
                        HBox.hgrow="ALWAYS"/>
             </HBox>
