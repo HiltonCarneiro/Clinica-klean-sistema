@@ -19,7 +19,7 @@ public class UsuariosPerfisController {
     private final AdminUsuariosPerfisDAO adminDAO = new AdminUsuariosPerfisDAO();
     private final PerfilPermissaoDAO permDAO = new PerfilPermissaoDAO();
 
-    // Usuários
+    // ===================== USUÁRIOS =====================
     @FXML private TextField txtBuscaUsuario;
     @FXML private CheckBox chkIncluirInativos;
 
@@ -43,7 +43,7 @@ public class UsuariosPerfisController {
 
     private AdminUsuariosPerfisDAO.UsuarioRow usuarioEditando;
 
-    // Perfis
+    // ===================== PERFIS =====================
     @FXML private TextField txtNovoPerfil;
     @FXML private TableView<AdminUsuariosPerfisDAO.PerfilRow> tblPerfis;
     @FXML private TableColumn<AdminUsuariosPerfisDAO.PerfilRow, Number> colPId;
@@ -51,16 +51,19 @@ public class UsuariosPerfisController {
     @FXML private TextField txtRenomearPerfil;
     @FXML private Label lblMsgPerfis;
 
-    // Permissões
+    // ✅ novo
+    @FXML private Button btnExcluirPerfil;
+
+    // ===================== PERMISSÕES =====================
     @FXML private ComboBox<AdminUsuariosPerfisDAO.PerfilRow> cbPerfilPermissoes;
     @FXML private VBox boxPermissoes;
     @FXML private Label lblMsgPermissoes;
 
-    private final Map<String, CheckBox> checks = new LinkedHashMap<>();
+    private final Map<String, CheckBox> checks = new HashMap<>();
 
     @FXML
     private void initialize() {
-        // Tabela Usuários
+        // --------- tabela usuários
         colUId.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().id));
         colULogin.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().login)));
         colUPessoa.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().pessoaNome)));
@@ -69,7 +72,8 @@ public class UsuariosPerfisController {
         colUAtivo.setCellValueFactory(c -> new SimpleBooleanProperty(c.getValue().ativo));
 
         colUAtivo.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(Boolean v, boolean empty) {
+            @Override
+            protected void updateItem(Boolean v, boolean empty) {
                 super.updateItem(v, empty);
                 setText(empty || v == null ? null : (v ? "Sim" : "Não"));
             }
@@ -79,25 +83,65 @@ public class UsuariosPerfisController {
             if (n != null) carregarUsuario(n);
         });
 
-        txtBuscaUsuario.textProperty().addListener((obs, o, n) -> atualizarUsuarios());
+        if (txtBuscaUsuario != null) {
+            txtBuscaUsuario.textProperty().addListener((obs, o, n) -> atualizarUsuarios());
+        }
 
-        // Tabela Perfis
+        // --------- tabela perfis
         colPId.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().id));
         colPNome.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().nome)));
 
-        // Carregar listas
+        // ✅ excluir só habilita com seleção
+        if (btnExcluirPerfil != null) {
+            btnExcluirPerfil.setDisable(true);
+            tblPerfis.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
+                btnExcluirPerfil.setDisable(n == null);
+            });
+        }
+
+        // carregar listas
         atualizarPerfis();
         atualizarUsuarios();
 
-        // Checklist Permissões
+        // checklist permissões
         montarChecklist();
     }
 
-    // Usuários
+    // =========================================================
+    // USUÁRIOS
+    // =========================================================
 
-    @FXML private void onAtualizarUsuarios() { atualizarUsuarios(); }
+    @FXML
+    private void onAtualizarUsuarios() { atualizarUsuarios(); }
 
-    @FXML private void onNovoUsuario() {
+    private void atualizarUsuarios() {
+        lblMsgUsuarios.setText("");
+        String termo = txtBuscaUsuario != null ? txtBuscaUsuario.getText() : "";
+        boolean incluirInativos = chkIncluirInativos != null && chkIncluirInativos.isSelected();
+
+        var lista = adminDAO.listarUsuarios(termo, incluirInativos);
+        tblUsuarios.setItems(FXCollections.observableArrayList(lista));
+    }
+
+    private void carregarUsuario(AdminUsuariosPerfisDAO.UsuarioRow u) {
+        usuarioEditando = u;
+        txtCargo.setText(safe(u.nome));
+        txtPessoaNome.setText(safe(u.pessoaNome));
+        txtLogin.setText(safe(u.login));
+        txtSenha.clear();
+        chkAtivoUsuario.setSelected(u.ativo);
+
+        var found = cbPerfilUsuario.getItems().stream()
+                .filter(p -> p.id == u.perfilId)
+                .findFirst()
+                .orElse(null);
+        cbPerfilUsuario.setValue(found);
+
+        lblMsgUsuarioForm.setText("");
+    }
+
+    @FXML
+    private void onNovoUsuario() {
         usuarioEditando = null;
         txtCargo.clear();
         txtPessoaNome.clear();
@@ -108,12 +152,15 @@ public class UsuariosPerfisController {
         lblMsgUsuarioForm.setText("");
     }
 
-    @FXML private void onCancelarUsuario() {
+    @FXML
+    private void onCancelarUsuario() {
+        lblMsgUsuarioForm.setText("");
         tblUsuarios.getSelectionModel().clearSelection();
         onNovoUsuario();
     }
 
-    @FXML private void onSalvarUsuario() {
+    @FXML
+    private void onSalvarUsuario() {
         lblMsgUsuarioForm.setText("");
 
         String cargo = safeTrim(txtCargo.getText()).toUpperCase();
@@ -128,30 +175,47 @@ public class UsuariosPerfisController {
         if (login.isBlank()) { lblMsgUsuarioForm.setText("Informe o login."); return; }
         if (perfil == null) { lblMsgUsuarioForm.setText("Selecione o perfil."); return; }
 
-        boolean criando = (usuarioEditando == null);
-        if (criando && senha.isBlank()) { lblMsgUsuarioForm.setText("Informe a senha."); return; }
-
         try {
-            AdminUsuariosPerfisDAO.UsuarioRow u = criando ? new AdminUsuariosPerfisDAO.UsuarioRow() : usuarioEditando;
-            u.nome = cargo;
-            u.pessoaNome = pessoa;
-            u.login = login;
-            u.ativo = ativo;
-            u.perfilId = perfil.id;
+            if (usuarioEditando == null) {
+                if (senha.isBlank()) { lblMsgUsuarioForm.setText("Informe a senha."); return; }
 
-            if (!senha.isBlank()) u.senha = senha; // se editando e deixar em branco, mantém
+                AdminUsuariosPerfisDAO.UsuarioRow novo = new AdminUsuariosPerfisDAO.UsuarioRow();
+                novo.nome = cargo;
+                novo.pessoaNome = pessoa;
+                novo.login = login;
+                novo.senha = senha;
+                novo.ativo = ativo;
+                novo.perfilId = perfil.id;
 
-            if (criando) adminDAO.inserirUsuario(u);
-            else adminDAO.atualizarUsuario(u);
+                adminDAO.inserirUsuario(novo);
+                lblMsgUsuarioForm.setText("Usuário criado.");
+
+            } else {
+                // se não digitar senha, mantém a atual
+                String senhaFinal = senha.isBlank() ? usuarioEditando.senha : senha;
+
+                AdminUsuariosPerfisDAO.UsuarioRow upd = new AdminUsuariosPerfisDAO.UsuarioRow();
+                upd.id = usuarioEditando.id;
+                upd.nome = cargo;
+                upd.pessoaNome = pessoa;
+                upd.login = login;
+                upd.senha = senhaFinal;
+                upd.ativo = ativo;
+                upd.perfilId = perfil.id;
+
+                adminDAO.atualizarUsuario(upd);
+                lblMsgUsuarioForm.setText("Usuário atualizado.");
+            }
 
             atualizarUsuarios();
-            lblMsgUsuarioForm.setText("Salvo com sucesso.");
+
         } catch (Exception e) {
-            lblMsgUsuarioForm.setText("Erro ao salvar: " + e.getMessage());
+            lblMsgUsuarioForm.setText("Erro: " + e.getMessage());
         }
     }
 
-    @FXML private void onAtivarInativarUsuario() {
+    @FXML
+    private void onAtivarInativarUsuario() {
         var sel = tblUsuarios.getSelectionModel().getSelectedItem();
         if (sel == null) { lblMsgUsuarios.setText("Selecione um usuário."); return; }
 
@@ -164,7 +228,8 @@ public class UsuariosPerfisController {
         }
     }
 
-    @FXML private void onResetarSenha() {
+    @FXML
+    private void onResetarSenha() {
         var sel = tblUsuarios.getSelectionModel().getSelectedItem();
         if (sel == null) { lblMsgUsuarios.setText("Selecione um usuário."); return; }
 
@@ -186,31 +251,45 @@ public class UsuariosPerfisController {
         }
     }
 
-    private void atualizarUsuarios() {
-        lblMsgUsuarios.setText("");
-        var lista = adminDAO.listarUsuarios(txtBuscaUsuario.getText(), chkIncluirInativos.isSelected());
-        tblUsuarios.setItems(FXCollections.observableArrayList(lista));
+    @FXML
+    private void onFazerBackupAgora() {
+        try {
+            var r = br.com.clinica.service.BackupService.fazerBackupAgora(
+                    java.nio.file.Paths.get(System.getProperty("user.home"), "ClinicaIntegracao", "backups")
+            );
+
+            Alert alert = new Alert(r.ok ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+            alert.setTitle("Backup do Sistema");
+            alert.setHeaderText(r.ok ? "Backup concluído" : "Falha ao gerar backup");
+            alert.setContentText(r.mensagem + (r.arquivo != null ? "\nArquivo: " + r.arquivo.toAbsolutePath() : ""));
+            alert.showAndWait();
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Backup do Sistema");
+            alert.setHeaderText("Falha ao gerar backup");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 
-    private void carregarUsuario(AdminUsuariosPerfisDAO.UsuarioRow u) {
-        usuarioEditando = u;
-        txtCargo.setText(safe(u.nome));
-        txtPessoaNome.setText(safe(u.pessoaNome));
-        txtLogin.setText(safe(u.login));
-        txtSenha.clear();
-        chkAtivoUsuario.setSelected(u.ativo);
+    // =========================================================
+    // PERFIS
+    // =========================================================
 
-        var found = cbPerfilUsuario.getItems().stream().filter(p -> p.id == u.perfilId).findFirst().orElse(null);
-        cbPerfilUsuario.setValue(found);
+    @FXML
+    private void onAtualizarPerfis() { atualizarPerfis(); }
 
-        lblMsgUsuarioForm.setText("");
+    private void atualizarPerfis() {
+        var perfis = adminDAO.listarPerfis();
+        var obs = FXCollections.observableArrayList(perfis);
+        tblPerfis.setItems(obs);
+        cbPerfilUsuario.setItems(obs);
+        cbPerfilPermissoes.setItems(obs);
     }
 
-    // Perfis
-
-    @FXML private void onAtualizarPerfis() { atualizarPerfis(); }
-
-    @FXML private void onCriarPerfil() {
+    @FXML
+    private void onCriarPerfil() {
         lblMsgPerfis.setText("");
         String nome = safeTrim(txtNovoPerfil.getText()).toUpperCase();
         if (nome.isBlank()) { lblMsgPerfis.setText("Informe o nome."); return; }
@@ -225,7 +304,8 @@ public class UsuariosPerfisController {
         }
     }
 
-    @FXML private void onRenomearPerfil() {
+    @FXML
+    private void onRenomearPerfil() {
         lblMsgPerfis.setText("");
         var sel = tblPerfis.getSelectionModel().getSelectedItem();
         if (sel == null) { lblMsgPerfis.setText("Selecione um perfil."); return; }
@@ -242,15 +322,43 @@ public class UsuariosPerfisController {
         }
     }
 
-    private void atualizarPerfis() {
-        var perfis = adminDAO.listarPerfis();
-        var obs = FXCollections.observableArrayList(perfis);
-        tblPerfis.setItems(obs);
-        cbPerfilUsuario.setItems(obs);
-        cbPerfilPermissoes.setItems(obs);
+    // ✅ NOVO: excluir perfil
+    @FXML
+    private void onExcluirPerfil() {
+        lblMsgPerfis.setText("");
+        var sel = tblPerfis.getSelectionModel().getSelectedItem();
+        if (sel == null) { lblMsgPerfis.setText("Selecione um perfil."); return; }
+
+        String nome = safeTrim(sel.nome).toUpperCase();
+        if (nome.equals("ADMINISTRADOR")) {
+            lblMsgPerfis.setText("O perfil ADMINISTRADOR não pode ser excluído.");
+            return;
+        }
+
+        try {
+            if (permDAO.perfilEmUso(sel.id)) {
+                lblMsgPerfis.setText("Não é possível excluir: perfil em uso (usuários e/ou permissões).");
+                return;
+            }
+
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Confirmar exclusão");
+            confirm.setHeaderText("Excluir perfil");
+            confirm.setContentText("Tem certeza que deseja excluir o perfil \"" + sel.nome + "\"?");
+
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+            permDAO.excluirPerfil(sel.id);
+            atualizarPerfis();
+            lblMsgPerfis.setText("Perfil excluído.");
+        } catch (Exception e) {
+            lblMsgPerfis.setText("Erro: " + e.getMessage());
+        }
     }
 
-    // Permissões
+    // =========================================================
+    // PERMISSÕES
+    // =========================================================
 
     private void montarChecklist() {
         boxPermissoes.getChildren().clear();
@@ -266,62 +374,46 @@ public class UsuariosPerfisController {
         }
     }
 
-    @FXML private void onCarregarPermissoes() {
+    @FXML
+    private void onCarregarPermissoes() {
         lblMsgPermissoes.setText("");
         var perfil = cbPerfilPermissoes.getValue();
         if (perfil == null) { lblMsgPermissoes.setText("Selecione um perfil."); return; }
-
-        Set<String> marcadas = permDAO.listarPorPerfilId(perfil.id);
-        for (var e : checks.entrySet()) e.getValue().setSelected(marcadas.contains(e.getKey()));
-
-        lblMsgPermissoes.setText("Carregado.");
-    }
-
-    @FXML private void onSalvarPermissoes() {
-        lblMsgPermissoes.setText("");
-        var perfil = cbPerfilPermissoes.getValue();
-        if (perfil == null) { lblMsgPermissoes.setText("Selecione um perfil."); return; }
-
-        Set<String> selecionadas = checks.entrySet().stream()
-                .filter(e -> e.getValue().isSelected())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
 
         try {
-            permDAO.salvarPermissoes(perfil.id, selecionadas);
-            lblMsgPermissoes.setText("Salvo.");
+            Set<String> atuais = permDAO.listarPorPerfilId(perfil.id);
+            for (var e : checks.entrySet()) {
+                e.getValue().setSelected(atuais.contains(e.getKey()));
+            }
+            lblMsgPermissoes.setText("Permissões carregadas.");
         } catch (Exception e) {
             lblMsgPermissoes.setText("Erro: " + e.getMessage());
         }
     }
 
-    // utils
-    private String safe(String s) { return s == null ? "" : s; }
-    private String safeTrim(String s) { return s == null ? "" : s.trim(); }
-
     @FXML
-    private void onFazerBackupAgora() {
+    private void onSalvarPermissoes() {
+        lblMsgPermissoes.setText("");
+        var perfil = cbPerfilPermissoes.getValue();
+        if (perfil == null) { lblMsgPermissoes.setText("Selecione um perfil."); return; }
+
         try {
-            var r = br.com.clinica.service.BackupService.fazerBackupAgora(
-                    java.nio.file.Paths.get(System.getProperty("user.home"), "ClinicaIntegracao", "backups")
-            );
+            Set<String> sel = checks.entrySet().stream()
+                    .filter(e -> e.getValue().isSelected())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
 
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    r.ok ? javafx.scene.control.Alert.AlertType.INFORMATION
-                            : javafx.scene.control.Alert.AlertType.ERROR
-            );
-            alert.setTitle("Backup do Sistema");
-            alert.setHeaderText(r.ok ? "Backup concluído" : "Falha ao gerar backup");
-            alert.setContentText(r.mensagem + (r.arquivo != null ? "\nArquivo: " + r.arquivo.toAbsolutePath() : ""));
-            alert.showAndWait();
-
+            permDAO.salvarPermissoes(perfil.id, sel);
+            lblMsgPermissoes.setText("Permissões salvas.");
         } catch (Exception e) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Backup do Sistema");
-            alert.setHeaderText("Erro inesperado");
-            alert.setContentText("Não foi possível gerar o backup.\n" + e.getMessage());
-            alert.showAndWait();
+            lblMsgPermissoes.setText("Erro: " + e.getMessage());
         }
     }
 
+    // =========================================================
+    // UTILS
+    // =========================================================
+
+    private static String safe(String s) { return s == null ? "" : s; }
+    private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
 }

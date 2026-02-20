@@ -35,45 +35,29 @@
                             <TextField fx:id="txtBuscaUsuario" promptText="login, cargo ou pessoa..." HBox.hgrow="ALWAYS"/>
                             <CheckBox fx:id="chkIncluirInativos" text="Incluir inativos"/>
                             <Button text="Atualizar" onAction="#onAtualizarUsuarios"/>
-                            <Button text="Fazer backup agora" onAction="#onFazerBackupAgora"/>
-                            <Button text="Novo" onAction="#onNovoUsuario"/>
+                            <Button text="Backup agora" onAction="#onFazerBackupAgora"/>
                         </HBox>
                     </top>
 
                     <center>
-                        <SplitPane dividerPositions="0.58">
-                            <!-- Tabela -->
-                            <VBox spacing="8">
-                                <padding>
-                                    <Insets top="0" right="12" bottom="12" left="12"/>
-                                </padding>
+                        <SplitPane dividerPositions="0.62">
+                            <TableView fx:id="tblUsuarios">
+                                <columns>
+                                    <TableColumn fx:id="colUId" text="ID" prefWidth="70"/>
+                                    <TableColumn fx:id="colULogin" text="Login" prefWidth="140"/>
+                                    <TableColumn fx:id="colUPessoa" text="Pessoa" prefWidth="180"/>
+                                    <TableColumn fx:id="colUCargo" text="Cargo" prefWidth="160"/>
+                                    <TableColumn fx:id="colUPerfil" text="Perfil" prefWidth="160"/>
+                                    <TableColumn fx:id="colUAtivo" text="Ativo" prefWidth="80"/>
+                                </columns>
+                            </TableView>
 
-                                <TableView fx:id="tblUsuarios" prefHeight="500">
-                                    <columns>
-                                        <TableColumn fx:id="colUId" text="ID" prefWidth="60"/>
-                                        <TableColumn fx:id="colULogin" text="Login" prefWidth="180"/>
-                                        <TableColumn fx:id="colUPessoa" text="Pessoa" prefWidth="220"/>
-                                        <TableColumn fx:id="colUCargo" text="Cargo" prefWidth="160"/>
-                                        <TableColumn fx:id="colUPerfil" text="Perfil" prefWidth="160"/>
-                                        <TableColumn fx:id="colUAtivo" text="Ativo" prefWidth="80"/>
-                                    </columns>
-                                </TableView>
-
-                                <HBox spacing="10">
-                                    <Button text="Ativar/Inativar" onAction="#onAtivarInativarUsuario"/>
-                                    <Button text="Resetar Senha" onAction="#onResetarSenha"/>
-                                </HBox>
-
-                                <Label fx:id="lblMsgUsuarios" textFill="red"/>
-                            </VBox>
-
-                            <!-- Form -->
                             <VBox spacing="10">
                                 <padding>
-                                    <Insets top="10" right="12" bottom="12" left="12"/>
+                                    <Insets top="10" right="12" bottom="10" left="12"/>
                                 </padding>
 
-                                <Label text="Dados do usuário" style="-fx-font-weight: bold;"/>
+                                <Label text="Cadastro / edição" style="-fx-font-weight: bold;"/>
 
                                 <GridPane hgap="10" vgap="10">
                                     <columnConstraints>
@@ -82,10 +66,10 @@
                                     </columnConstraints>
 
                                     <Label text="Cargo:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="txtCargo" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="Ex: ENFERMEIRA"/>
+                                    <TextField fx:id="txtCargo" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
                                     <Label text="Pessoa:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="txtPessoaNome" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Nome completo"/>
+                                    <TextField fx:id="txtPessoaNome" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
                                     <Label text="Login:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
                                     <TextField fx:id="txtLogin" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
@@ -97,15 +81,22 @@
                                     <ComboBox fx:id="cbPerfilUsuario" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                                     <Label text="Ativo:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                                    <CheckBox fx:id="chkAtivoUsuario" GridPane.rowIndex="5" GridPane.columnIndex="1" selected="true"/>
+                                    <CheckBox fx:id="chkAtivoUsuario" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
                                 </GridPane>
 
                                 <HBox spacing="10">
+                                    <Button text="Novo" onAction="#onNovoUsuario"/>
                                     <Button text="Salvar" onAction="#onSalvarUsuario"/>
                                     <Button text="Cancelar" onAction="#onCancelarUsuario"/>
                                 </HBox>
 
+                                <HBox spacing="10">
+                                    <Button text="Ativar/Inativar" onAction="#onAtivarInativarUsuario"/>
+                                    <Button text="Resetar senha" onAction="#onResetarSenha"/>
+                                </HBox>
+
                                 <Label fx:id="lblMsgUsuarioForm" textFill="red"/>
+                                <Label fx:id="lblMsgUsuarios" textFill="red"/>
                             </VBox>
                         </SplitPane>
                     </center>
@@ -125,6 +116,8 @@
                             <TextField fx:id="txtNovoPerfil" promptText="Ex: NUTRICIONISTA" HBox.hgrow="ALWAYS"/>
                             <Button text="Criar" onAction="#onCriarPerfil"/>
                             <Button text="Atualizar" onAction="#onAtualizarPerfis"/>
+                            <!-- ✅ NOVO -->
+                            <Button fx:id="btnExcluirPerfil" text="Excluir" onAction="#onExcluirPerfil" disable="true"/>
                         </HBox>
                     </top>
 
@@ -138,8 +131,12 @@
                             </TableView>
 
                             <VBox spacing="10" alignment="TOP_LEFT">
+                                <padding>
+                                    <Insets top="10" right="12" bottom="10" left="12"/>
+                                </padding>
+
                                 <Label text="Renomear perfil" style="-fx-font-weight: bold;"/>
-                                <Label text="Selecione um perfil na tabela e informe o novo nome:"/>
+                                <Label text="Selecione um perfil na tabela e informe o novo nome:" wrapText="true"/>
                                 <TextField fx:id="txtRenomearPerfil" promptText="Novo nome"/>
                                 <Button text="Salvar nome" onAction="#onRenomearPerfil"/>
                                 <Label fx:id="lblMsgPerfis" textFill="red"/>
@@ -159,16 +156,15 @@
                     <top>
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Perfil:"/>
-                            <ComboBox fx:id="cbPerfilPermissoes" prefWidth="320"/>
+                            <ComboBox fx:id="cbPerfilPermissoes" prefWidth="260"/>
                             <Button text="Carregar" onAction="#onCarregarPermissoes"/>
-                            <Button text="Salvar Permissões" onAction="#onSalvarPermissoes"/>
+                            <Button text="Salvar" onAction="#onSalvarPermissoes"/>
                         </HBox>
                     </top>
 
                     <center>
                         <ScrollPane fitToWidth="true">
-                            <!-- CORREÇÃO: padding precisa ser Insets, não "10" -->
-                            <VBox fx:id="boxPermissoes" spacing="8">
+                            <VBox fx:id="boxPermissoes" spacing="6">
                                 <padding>
                                     <Insets top="10" right="10" bottom="10" left="10"/>
                                 </padding>
@@ -177,11 +173,14 @@
                     </center>
 
                     <bottom>
-                        <Label fx:id="lblMsgPermissoes" textFill="red"/>
+                        <HBox>
+                            <Label fx:id="lblMsgPermissoes" textFill="red"/>
+                        </HBox>
                     </bottom>
                 </BorderPane>
             </Tab>
 
         </TabPane>
     </center>
+
 </BorderPane>
