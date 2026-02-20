@@ -33,23 +33,48 @@ public class AnamneseController {
     @FXML private Button btnSalvarInicial;
     @FXML private Button btnSalvarEvolucao;
 
+    // Aba principal
     @FXML private TextArea taQueixa;
     @FXML private TextArea taEvolucao;
     @FXML private TextArea taObservacoes;
 
-    // Histórico
+    // Sinais vitais
+    @FXML private TextField tfPA;
+    @FXML private TextField tfFC;
+    @FXML private TextField tfFR;
+    @FXML private TextField tfTemp;
+    @FXML private TextField tfPeso;
+    @FXML private TextField tfAltura;
+    @FXML private TextField tfSpO2;
+
+    // Histórico clínico
+    @FXML private TextArea taAntecedentes;
+    @FXML private TextArea taMedicacoes;
+    @FXML private TextArea taAlergias;
+    @FXML private TextArea taCirurgias;
+
+    // Hábitos
+    @FXML private ComboBox<String> cbTabagismo;
+    @FXML private ComboBox<String> cbAlcool;
+    @FXML private TextArea taSono;
+    @FXML private TextArea taAtividadeFisica;
+    @FXML private TextArea taAlimentacao;
+
+    // Exame físico
+    @FXML private TextArea taExameGeral;
+    @FXML private TextArea taExameSegmentar;
+
+    // Histórico (lista)
     @FXML private TableView<Anamnese> tvHistorico;
     @FXML private TableColumn<Anamnese, String> colData;
     @FXML private TableColumn<Anamnese, String> colTipo;
 
     // Anexos
     @FXML private TextField tfDescricaoAnexo;
-
     @FXML private TableView<AnexoPacienteDAO.AnexoPacienteItem> tvAnexos;
     @FXML private TableColumn<AnexoPacienteDAO.AnexoPacienteItem, String> colAnexoData;
     @FXML private TableColumn<AnexoPacienteDAO.AnexoPacienteItem, String> colAnexoArquivo;
     @FXML private TableColumn<AnexoPacienteDAO.AnexoPacienteItem, String> colAnexoDescricao;
-
     @FXML private Button btnAnexarPdf;
     @FXML private Button btnAbrirPdf;
     @FXML private Button btnRemoverPdf;
@@ -61,24 +86,35 @@ public class AnamneseController {
     private Agendamento agendamento;
     private Paciente paciente;
 
+    private Anamnese anamneseInicialAtual;  // (única)
+    private Anamnese selecionada;           // item selecionado no histórico (pode ser evolução)
+
     private boolean inicialJaSalva = false;
 
     private static final DateTimeFormatter DB_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", new Locale("pt", "BR"));
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.forLanguageTag("pt-BR"));
 
     @FXML
     public void initialize() {
         cbTipo.setItems(FXCollections.observableArrayList("ANAMNESE_INICIAL", "EVOLUCAO"));
         cbTipo.getSelectionModel().select("ANAMNESE_INICIAL");
 
-        // Histórico
+        // combos hábitos (padrão mercado)
+        cbTabagismo.setItems(FXCollections.observableArrayList("Não", "Sim", "Ex-tabagista"));
+        cbAlcool.setItems(FXCollections.observableArrayList("Não", "Social", "Frequente"));
+        cbTabagismo.getSelectionModel().select("Não");
+        cbAlcool.getSelectionModel().select("Não");
+
         colData.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
         colTipo.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getTipo()));
 
         tvHistorico.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            if (sel != null) carregarSelecionada(sel);
+            if (sel != null) {
+                selecionada = sel;
+                carregarSelecionada(sel);
+            }
         });
 
         cbTipo.valueProperty().addListener((obs, old, tipo) -> atualizarVisibilidadeBotoes(tipo));
@@ -87,15 +123,10 @@ public class AnamneseController {
         // ANEXOS
         colAnexoData.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getDataHora()));
-
-        // Mostra o nome do arquivo
         colAnexoArquivo.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(c.getValue().getNomeArquivo()));
-
         colAnexoDescricao.setCellValueFactory(c ->
-                new javafx.beans.property.SimpleStringProperty(
-                        c.getValue().getDescricao() == null ? "" : c.getValue().getDescricao()
-                ));
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getDescricao() == null ? "" : c.getValue().getDescricao()));
 
         tvAnexos.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> atualizarBotoesAnexos());
         atualizarBotoesAnexos();
@@ -112,16 +143,18 @@ public class AnamneseController {
         }
 
         preencherCabecalho();
-        recarregarHistorico();
 
-        inicialJaSalva = tvHistorico.getItems().stream()
-                .anyMatch(a -> "ANAMNESE_INICIAL".equalsIgnoreCase(a.getTipo()));
+        // carrega inicial (única) e evoluções
+        carregarInicialEvolucoes();
 
+        // UI padrão: se não existe inicial, fica no tipo inicial; se existe, fica em evolução
         cbTipo.getSelectionModel().select(inicialJaSalva ? "EVOLUCAO" : "ANAMNESE_INICIAL");
         atualizarVisibilidadeBotoes(cbTipo.getValue());
 
+        // limpa campos e anexos
         limparFormulario();
         carregarAnexosDoPaciente();
+        setInfo("");
     }
 
     private void preencherCabecalho() {
@@ -139,20 +172,34 @@ public class AnamneseController {
         lblAgendamento.setText("Agendamento ID: " + (agendamento != null ? agendamento.getId() : "(não definido)"));
     }
 
-    private void recarregarHistorico() {
+    private void carregarInicialEvolucoes() {
+        tvHistorico.setItems(FXCollections.observableArrayList());
+        selecionada = null;
+
         if (paciente == null || paciente.getId() == null) {
-            tvHistorico.setItems(FXCollections.observableArrayList());
+            inicialJaSalva = false;
+            anamneseInicialAtual = null;
             return;
         }
 
-        List<Anamnese> list;
-        if (agendamento != null && agendamento.getId() != null) {
-            list = anamneseDAO.listarPorAgendamento(agendamento.getId());
+        Integer agId = (agendamento != null ? agendamento.getId() : null);
+
+        // inicial única
+        anamneseInicialAtual = (agId != null)
+                ? anamneseDAO.buscarInicialPorAgendamento(agId)
+                : anamneseDAO.buscarInicialPorPaciente(paciente.getId());
+
+        inicialJaSalva = anamneseInicialAtual != null;
+
+        // histórico: inicial (se existir) + evoluções
+        List<Anamnese> lista;
+        if (agId != null) {
+            lista = anamneseDAO.listarPorAgendamento(agId);
         } else {
-            list = anamneseDAO.listarPorPaciente(paciente.getId());
+            lista = anamneseDAO.listarPorPaciente(paciente.getId());
         }
 
-        tvHistorico.setItems(FXCollections.observableArrayList(list));
+        tvHistorico.setItems(FXCollections.observableArrayList(lista));
     }
 
     private void atualizarVisibilidadeBotoes(String tipo) {
@@ -178,22 +225,30 @@ public class AnamneseController {
     @FXML
     private void onNovaEvolucao() {
         tvHistorico.getSelectionModel().clearSelection();
+        selecionada = null;
         cbTipo.getSelectionModel().select("EVOLUCAO");
         limparFormulario();
-        setInfo("");
+        setInfo("Nova evolução: preencha e clique em Salvar evolução.");
     }
 
     @FXML
     private void onSalvarInicial() {
-        salvarRegistro("ANAMNESE_INICIAL");
+        salvarOuAtualizar("ANAMNESE_INICIAL");
     }
 
     @FXML
     private void onSalvarEvolucao() {
-        salvarRegistro("EVOLUCAO");
+        salvarOuAtualizar("EVOLUCAO");
     }
 
-    private void salvarRegistro(String tipo) {
+    /**
+     * Regras:
+     * - ANAMNESE_INICIAL: sempre UPSERT (atualiza se existir).
+     * - EVOLUCAO:
+     *      - se usuário selecionou uma evolução no histórico -> UPDATE dessa evolução + atualiza arquivo TXT
+     *      - se não selecionou -> INSERT nova evolução + cria arquivo TXT
+     */
+    private void salvarOuAtualizar(String tipo) {
         setInfo("");
 
         if (paciente == null || paciente.getId() == null) {
@@ -226,24 +281,53 @@ public class AnamneseController {
         a.setProfissionalId(u.getId());
         a.setDataHora(LocalDateTime.now().format(DB_FMT));
         a.setTipo(tipo);
-        a.setDadosJson("{\"queixa\":\"" + escapeJson(queixa) + "\",\"evolucao\":\"" + escapeJson(evolucao) + "\"}");
+        a.setDadosJson(montarJsonCompleto());
         a.setObservacoes(safe(taObservacoes));
 
-        int id = anamneseDAO.inserir(a);
-        if (id > 0) {
-            recarregarHistorico();
-            limparFormulario();
-
+        try {
             if ("ANAMNESE_INICIAL".equals(tipo)) {
+                int id = anamneseDAO.salvarOuAtualizarInicial(a);
+                a.setId(id);
+                anamneseInicialAtual = a;
                 inicialJaSalva = true;
+
+                carregarInicialEvolucoes();
+                setInfo("Anamnese inicial salva/atualizada com sucesso. Evoluções liberadas.");
                 cbTipo.getSelectionModel().select("EVOLUCAO");
                 atualizarVisibilidadeBotoes("EVOLUCAO");
-                setInfo("Anamnese inicial salva. Evoluções liberadas.");
-            } else {
-                setInfo("Evolução salva com sucesso.");
+                return;
             }
-        } else {
-            setInfo("Não foi possível salvar.");
+
+            // EVOLUÇÃO
+            boolean editandoEvolucaoSelecionada = (selecionada != null
+                    && "EVOLUCAO".equalsIgnoreCase(selecionada.getTipo())
+                    && selecionada.getId() != null);
+
+            if (editandoEvolucaoSelecionada) {
+                a.setId(selecionada.getId());
+                anamneseDAO.atualizar(a);
+
+                // atualiza arquivo TXT da evolução
+                anexoDAO.criarOuAtualizarArquivoEvolucao(paciente.getId(), a.getId(), gerarTextoEvolucaoParaArquivo(a));
+
+                carregarInicialEvolucoes();
+                setInfo("Evolução atualizada (registro e arquivo).");
+                return;
+            }
+
+            // nova evolução (INSERT + cria arquivo TXT)
+            int id = anamneseDAO.inserir(a);
+            a.setId(id);
+
+            anexoDAO.criarOuAtualizarArquivoEvolucao(paciente.getId(), a.getId(), gerarTextoEvolucaoParaArquivo(a));
+
+            carregarInicialEvolucoes();
+            limparFormulario();
+            setInfo("Evolução salva com sucesso (registro + arquivo).");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            setInfo("Erro ao salvar: " + e.getMessage());
         }
     }
 
@@ -251,21 +335,81 @@ public class AnamneseController {
         cbTipo.getSelectionModel().select(a.getTipo());
 
         String json = a.getDadosJson() == null ? "" : a.getDadosJson();
+
+        // principais
         taQueixa.setText(extrairCampoJson(json, "queixa"));
         taEvolucao.setText(extrairCampoJson(json, "evolucao"));
-
         taObservacoes.setText(a.getObservacoes() == null ? "" : a.getObservacoes());
 
+        // vitais
+        tfPA.setText(extrairCampoJson(json, "pa"));
+        tfFC.setText(extrairCampoJson(json, "fc"));
+        tfFR.setText(extrairCampoJson(json, "fr"));
+        tfTemp.setText(extrairCampoJson(json, "temp"));
+        tfPeso.setText(extrairCampoJson(json, "peso"));
+        tfAltura.setText(extrairCampoJson(json, "altura"));
+        tfSpO2.setText(extrairCampoJson(json, "spo2"));
+
+        // histórico
+        taAntecedentes.setText(extrairCampoJson(json, "antecedentes"));
+        taMedicacoes.setText(extrairCampoJson(json, "medicacoes"));
+        taAlergias.setText(extrairCampoJson(json, "alergias"));
+        taCirurgias.setText(extrairCampoJson(json, "cirurgias"));
+
+        // hábitos
+        String tab = extrairCampoJson(json, "tabagismo");
+        if (!tab.isBlank()) cbTabagismo.getSelectionModel().select(tab);
+        String alc = extrairCampoJson(json, "alcool");
+        if (!alc.isBlank()) cbAlcool.getSelectionModel().select(alc);
+
+        taSono.setText(extrairCampoJson(json, "sono"));
+        taAtividadeFisica.setText(extrairCampoJson(json, "atividade_fisica"));
+        taAlimentacao.setText(extrairCampoJson(json, "alimentacao"));
+
+        // exame físico
+        taExameGeral.setText(extrairCampoJson(json, "exame_geral"));
+        taExameSegmentar.setText(extrairCampoJson(json, "exame_segmentar"));
+
         atualizarVisibilidadeBotoes(cbTipo.getValue());
+
+        if ("ANAMNESE_INICIAL".equalsIgnoreCase(a.getTipo())) {
+            setInfo("Anamnese inicial carregada. Você pode editar e clicar em 'Salvar anamnese inicial' para atualizar (não cria novo).");
+        } else {
+            setInfo("Evolução carregada. Você pode editar e clicar em 'Salvar evolução' para atualizar esta evolução (arquivo será atualizado).");
+        }
     }
 
     private void limparFormulario() {
         taQueixa.clear();
         taEvolucao.clear();
         taObservacoes.clear();
+
+        tfPA.clear();
+        tfFC.clear();
+        tfFR.clear();
+        tfTemp.clear();
+        tfPeso.clear();
+        tfAltura.clear();
+        tfSpO2.clear();
+
+        taAntecedentes.clear();
+        taMedicacoes.clear();
+        taAlergias.clear();
+        taCirurgias.clear();
+
+        cbTabagismo.getSelectionModel().select("Não");
+        cbAlcool.getSelectionModel().select("Não");
+        taSono.clear();
+        taAtividadeFisica.clear();
+        taAlimentacao.clear();
+
+        taExameGeral.clear();
+        taExameSegmentar.clear();
     }
 
-    // ANEXOS
+    // =========================
+    // ANEXOS (PDF)
+    // =========================
 
     @FXML
     private void onAnexarPdf() {
@@ -372,7 +516,61 @@ public class AnamneseController {
         btnRemoverPdf.setDisable(!temSel);
     }
 
-    // HELPERS
+    // =========================
+    // JSON helpers / montagem
+    // =========================
+
+    private String montarJsonCompleto() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+
+        put(sb, "queixa", safe(taQueixa)); sb.append(",");
+        put(sb, "evolucao", safe(taEvolucao)); sb.append(",");
+
+        put(sb, "pa", safe(tfPA)); sb.append(",");
+        put(sb, "fc", safe(tfFC)); sb.append(",");
+        put(sb, "fr", safe(tfFR)); sb.append(",");
+        put(sb, "temp", safe(tfTemp)); sb.append(",");
+        put(sb, "peso", safe(tfPeso)); sb.append(",");
+        put(sb, "altura", safe(tfAltura)); sb.append(",");
+        put(sb, "spo2", safe(tfSpO2)); sb.append(",");
+
+        put(sb, "antecedentes", safe(taAntecedentes)); sb.append(",");
+        put(sb, "medicacoes", safe(taMedicacoes)); sb.append(",");
+        put(sb, "alergias", safe(taAlergias)); sb.append(",");
+        put(sb, "cirurgias", safe(taCirurgias)); sb.append(",");
+
+        put(sb, "tabagismo", cbTabagismo.getValue()); sb.append(",");
+        put(sb, "alcool", cbAlcool.getValue()); sb.append(",");
+        put(sb, "sono", safe(taSono)); sb.append(",");
+        put(sb, "atividade_fisica", safe(taAtividadeFisica)); sb.append(",");
+        put(sb, "alimentacao", safe(taAlimentacao)); sb.append(",");
+
+        put(sb, "exame_geral", safe(taExameGeral)); sb.append(",");
+        put(sb, "exame_segmentar", safe(taExameSegmentar));
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private void put(StringBuilder sb, String key, String value) {
+        sb.append("\"").append(escapeJson(key)).append("\":\"")
+                .append(escapeJson(value == null ? "" : value))
+                .append("\"");
+    }
+
+    private String gerarTextoEvolucaoParaArquivo(Anamnese a) {
+        StringBuilder t = new StringBuilder();
+        t.append("EVOLUÇÃO CLÍNICA").append("\n");
+        t.append("Data/Hora: ").append(a.getDataHora()).append("\n");
+        t.append("Paciente: ").append(paciente != null ? paciente.getNome() : "").append("\n");
+        t.append("Agendamento ID: ").append(agendamento != null ? agendamento.getId() : "").append("\n");
+        t.append("--------------------------------------------------").append("\n");
+        t.append("Queixa:").append("\n").append(safe(taQueixa)).append("\n\n");
+        t.append("Evolução:").append("\n").append(safe(taEvolucao)).append("\n\n");
+        t.append("Observações:").append("\n").append(safe(taObservacoes)).append("\n");
+        return t.toString();
+    }
 
     private void setInfo(String msg) {
         lblInfo.setText(msg == null ? "" : msg);
@@ -380,6 +578,10 @@ public class AnamneseController {
 
     private String safe(TextArea ta) {
         return ta == null || ta.getText() == null ? "" : ta.getText().trim();
+    }
+
+    private String safe(TextField tf) {
+        return tf == null || tf.getText() == null ? "" : tf.getText().trim();
     }
 
     private String escapeJson(String s) {
