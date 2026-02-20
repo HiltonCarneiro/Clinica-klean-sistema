@@ -27,6 +27,10 @@
 
                 <Label text="Logado:" styleClass="user-label" />
                 <Label fx:id="lblUsuarioLogado" text="-" styleClass="user-name" />
+
+                <!-- ✅ NOVO (seguindo o mesmo padrão visual) -->
+                <Button text="Sair" onAction="#onSair" styleClass="nav-btn"/>
+
             </HBox>
 
             <Separator/>
@@ -148,7 +152,7 @@
                 </TilePane>
             </VBox>
 
-            <!-- CONTEÚDO DINÂMICO -->
+            <!-- CONTEÚDO -->
             <AnchorPane fx:id="contentPane" visible="false" managed="false"/>
 
         </StackPane>

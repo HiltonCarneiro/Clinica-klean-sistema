@@ -8,6 +8,7 @@ import br.com.clinica.session.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -15,9 +16,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.MenuBar;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -44,7 +47,6 @@ public class MainController {
     @FXML private MenuItem miUsuarios;
     @FXML private MenuItem miAuditoria;
 
-
     @FXML private Button btnCardPacientes;
     @FXML private Button btnCardAgenda;
     @FXML private Button btnCardCaixa;
@@ -63,6 +65,7 @@ public class MainController {
 
     private final Deque<String> backStack = new ArrayDeque<>();
     private final Deque<String> forwardStack = new ArrayDeque<>();
+
     private String currentView = null;
 
     @FXML
@@ -106,7 +109,6 @@ public class MainController {
         removerItem(menuOperacoes, miCaixa);
         removerItem(menuOperacoes, miEstoque);
 
-
         // aplica permissão: se não tiver acesso, remove o menu inteiro
         if (!temPermissao(Permissao.PACIENTE_VER)) removerMenu(menuCadastros);
         if (!temPermissao(Permissao.AGENDA_VER)) removerMenu(menuOperacoes);
@@ -117,7 +119,6 @@ public class MainController {
         removerMenuSeVazio(menuOperacoes);
         removerMenuSeVazio(menuRelatorios);
     }
-
 
     private boolean temPermissao(Permissao permissao) {
         try {
@@ -146,7 +147,6 @@ public class MainController {
             removerMenu(menu);
         }
     }
-
 
     /** Chamado pelo LoginController depois de autenticar */
     public void setUsuarioLogado(String usuario) {
@@ -195,7 +195,6 @@ public class MainController {
         }
     }
 
-
     // ================== AÇÕES (MENU / HOME) ==================
 
     @FXML private void onPacientes() { abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER); }
@@ -204,11 +203,9 @@ public class MainController {
     @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
     @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
     @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
-    @FXML
-    private void onAuditoria() {abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER);}
+    @FXML private void onAuditoria() { abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER); }
 
     // NAVEGAÇÃO INTERNA
-
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
         try {
             AuthGuard.exigirPermissao(permissao);
@@ -295,6 +292,34 @@ public class MainController {
         btn.setManaged(pode);
     }
 
+    // ================== ✅ SAIR (VOLTA AO LOGIN) ==================
+    @FXML
+    private void onSair() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Sair do sistema");
+        confirm.setHeaderText("Encerrar sessão");
+        confirm.setContentText("Deseja realmente sair e voltar para a tela de login?");
+
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        // limpa sessão
+        Session.limpar();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) contentPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarErro("Erro", "Não foi possível voltar para a tela de login.");
+        }
+    }
 
     // ALERTAS
     private void mostrarErro(String titulo, String mensagem) {
