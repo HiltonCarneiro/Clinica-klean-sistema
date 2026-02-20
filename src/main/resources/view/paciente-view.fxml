@@ -8,41 +8,38 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.clinica.controller.PacienteController">
 
-
     <center>
         <StackPane>
 
             <!-- ====================== TELA DE ESCOLHA ====================== -->
             <VBox fx:id="boxEscolha"
-                   alignment="CENTER"
-                   spacing="18"
-                   styleClass="paciente-escolha-root">
+                  alignment="CENTER"
+                  spacing="18"
+                  styleClass="paciente-escolha-root">
 
-            <Label text="Pacientes" styleClass="page-title"/>
-            <Label text="Escolha uma opção para continuar" styleClass="page-subtitle"/>
+                <Label text="Pacientes" styleClass="page-title"/>
+                <Label text="Escolha uma opção para continuar" styleClass="page-subtitle"/>
 
-            <VBox alignment="CENTER" spacing="10">
-                <Label text="O que você deseja fazer?" styleClass="section-title"/>
+                <VBox alignment="CENTER" spacing="10">
+                    <Label text="O que você deseja fazer?" styleClass="section-title"/>
 
-                <HBox alignment="CENTER" spacing="16" styleClass="choice-row">
-                    <Button text="Cadastrar paciente"
-                            onAction="#irParaCadastro"
-                            prefWidth="230" prefHeight="110"
-                            styleClass="choice-card"/>
+                    <HBox alignment="CENTER" spacing="16" styleClass="choice-row">
+                        <Button text="Cadastrar paciente"
+                                onAction="#irParaCadastro"
+                                prefWidth="230" prefHeight="110"
+                                styleClass="choice-card"/>
 
-                    <Button text="Buscar paciente"
-                            onAction="#irParaBusca"
-                            prefWidth="230" prefHeight="110"
-                            styleClass="choice-card"/>
-                </HBox>
+                        <Button text="Buscar paciente"
+                                onAction="#irParaBusca"
+                                prefWidth="230" prefHeight="110"
+                                styleClass="choice-card"/>
+                    </HBox>
 
-                <Label text="Você pode alternar entre as telas quando quiser."
-                       styleClass="hint-text"/>
+                    <Label text="Você pode alternar entre as telas quando quiser." styleClass="hint-text"/>
+                </VBox>
             </VBox>
-        </VBox>
 
-
-            <!-- ====================== CADASTRO ====================== -->
+            <!-- ====================== TELA DE CADASTRO ====================== -->
             <ScrollPane fx:id="scrollCadastro" fitToWidth="true" visible="false" managed="false" styleClass="page-scroll">
                 <VBox spacing="12" styleClass="page-content">
                     <padding>
@@ -59,68 +56,63 @@
                             <ColumnConstraints minWidth="120"/>
                             <ColumnConstraints hgrow="ALWAYS"/>
                             <ColumnConstraints minWidth="140"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
                         </columnConstraints>
 
                         <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
 
                         <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <Label text="Data Nasc.:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="Data Nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                        <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                        <Label text="Telefone:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtTelefone" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="Telefone:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtTelefone" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                        <Separator GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3"/>
+                        <Label text="Rua:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtRua" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
 
-                        <Label text="Rua:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtRua" GridPane.rowIndex="5" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="Número:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtNumero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                        <Label text="Número:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtNumero" promptText="Ex: 123" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
                         <CheckBox fx:id="chkSemNumero" text="Sem número"
-                                  onAction="#onToggleSemNumero"
-                                  GridPane.rowIndex="6" GridPane.columnIndex="2"/>
+                                  GridPane.rowIndex="4" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
 
-                        <Label text="Bairro:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtBairro" GridPane.rowIndex="7" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="Bairro:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtBairro" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-                        <Label text="Cidade:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtCidade" GridPane.rowIndex="8" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="Cidade:" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+                        <TextField fx:id="txtCidade" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
 
-                        <Label text="CEP:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtCep" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
-                        <Button text="Buscar CEP" onAction="#onBuscarCep"
-                                GridPane.rowIndex="9" GridPane.columnIndex="2"/>
+                        <Label text="CEP:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtCep" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-                        <Label text="UF:" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtUf" GridPane.rowIndex="10" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="UF:" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
+                        <TextField fx:id="txtUf" GridPane.rowIndex="6" GridPane.columnIndex="3"/>
 
-                        <Label text="Responsável legal:" GridPane.rowIndex="11" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtResponsavelLegal" GridPane.rowIndex="11" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+                        <Label text="Responsável legal:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtResponsavelLegal"
+                                   GridPane.rowIndex="7" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
                     </GridPane>
 
-                    <Label fx:id="lblMensagem" styleClass="msg"/>
-
-                    <HBox spacing="10" alignment="CENTER_LEFT">
+                    <HBox spacing="10">
                         <Button text="Novo" onAction="#onNovo"/>
                         <Button text="Salvar" onAction="#onSalvar"/>
-
                         <Button fx:id="btnInativar" text="Inativar" onAction="#onInativar"/>
-                        <Button fx:id="btnAtivar" text="Reativar" onAction="#onAtivar"/>
+                        <Button fx:id="btnAtivar" text="Ativar" onAction="#onAtivar"/>
+                    </HBox>
 
-                        <Button text="Limpar" onAction="#onLimpar"/>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
+                    <HBox spacing="18">
                         <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
                     </HBox>
+
+                    <Label fx:id="lblMensagem" styleClass="hint-text"/>
                 </VBox>
             </ScrollPane>
 
-            <!-- ====================== BUSCA ====================== -->
+            <!-- ====================== TELA DE BUSCA ====================== -->
             <VBox fx:id="boxBusca" spacing="12" visible="false" managed="false" styleClass="page-content">
                 <padding>
                     <Insets top="14" right="16" bottom="16" left="16"/>
@@ -129,6 +121,10 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
                     <Label text="Buscar Paciente" styleClass="section-title"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <!-- ✅ BOTÕES -->
+                    <Button fx:id="btnEditarSelecionado" text="Editar" onAction="#onEditarSelecionado" disable="true"/>
+                    <Button fx:id="btnHistoricoSelecionado" text="Ver histórico" onAction="#onVerHistoricoSelecionado" disable="true"/>
                 </HBox>
 
                 <HBox spacing="10">
@@ -137,7 +133,7 @@
                     <Button text="Limpar" onAction="#onLimparBusca"/>
                 </HBox>
 
-                <HBox>
+                <HBox spacing="18">
                     <CheckBox fx:id="chkMostrarInativosBusca" text="Mostrar inativos" onAction="#onBuscarPaciente"/>
                 </HBox>
 
@@ -154,5 +150,4 @@
 
         </StackPane>
     </center>
-
 </BorderPane>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.PacienteHistoricoController">
+
+    <!-- ======= TOPO ======= -->
+    <top>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="14" right="16" bottom="10" left="16"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Histórico do Paciente" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="Fechar" onAction="#onFechar"/>
+            </HBox>
+
+            <GridPane hgap="14" vgap="6">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="110" halignment="RIGHT"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints minWidth="110" halignment="RIGHT"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label fx:id="lblNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="CPF:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <Label fx:id="lblCpf" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                <Label text="Telefone:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label fx:id="lblTelefone" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Data nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <Label fx:id="lblDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                <Label text="Ativo:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label fx:id="lblAtivo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+        </VBox>
+    </top>
+
+    <!-- ======= CENTRO: ABAS ======= -->
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <!-- ======================= ANEXOS ======================= -->
+            <Tab text="Anexos / Exames">
+                <VBox spacing="10">
+                    <padding>
+                        <Insets top="10" right="16" bottom="16" left="16"/>
+                    </padding>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Anexos do paciente" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnAtualizarAnexos" text="Atualizar" onAction="#onAtualizarAnexos"/>
+                        <Button fx:id="btnAbrirAnexo" text="Abrir" onAction="#onAbrirAnexo" disable="true"/>
+                    </HBox>
+
+                    <TableView fx:id="tableAnexos" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colAnexoNome" text="Arquivo" prefWidth="320"/>
+                            <TableColumn fx:id="colAnexoDescricao" text="Descrição" prefWidth="240"/>
+                            <TableColumn fx:id="colAnexoDataHora" text="Data/Hora" prefWidth="160"/>
+                        </columns>
+                    </TableView>
+
+                    <Label text="Dica: selecione um anexo e clique em “Abrir” para visualizar o PDF no leitor padrão."
+                           style="-fx-text-fill: #666;"/>
+                </VBox>
+            </Tab>
+
+            <!-- ======================= ANAMNESE & EVOLUÇÕES ======================= -->
+            <Tab text="Anamnese &amp; Evoluções">
+                <BorderPane>
+                    <padding>
+                        <Insets top="10" right="16" bottom="16" left="16"/>
+                    </padding>
+
+                    <top>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Histórico de Anamnese e Evoluções" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                            <Pane HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnAtualizarAnamnese" text="Atualizar" onAction="#onAtualizarAnamnese"/>
+                        </HBox>
+                    </top>
+
+                    <left>
+                        <VBox spacing="8" prefWidth="360">
+                            <TableView fx:id="tableAnamnese" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colAnaDataHora" text="Data/Hora" prefWidth="170"/>
+                                    <TableColumn fx:id="colAnaTipo" text="Tipo" prefWidth="160"/>
+                                </columns>
+                            </TableView>
+
+                            <Label text="Selecione um item para ver os detalhes à direita."
+                                   style="-fx-text-fill: #666;"/>
+                        </VBox>
+                    </left>
+
+                    <center>
+                        <VBox spacing="10">
+                            <Label text="Observações" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="txtObservacoes" prefRowCount="6" wrapText="true"/>
+
+                            <Label text="Dados (JSON)" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="txtJson" prefRowCount="12" wrapText="false"/>
+                        </VBox>
+                    </center>
+                </BorderPane>
+            </Tab>
+
+        </TabPane>
+    </center>
+
+</BorderPane>
