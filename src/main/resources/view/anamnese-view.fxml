@@ -82,22 +82,55 @@
                 </Tab>
 
                 <Tab text="Histórico Clínico">
-                    <VBox spacing="8">
+                    <VBox spacing="10">
                         <padding>
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
 
-                        <Label text="Antecedentes"/>
-                        <TextArea fx:id="taAntecedentes"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Antecedentes (marque o que se aplica)"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <CheckBox fx:id="chkNegaAntecedentes" text="Nega antecedentes"/>
+                        </HBox>
 
-                        <Label text="Medicações"/>
-                        <TextArea fx:id="taMedicacoes"/>
+                        <FlowPane hgap="12" vgap="8" prefWrapLength="700">
+                            <CheckBox fx:id="chkHipertensao" text="Hipertensão"/>
+                            <CheckBox fx:id="chkDiabetes" text="Diabetes"/>
+                            <CheckBox fx:id="chkDislipidemia" text="Dislipidemia"/>
+                            <CheckBox fx:id="chkAsma" text="Asma"/>
+                            <CheckBox fx:id="chkCardiopatia" text="Cardiopatia"/>
+                            <CheckBox fx:id="chkDoencaRenal" text="Doença renal"/>
+                            <CheckBox fx:id="chkDoencaHepatica" text="Doença hepática"/>
+                            <CheckBox fx:id="chkAutoimune" text="Autoimune"/>
+                            <CheckBox fx:id="chkCancer" text="Câncer"/>
+                            <CheckBox fx:id="chkAnsiedadeDepressao" text="Ansiedade/Depressão"/>
+                        </FlowPane>
 
-                        <Label text="Alergias"/>
-                        <TextArea fx:id="taAlergias"/>
+                        <Label text="Outros / detalhes (opcional)"/>
+                        <TextArea fx:id="taAntecedentes" prefRowCount="4"/>
 
-                        <Label text="Cirurgias"/>
-                        <TextArea fx:id="taCirurgias"/>
+                        <Separator/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Medicações"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <CheckBox fx:id="chkSemMedicacoes" text="Não faz uso"/>
+                        </HBox>
+                        <TextArea fx:id="taMedicacoes" prefRowCount="4"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Alergias"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <CheckBox fx:id="chkNegaAlergias" text="Nega alergias"/>
+                        </HBox>
+                        <TextArea fx:id="taAlergias" prefRowCount="4"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Cirurgias"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <CheckBox fx:id="chkNegaCirurgias" text="Nega cirurgias"/>
+                        </HBox>
+                        <TextArea fx:id="taCirurgias" prefRowCount="4"/>
                     </VBox>
                 </Tab>
 
@@ -134,10 +167,10 @@
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
 
-                        <Label text="Exame Geral"/>
+                        <Label text="Exame geral"/>
                         <TextArea fx:id="taExameGeral"/>
 
-                        <Label text="Exame Segmentar"/>
+                        <Label text="Exame segmentar"/>
                         <TextArea fx:id="taExameSegmentar"/>
                     </VBox>
                 </Tab>
@@ -148,10 +181,10 @@
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
 
-                        <TableView fx:id="tvHistorico">
+                        <TableView fx:id="tvHistorico" prefHeight="350">
                             <columns>
-                                <TableColumn fx:id="colData" text="Data/Hora"/>
-                                <TableColumn fx:id="colTipo" text="Tipo"/>
+                                <TableColumn fx:id="colData" text="Data/Hora" prefWidth="220"/>
+                                <TableColumn fx:id="colTipo" text="Tipo" prefWidth="220"/>
                             </columns>
                         </TableView>
                     </VBox>
@@ -164,17 +197,18 @@
                         </padding>
 
                         <HBox spacing="10">
-                            <TextField fx:id="tfDescricaoAnexo"/>
+                            <Label text="Descrição:"/>
+                            <TextField fx:id="tfDescricaoAnexo" HBox.hgrow="ALWAYS"/>
                             <Button fx:id="btnAnexarPdf" text="Anexar PDF" onAction="#onAnexarPdf"/>
                             <Button fx:id="btnAbrirPdf" text="Abrir" onAction="#onAbrirPdf"/>
                             <Button fx:id="btnRemoverPdf" text="Remover" onAction="#onRemoverPdf"/>
                         </HBox>
 
-                        <TableView fx:id="tvAnexos">
+                        <TableView fx:id="tvAnexos" prefHeight="320">
                             <columns>
-                                <TableColumn fx:id="colAnexoData" text="Data"/>
-                                <TableColumn fx:id="colAnexoArquivo" text="Arquivo"/>
-                                <TableColumn fx:id="colAnexoDescricao" text="Descrição"/>
+                                <TableColumn fx:id="colAnexoData" text="Data/Hora" prefWidth="190"/>
+                                <TableColumn fx:id="colAnexoArquivo" text="Arquivo" prefWidth="240"/>
+                                <TableColumn fx:id="colAnexoDescricao" text="Descrição" prefWidth="280"/>
                             </columns>
                         </TableView>
                     </VBox>
