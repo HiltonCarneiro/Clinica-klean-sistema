@@ -40,76 +40,84 @@
             </VBox>
 
             <!-- ====================== TELA DE CADASTRO ====================== -->
-            <ScrollPane fx:id="scrollCadastro" fitToWidth="true" visible="false" managed="false" styleClass="page-scroll">
-                <VBox spacing="12" styleClass="page-content">
-                    <padding>
-                        <Insets top="14" right="16" bottom="16" left="16"/>
-                    </padding>
+            <ScrollPane fx:id="scrollCadastro"
+                        fitToWidth="true"
+                        visible="false"
+                        managed="false"
+                        styleClass="page-scroll">
+                <content>
+                    <StackPane styleClass="page-center">
+                        <VBox spacing="12" styleClass="page-content">
+                            <padding>
+                                <Insets top="14" right="16" bottom="16" left="16"/>
+                            </padding>
 
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
-                        <Label text="Cadastro de Pacientes" styleClass="section-title"/>
-                    </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
+                                <Label text="Cadastro de Pacientes" styleClass="section-title"/>
+                            </HBox>
 
-                    <GridPane hgap="10" vgap="10">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="120"/>
-                            <ColumnConstraints hgrow="ALWAYS"/>
-                            <ColumnConstraints minWidth="140"/>
-                            <ColumnConstraints hgrow="ALWAYS"/>
-                        </columnConstraints>
+                            <GridPane hgap="10" vgap="10">
+                                <columnConstraints>
+                                    <ColumnConstraints minWidth="120"/>
+                                    <ColumnConstraints hgrow="ALWAYS"/>
+                                    <ColumnConstraints minWidth="140"/>
+                                    <ColumnConstraints hgrow="ALWAYS"/>
+                                </columnConstraints>
 
-                        <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
 
-                        <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <Label text="Data Nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                        <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                                <Label text="Data Nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                        <Label text="Telefone:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtTelefone" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                <Label text="Telefone:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtTelefone" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                        <Label text="Rua:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtRua" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                <Label text="Rua:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtRua" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
 
-                        <Label text="Número:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtNumero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                <Label text="Número:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtNumero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                        <CheckBox fx:id="chkSemNumero" text="Sem número"
-                                  GridPane.rowIndex="4" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
+                                <CheckBox fx:id="chkSemNumero" text="Sem número"
+                                          GridPane.rowIndex="4" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
 
-                        <Label text="Bairro:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtBairro" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                <Label text="Bairro:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtBairro" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-                        <Label text="Cidade:" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
-                        <TextField fx:id="txtCidade" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
+                                <Label text="Cidade:" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtCidade" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
 
-                        <Label text="CEP:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtCep" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                                <Label text="CEP:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtCep" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-                        <Label text="UF:" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
-                        <TextField fx:id="txtUf" GridPane.rowIndex="6" GridPane.columnIndex="3"/>
+                                <Label text="UF:" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtUf" GridPane.rowIndex="6" GridPane.columnIndex="3"/>
 
-                        <Label text="Responsável legal:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtResponsavelLegal"
-                                   GridPane.rowIndex="7" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
-                    </GridPane>
+                                <Label text="Responsável legal:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtResponsavelLegal"
+                                           GridPane.rowIndex="7" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                            </GridPane>
 
-                    <HBox spacing="10">
-                        <Button text="Novo" onAction="#onNovo"/>
-                        <Button text="Salvar" onAction="#onSalvar"/>
-                        <Button fx:id="btnInativar" text="Inativar" onAction="#onInativar"/>
-                        <Button fx:id="btnAtivar" text="Ativar" onAction="#onAtivar"/>
-                    </HBox>
+                            <HBox spacing="10">
+                                <Button text="Novo" onAction="#onNovo"/>
+                                <Button text="Salvar" onAction="#onSalvar"/>
+                                <Button fx:id="btnInativar" text="Inativar" onAction="#onInativar"/>
+                                <Button fx:id="btnAtivar" text="Ativar" onAction="#onAtivar"/>
+                            </HBox>
 
-                    <HBox spacing="18">
-                        <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
-                    </HBox>
+                            <HBox spacing="18">
+                                <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
+                            </HBox>
 
-                    <Label fx:id="lblMensagem" styleClass="hint-text"/>
-                </VBox>
+                            <Label fx:id="lblMensagem" styleClass="hint-text"/>
+                        </VBox>
+                    </StackPane>
+                </content>
             </ScrollPane>
 
             <!-- ====================== TELA DE BUSCA ====================== -->

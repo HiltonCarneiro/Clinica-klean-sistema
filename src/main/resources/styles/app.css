@@ -279,3 +279,150 @@
     -fx-translate-y: 1;
     -fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.12), 10, 0.2, 0, 4);
 }
+
+/* para a parte de cadastrar paciente */
+/* =========================
+   Card central de formulário
+   ========================= */
+
+.form-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+
+    -fx-padding: 26 28 28 28;
+
+    /* largura controlada */
+    -fx-max-width: 820;
+    -fx-min-width: 720;
+
+    /* sombra suave */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 18, 0.25, 0, 6);
+}
+
+/* ficha alinhada */
+/* barra de ações */
+.form-actions {
+    -fx-padding: 18 0 0 0;
+    -fx-spacing: 10;
+}
+
+/* botões padrão */
+.button {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 6 14;
+    -fx-font-weight: 700;
+}
+
+/* Campos padrão do sistema */
+.text-field,
+.text-area,
+.date-picker,
+.combo-box {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 7 10;
+    -fx-font-size: 13px;
+}
+
+/* Evita campos gigantes */
+.text-field {
+    -fx-max-width: 420;
+}
+
+.date-picker {
+    -fx-max-width: 160;
+}
+
+.combo-box {
+    -fx-max-width: 260;
+}
+
+/* centralizar tela de cadastro */
+.page-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 24 0 28 0;
+}
+
+.page-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* centraliza o conteúdo do ScrollPane */
+.page-center {
+    -fx-alignment: TOP_CENTER;
+    -fx-padding: 0 24 0 24;
+}
+
+/* limita largura do “card” (use sua classe atual: page-content) */
+.page-content {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+
+    -fx-padding: 26 28 28 28;
+
+    -fx-max-width: 860;
+    -fx-min-width: 720;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 18, 0.25, 0, 6);
+}
+
+/* =========================
+   DatePicker – visual delicado
+   ========================= */
+
+/* container do DatePicker */
+.date-picker {
+    -fx-background-color: transparent;
+}
+
+/* campo de texto */
+.date-picker > .text-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+
+    -fx-border-color: #e5e7eb;   /* cinza claro */
+    -fx-border-width: 1;
+
+    -fx-padding: 7 10;
+    -fx-font-size: 13px;
+}
+
+/* botão do calendário */
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 0 1;   /* só separador */
+    -fx-background-radius: 0 10 10 0;
+    -fx-border-radius: 0 10 10 0;
+}
+
+/* ícone do calendário */
+.date-picker .arrow {
+    -fx-background-color: #6b7280; /* cinza discreto */
+}
+
+/* hover suave */
+.date-picker:hover > .text-field {
+    -fx-border-color: #cbd5e1;
+}
+
+/* foco elegante (sem azul forte) */
+.date-picker:focused > .text-field,
+.date-picker > .text-field:focused {
+    -fx-border-color: #22c55e; /* verde do sistema */
+    -fx-effect: dropshadow(gaussian, rgba(34,197,94,0.18), 10, 0.25, 0, 0);
+}
+
+/* hover no botão */
+.date-picker .arrow-button:hover {
+    -fx-background-color: #f8fafc;
+}
