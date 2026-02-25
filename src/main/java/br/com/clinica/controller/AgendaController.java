@@ -33,7 +33,7 @@ public class AgendaController {
     private static final DateTimeFormatter HORA_FORMATTER = DateTimeFormatter.ofPattern("HH:mm", LOCALE_PT_BR);
     private static final DateTimeFormatter DATA_BR = DateTimeFormatter.ofPattern("dd/MM/yyyy", LOCALE_PT_BR);
 
-    // Regras fixas (mantendo sua lógica)
+    // Regras fixas
     private static final LocalTime HORA_ABERTURA = LocalTime.of(7, 0);
     private static final LocalTime HORA_FECHAMENTO = LocalTime.of(19, 0);
     private static final LocalTime ALMOCO_INICIO = LocalTime.of(12, 0);
@@ -68,11 +68,11 @@ public class AgendaController {
 
     @FXML
     public void initialize() {
-        // ✅ (2) data NÃO pode vir preenchida com hoje
+        // ✅ Data não deve vir preenchida com hoje
         dpData.setValue(null);
         dpData.getEditor().clear();
 
-        // ✅ (3) máscara ao digitar + bloquear passado no calendário e no texto
+        // ✅ Máscara ao digitar + bloqueio no calendário (sem “sumir” ao perder foco)
         configurarDatePickerData();
 
         cbProfissional.setItems(FXCollections.observableArrayList(usuarioDAO.listarProfissionaisAtivos()));
@@ -83,7 +83,7 @@ public class AgendaController {
         txtHoraInicio.setTextFormatter(criarTextFormatterHora());
         txtHoraFim.setTextFormatter(criarTextFormatterHora());
 
-        // sugestão procedimento (mantém seu recurso)
+        // sugestão procedimento (mantém recurso do sistema)
         configurarSugestoesProcedimento();
 
         // colunas
@@ -94,21 +94,17 @@ public class AgendaController {
                                 (c.getValue().getHoraFim() != null ? c.getValue().getHoraFim().format(HORA_FORMATTER) : "")
                 )
         );
-
         colProfissional.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(safe(c.getValue().getProfissionalNome()))
         );
-
         colSala.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(
                         c.getValue().getSala() != null ? c.getValue().getSala().getDescricao() : ""
                 )
         );
-
         colPaciente.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(safe(c.getValue().getPacienteNome()))
         );
-
         colStatus.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(
                         c.getValue().getStatus() != null ? c.getValue().getStatus().name() : ""
@@ -126,7 +122,7 @@ public class AgendaController {
     }
 
     // =========================
-    // ✅ DatePicker: máscara + bloqueio passado
+    // DatePicker: máscara + bloqueio passado
     // =========================
     private void configurarDatePickerData() {
         dpData.getEditor().setPromptText("dd/MM/aaaa");
@@ -160,7 +156,7 @@ public class AgendaController {
             }
         });
 
-        // Máscara ao digitar: 01022026 -> 01/02/2026
+        // Máscara ao digitar: 01022026 -> 01/02/2026 (não apaga ao sair)
         dpData.getEditor().setTextFormatter(new TextFormatter<String>(change -> {
             String newText = change.getControlNewText();
             if (newText == null || newText.isEmpty()) return change;
@@ -181,27 +177,15 @@ public class AgendaController {
             return change;
         }));
 
-        // Ao perder foco: valida; se inválida/passatempo, limpa
+        // Ao perder foco: se for válido, normaliza o formato. Se inválido, NÃO APAGA (usuário corrige).
         dpData.getEditor().focusedProperty().addListener((obs, old, focused) -> {
             if (focused) return;
 
             LocalDate parsed = dpData.getConverter().fromString(dpData.getEditor().getText());
-            if (parsed == null) {
-                dpData.setValue(null);
-                dpData.getEditor().clear();
-                return;
+            if (parsed != null) {
+                dpData.setValue(parsed);
+                dpData.getEditor().setText(dpData.getConverter().toString(parsed));
             }
-
-            if (parsed.isBefore(LocalDate.now())) {
-                setMsg("Data no passado não é permitida.");
-                dpData.setValue(null);
-                dpData.getEditor().clear();
-                tbAgenda.getItems().clear();
-                return;
-            }
-
-            dpData.setValue(parsed);
-            dpData.getEditor().setText(dpData.getConverter().toString(parsed));
         });
     }
 
@@ -309,7 +293,7 @@ public class AgendaController {
     private void onNovo() {
         limparFormulario();
 
-        // ✅ data deve ficar vazia no novo agendamento
+        // ✅ data deve ficar vazia ao criar novo agendamento
         dpData.setValue(null);
         dpData.getEditor().clear();
 
@@ -330,9 +314,9 @@ public class AgendaController {
 
             if (data == null) { setMsg("Selecione uma data."); return; }
 
-            // ✅ (1) bloquear agendamento no passado
+            // ✅ mensagem/validação se usuário colocar data no passado
             if (data.isBefore(LocalDate.now())) {
-                setMsg("Não é permitido agendar no passado.");
+                setMsg("❌ Não é permitido agendar no passado.");
                 return;
             }
 
@@ -449,13 +433,17 @@ public class AgendaController {
     @FXML
     private void onDataAlterada() {
         LocalDate data = dpData.getValue();
-        if (data != null && data.isBefore(LocalDate.now())) {
-            setMsg("Data no passado não é permitida.");
+        if (data == null) return;
+
+        // ✅ mensagem ao selecionar data no passado (sem “sumir” durante digitação)
+        if (data.isBefore(LocalDate.now())) {
+            setMsg("❌ Não é permitido selecionar data no passado.");
             dpData.setValue(null);
             dpData.getEditor().clear();
             tbAgenda.getItems().clear();
             return;
         }
+
         carregarAgendaDoDia();
     }
 
@@ -467,6 +455,13 @@ public class AgendaController {
         if (data == null) {
             tbAgenda.getItems().clear();
             setMsg("Selecione uma data para visualizar a agenda.");
+            return;
+        }
+
+        // segurança extra
+        if (data.isBefore(LocalDate.now())) {
+            setMsg("❌ Não é permitido selecionar data no passado.");
+            tbAgenda.getItems().clear();
             return;
         }
 
@@ -532,7 +527,6 @@ public class AgendaController {
 
     private boolean horarioPermitido(LocalTime ini, LocalTime fim) {
         if (ini.isBefore(HORA_ABERTURA) || fim.isAfter(HORA_FECHAMENTO)) return false;
-
         boolean sobrepoeAlmoco = !(fim.isBefore(ALMOCO_INICIO) || ini.isAfter(ALMOCO_FIM));
         return !sobrepoeAlmoco;
     }
