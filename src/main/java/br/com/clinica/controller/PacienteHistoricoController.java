@@ -10,7 +10,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TitledPane;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -40,7 +46,9 @@ public class PacienteHistoricoController {
     @FXML private TableColumn<Anamnese, String> colAnaTipo;
 
     @FXML private TextArea txtObservacoes;
+    @FXML private TextArea txtResumo;
     @FXML private TextArea txtJson;
+    @FXML private TitledPane tpJson;
 
     @FXML private Button btnAtualizarAnamnese;
 
@@ -95,7 +103,9 @@ public class PacienteHistoricoController {
         }
 
         if (txtObservacoes != null) txtObservacoes.setEditable(false);
+        if (txtResumo != null) txtResumo.setEditable(false);
         if (txtJson != null) txtJson.setEditable(false);
+        if (tpJson != null) tpJson.setExpanded(false);
     }
 
     public void setPaciente(Paciente paciente) {
@@ -188,19 +198,144 @@ public class PacienteHistoricoController {
             return;
         }
 
+        String obs = safe(a.getObservacoes());
+        String rawJson = safe(a.getDadosJson());
+
         if (txtObservacoes != null) {
-            txtObservacoes.setText(safe(a.getObservacoes()));
+            txtObservacoes.setText(obs);
+        }
+
+        if (txtResumo != null) {
+            txtResumo.setText(montarResumoBonito(a, rawJson, obs));
         }
 
         if (txtJson != null) {
-            String raw = safe(a.getDadosJson());
-            txtJson.setText(prettyJson(raw));
+            txtJson.setText(prettyJson(rawJson));
         }
+
+        // JSON recolhido por padrão
+        if (tpJson != null) tpJson.setExpanded(false);
     }
 
     private void limparDetalheAnamnese() {
         if (txtObservacoes != null) txtObservacoes.clear();
+        if (txtResumo != null) txtResumo.clear();
         if (txtJson != null) txtJson.clear();
+        if (tpJson != null) tpJson.setExpanded(false);
+    }
+
+    private String montarResumoBonito(Anamnese a, String rawJson, String obs) {
+        String tipo = formatTipo(safe(a.getTipo()));
+        String dataHora = safe(a.getDataHora());
+
+        String queixa = getJsonField(rawJson, "queixa");
+        String evolucao = getJsonField(rawJson, "evolucao");
+
+        String pa = getJsonField(rawJson, "pa");
+        String fc = getJsonField(rawJson, "fc");
+        String fr = getJsonField(rawJson, "fr");
+        String temp = getJsonField(rawJson, "temp");
+        String peso = getJsonField(rawJson, "peso");
+        String altura = getJsonField(rawJson, "altura");
+        String spo2 = getJsonField(rawJson, "spo2");
+
+        String antecedentes = getJsonField(rawJson, "antecedentes");
+        String medicacoes = getJsonField(rawJson, "medicacoes");
+        String alergias = getJsonField(rawJson, "alergias");
+        String cirurgias = getJsonField(rawJson, "cirurgias");
+
+        String tabagismo = getJsonField(rawJson, "tabagismo");
+        String alcool = getJsonField(rawJson, "alcool");
+        String sono = getJsonField(rawJson, "sono");
+        String atividade = getJsonField(rawJson, "atividade_fisica");
+        String alimentacao = getJsonField(rawJson, "alimentacao");
+
+        String exameGeral = getJsonField(rawJson, "exame_geral");
+        String exameSeg = getJsonField(rawJson, "exame_segmentar");
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(tipo);
+        if (!dataHora.isBlank()) sb.append(" — ").append(dataHora);
+        sb.append("\n\n");
+
+        if (!queixa.isBlank()) {
+            sb.append("Queixa principal\n");
+            sb.append(queixa).append("\n\n");
+        }
+        if (!evolucao.isBlank()) {
+            sb.append("Evolução\n");
+            sb.append(evolucao).append("\n\n");
+        }
+
+        String sinais = montarLinhaSinaisVitais(pa, fc, fr, temp, peso, altura, spo2);
+        if (!sinais.isBlank()) {
+            sb.append("Sinais vitais\n");
+            sb.append(sinais).append("\n\n");
+        }
+
+        boolean temHist = !antecedentes.isBlank() || !medicacoes.isBlank() || !alergias.isBlank() || !cirurgias.isBlank();
+        if (temHist) {
+            sb.append("Histórico clínico\n");
+            if (!antecedentes.isBlank()) sb.append("• Antecedentes: ").append(antecedentes).append("\n");
+            if (!medicacoes.isBlank()) sb.append("• Medicações: ").append(medicacoes).append("\n");
+            if (!alergias.isBlank()) sb.append("• Alergias: ").append(alergias).append("\n");
+            if (!cirurgias.isBlank()) sb.append("• Cirurgias: ").append(cirurgias).append("\n");
+            sb.append("\n");
+        }
+
+        boolean temHab = !tabagismo.isBlank() || !alcool.isBlank() || !sono.isBlank() || !atividade.isBlank() || !alimentacao.isBlank();
+        if (temHab) {
+            sb.append("Hábitos\n");
+            if (!tabagismo.isBlank()) sb.append("• Tabagismo: ").append(tabagismo).append("\n");
+            if (!alcool.isBlank()) sb.append("• Álcool: ").append(alcool).append("\n");
+            if (!sono.isBlank()) sb.append("• Sono: ").append(sono).append("\n");
+            if (!atividade.isBlank()) sb.append("• Atividade física: ").append(atividade).append("\n");
+            if (!alimentacao.isBlank()) sb.append("• Alimentação: ").append(alimentacao).append("\n");
+            sb.append("\n");
+        }
+
+        boolean temEx = !exameGeral.isBlank() || !exameSeg.isBlank();
+        if (temEx) {
+            sb.append("Exame físico\n");
+            if (!exameGeral.isBlank()) sb.append("• Geral: ").append(exameGeral).append("\n");
+            if (!exameSeg.isBlank()) sb.append("• Segmentar: ").append(exameSeg).append("\n");
+            sb.append("\n");
+        }
+
+        if (!obs.isBlank()) {
+            sb.append("Observações\n");
+            sb.append(obs).append("\n");
+        }
+
+        String out = sb.toString().trim();
+        if (out.isBlank()) return "Sem detalhes para exibir neste registro.";
+        return out;
+    }
+
+    private String montarLinhaSinaisVitais(String pa, String fc, String fr, String temp, String peso, String altura, String spo2) {
+        StringBuilder s = new StringBuilder();
+        appendCampo(s, "PA", pa);
+        appendCampo(s, "FC", fc);
+        appendCampo(s, "FR", fr);
+        appendCampo(s, "Temp", temp, "°C");
+        appendCampo(s, "Peso", peso, "kg");
+        appendCampo(s, "Altura", altura, "m");
+        appendCampo(s, "SpO₂", spo2, "%");
+        return s.toString().trim();
+    }
+
+    private void appendCampo(StringBuilder sb, String label, String valor) {
+        appendCampo(sb, label, valor, "");
+    }
+
+    private void appendCampo(StringBuilder sb, String label, String valor, String sufixo) {
+        String v = safe(valor).trim();
+        if (v.isBlank()) return;
+
+        if (sb.length() > 0) sb.append("   ");
+        sb.append(label).append(": ").append(v);
+        if (sufixo != null && !sufixo.isBlank()) sb.append(" ").append(sufixo);
     }
 
     private String formatTipo(String tipo) {
@@ -228,6 +363,49 @@ public class PacienteHistoricoController {
     // ===============================
     private String safe(String s) {
         return s == null ? "" : s;
+    }
+
+    /**
+     * Extrai um campo de um JSON do tipo {"campo":"valor"} sem depender de libs.
+     * Se não encontrar, retorna "".
+     */
+    private String getJsonField(String json, String field) {
+        if (json == null || json.isBlank() || field == null || field.isBlank()) return "";
+        String t = json.trim();
+
+        String key = "\"" + field + "\":\"";
+        int i = t.indexOf(key);
+        if (i < 0) return "";
+
+        int start = i + key.length();
+        int end = start;
+        boolean escape = false;
+
+        while (end < t.length()) {
+            char c = t.charAt(end);
+            if (escape) {
+                escape = false;
+                end++;
+                continue;
+            }
+            if (c == '\\') {
+                escape = true;
+                end++;
+                continue;
+            }
+            if (c == '"') break;
+            end++;
+        }
+
+        if (end <= start || end >= t.length()) return "";
+
+        String raw = t.substring(start, end);
+        return raw.replace("\\n", "\n")
+                .replace("\\t", "\t")
+                .replace("\\r", "\r")
+                .replace("\\\"", "\"")
+                .replace("\\\\", "\\")
+                .trim();
     }
 
     /**

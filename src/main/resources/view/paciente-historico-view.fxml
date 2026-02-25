@@ -111,10 +111,16 @@
                     <center>
                         <VBox spacing="10">
                             <Label text="Observações" style="-fx-font-weight: bold;"/>
-                            <TextArea fx:id="txtObservacoes" prefRowCount="6" wrapText="true"/>
+                            <TextArea fx:id="txtObservacoes" prefRowCount="4" wrapText="true" editable="false"/>
 
-                            <Label text="Dados (JSON)" style="-fx-font-weight: bold;"/>
-                            <TextArea fx:id="txtJson" prefRowCount="12" wrapText="false"/>
+                            <Label text="Resumo do registro" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="txtResumo" prefRowCount="14" wrapText="true" editable="false"/>
+
+                            <TitledPane fx:id="tpJson" text="Dados técnicos (JSON)" expanded="false">
+                                <content>
+                                    <TextArea fx:id="txtJson" prefRowCount="10" wrapText="false" editable="false"/>
+                                </content>
+                            </TitledPane>
                         </VBox>
                     </center>
                 </BorderPane>
