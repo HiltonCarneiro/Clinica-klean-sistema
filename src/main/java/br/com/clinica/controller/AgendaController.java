@@ -11,6 +11,7 @@ import br.com.clinica.model.Usuario;
 import br.com.clinica.model.enums.SalaAtendimento;
 import br.com.clinica.model.enums.StatusAgendamento;
 import br.com.clinica.session.Session;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -66,11 +67,17 @@ public class AgendaController {
 
     private final ContextMenu menuSugestoes = new ContextMenu();
 
+    // Guarda o último valor válido para ajudar a evitar “sumir” o texto ao digitar
+    private LocalDate ultimaDataValida = null;
+
     @FXML
     public void initialize() {
         // ✅ Data não deve vir preenchida com hoje
         dpData.setValue(null);
         dpData.getEditor().clear();
+
+        // garante que o usuário possa digitar no campo
+        dpData.setEditable(true);
 
         // ✅ Máscara ao digitar + bloqueio no calendário (sem “sumir” ao perder foco)
         configurarDatePickerData();
@@ -156,36 +163,100 @@ public class AgendaController {
             }
         });
 
+        // Evita que o DatePicker “apague” o texto do editor quando value = null
+        // (comum em alguns skins quando o usuário digita e sai do campo)
+        dpData.valueProperty().addListener((obs, old, val) -> {
+            if (val != null) {
+                ultimaDataValida = val;
+                if (!dpData.getEditor().isFocused()) {
+                    dpData.getEditor().setText(dpData.getConverter().toString(val));
+                }
+            }
+        });
+
         // Máscara ao digitar: 01022026 -> 01/02/2026 (não apaga ao sair)
         dpData.getEditor().setTextFormatter(new TextFormatter<String>(change -> {
-            String newText = change.getControlNewText();
-            if (newText == null || newText.isEmpty()) return change;
+            if (!change.isContentChange()) return change;
 
+            String newText = change.getControlNewText();
+            if (newText == null) return change;
+
+            // pega só números
             String digits = newText.replaceAll("\\D", "");
             if (digits.length() > 8) digits = digits.substring(0, 8);
 
+            // se apagou tudo, deixa vazio (sem barras)
+            if (digits.isEmpty()) {
+                change.setText("");
+                change.setRange(0, change.getControlText().length());
+                change.selectRange(0, 0);
+                return change;
+            }
+
+            // monta dd/MM/yyyy conforme vai digitando
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < digits.length(); i++) {
                 sb.append(digits.charAt(i));
-                if (i == 1 || i == 3) sb.append('/');
+                if (i == 1 && digits.length() > 2) sb.append('/');
+                if (i == 3 && digits.length() > 4) sb.append('/');
             }
-
             String formatted = sb.toString();
+
+            // tenta preservar o "sentido" do cursor
+            int oldCaret = dpData.getEditor().getCaretPosition();
+            int oldLen = change.getControlText() == null ? 0 : change.getControlText().length();
+
             change.setText(formatted);
-            change.setRange(0, change.getControlText().length());
-            change.selectRange(formatted.length(), formatted.length());
+            change.setRange(0, oldLen);
+
+            int newCaret = Math.min(formatted.length(), oldCaret);
+            change.selectRange(newCaret, newCaret);
+
             return change;
         }));
 
-        // Ao perder foco: se for válido, normaliza o formato. Se inválido, NÃO APAGA (usuário corrige).
+        // Ao perder foco: valida, normaliza e impede passado.
+        // Se inválido, NÃO APAGA (usuário corrige) e mostra mensagem.
         dpData.getEditor().focusedProperty().addListener((obs, old, focused) -> {
             if (focused) return;
 
-            LocalDate parsed = dpData.getConverter().fromString(dpData.getEditor().getText());
-            if (parsed != null) {
-                dpData.setValue(parsed);
-                dpData.getEditor().setText(dpData.getConverter().toString(parsed));
+            String texto = dpData.getEditor().getText() == null ? "" : dpData.getEditor().getText().trim();
+
+            // se está vazio, tudo bem
+            if (texto.isEmpty()) {
+                dpData.setValue(null);
+                return;
             }
+
+            // se ainda não completou dd/MM/aaaa, não força parse nem limpa
+            // (evita o “sumiu” quando o usuário sai com data incompleta)
+            String digits = texto.replaceAll("\\D", "");
+            if (digits.length() < 8) {
+                setMsg("Digite a data completa (dd/MM/aaaa). ");
+                return;
+            }
+
+            LocalDate parsed = dpData.getConverter().fromString(texto);
+            if (parsed == null) {
+                setMsg("Data inválida. Use o formato dd/MM/aaaa.");
+                // mantém o texto para o usuário corrigir
+                dpData.setValue(null);
+                return;
+            }
+
+            if (parsed.isBefore(LocalDate.now())) {
+                setMsg("❌ Não é permitido selecionar data no passado.");
+                dpData.setValue(null);
+                // mantém o texto e volta o foco pro campo para corrigir
+                Platform.runLater(() -> dpData.getEditor().requestFocus());
+                tbAgenda.getItems().clear();
+                return;
+            }
+
+            // válido: normaliza e carrega a agenda
+            dpData.setValue(parsed);
+            dpData.getEditor().setText(dpData.getConverter().toString(parsed));
+            carregarAgendaDoDia();
         });
     }
 

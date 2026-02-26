@@ -20,9 +20,12 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.io.File;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 
 public class CaixaController {
@@ -84,10 +87,90 @@ public class CaixaController {
         configurarTabela();
         configurarTipoItem();
 
+        configurarMascarasCamposNumericos();
+
         // Autocomplete/pesquisa
         configurarPesquisaCombos();
 
         atualizarTotal();
+    }
+
+    // =========================
+    // Máscaras: Quantidade (inteiro) e Valor (moeda)
+    // =========================
+    private static final Locale LOCALE_PT_BR = Locale.forLanguageTag("pt-BR");
+    private static final DecimalFormatSymbols DFS_BR = new DecimalFormatSymbols(LOCALE_PT_BR);
+    private static final DecimalFormat DF_MOEDA = new DecimalFormat("#,##0.00", DFS_BR);
+
+    private void configurarMascarasCamposNumericos() {
+        if (txtQuantidade != null) {
+            // Apenas números inteiros (sem letras)
+            txtQuantidade.setTextFormatter(new TextFormatter<String>(change -> {
+                if (!change.isContentChange()) return change;
+                String novo = change.getControlNewText();
+                if (novo == null || novo.isEmpty()) return change; // permite limpar
+                if (novo.matches("\\d+")) return change;
+                return null;
+            }));
+        }
+
+        if (txtValorUnitario != null) {
+            // Máscara de moeda: digita "1234" => "12,34"
+            txtValorUnitario.setTextFormatter(new TextFormatter<String>(change -> {
+                if (!change.isContentChange()) return change;
+
+                String newText = change.getControlNewText();
+                if (newText == null) return change;
+
+                String digits = newText.replaceAll("\\D", "");
+
+                // permite limpar totalmente
+                if (digits.isEmpty()) {
+                    change.setText("");
+                    change.setRange(0, change.getControlText().length());
+                    change.selectRange(0, 0);
+                    return change;
+                }
+
+                // evita números gigantes
+                if (digits.length() > 15) digits = digits.substring(0, 15);
+
+                long cents = Long.parseLong(digits);
+                double valor = cents / 100.0;
+                String formatted = DF_MOEDA.format(valor);
+
+                int oldLen = change.getControlText() == null ? 0 : change.getControlText().length();
+                change.setText(formatted);
+                change.setRange(0, oldLen);
+                change.selectRange(formatted.length(), formatted.length());
+                return change;
+            }));
+        }
+    }
+
+    private void setValorUnitarioMonetario(Double valor) {
+        if (txtValorUnitario == null) return;
+        if (valor == null) {
+            txtValorUnitario.clear();
+            return;
+        }
+        txtValorUnitario.setText(DF_MOEDA.format(valor));
+    }
+
+    private double parseMoedaBR(String texto) {
+        if (texto == null) throw new NumberFormatException("Valor vazio.");
+        String s = texto.trim();
+        if (s.isEmpty()) throw new NumberFormatException("Valor vazio.");
+
+        // remove símbolo e espaços; mantém dígitos e separadores
+        s = s.replaceAll("[^0-9,\\.]", "");
+        if (s.isEmpty()) throw new NumberFormatException("Valor vazio.");
+
+        // remove separador de milhar e normaliza decimal
+        s = s.replace(".", "");
+        s = s.replace(",", ".");
+
+        return Double.parseDouble(s);
     }
 
     private void configurarToggleGroup() {
@@ -107,7 +190,7 @@ public class CaixaController {
 
         // Formas de pagamento
         cbFormaPagamento.setItems(FXCollections.observableArrayList(
-                "DINHEIRO", "PIX", "CARTAO", "DEBITO"
+                "DINHEIRO", "PIX", "CREDITO", "DEBITO"
         ));
         if (!cbFormaPagamento.getItems().isEmpty()) {
             cbFormaPagamento.getSelectionModel().selectFirst();
@@ -150,7 +233,7 @@ public class CaixaController {
 
         cbProduto.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
             if (novo != null && novo.getPrecoVenda() != null) {
-                txtValorUnitario.setText(String.valueOf(novo.getPrecoVenda()));
+                setValorUnitarioMonetario(novo.getPrecoVenda());
             }
         });
     }
@@ -374,14 +457,21 @@ public class CaixaController {
     private double lerQuantidade() {
         String textoQtd = txtQuantidade.getText();
         if (textoQtd == null || textoQtd.isBlank()) return 1.0;
-        return Double.parseDouble(textoQtd.replace(",", "."));
+
+        // quantidade é inteira (sem letras)
+        String digits = textoQtd.replaceAll("\\D", "");
+        if (digits.isBlank()) return 1.0;
+
+        return Double.parseDouble(digits);
     }
 
     private double lerValorUnitario(Double valorSugestao) {
         String textoValor = txtValorUnitario.getText();
+
         if ((textoValor == null || textoValor.isBlank()) && valorSugestao != null) return valorSugestao;
         if (textoValor == null || textoValor.isBlank()) throw new NumberFormatException("Valor unitário vazio.");
-        return Double.parseDouble(textoValor.replace(",", "."));
+
+        return parseMoedaBR(textoValor);
     }
 
     @FXML

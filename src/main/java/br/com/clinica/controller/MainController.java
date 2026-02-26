@@ -312,7 +312,13 @@ public class MainController {
             Parent root = loader.load();
 
             Stage stage = (Stage) contentPane.getScene().getWindow();
-            stage.setScene(new Scene(root));
+
+            // ✅ ALTERAÇÃO MÍNIMA: recria a Scene e reaplica o MESMO CSS do app
+            Scene scene = new Scene(root);
+            var cssUrl = getClass().getResource("/styles/app.css");
+            if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
+
+            stage.setScene(scene);
             stage.centerOnScreen();
 
         } catch (IOException e) {
