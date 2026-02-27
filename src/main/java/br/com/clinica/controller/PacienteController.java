@@ -27,21 +27,17 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.function.Function;
 
 public class PacienteController {
 
     // ====== NAVEGAÇÃO ======
     @FXML private VBox boxEscolha;
-    @FXML private VBox boxBusca;
-    @FXML private VBox boxCadastro;
     @FXML private ScrollPane scrollCadastro;
+    @FXML private VBox boxBusca;
 
     // ====== BUSCA ======
-    @FXML private ComboBox<String> cbFiltro;
     @FXML private TextField txtBusca;
-    @FXML private Button btnBuscar;
-    @FXML private Button btnLimparBusca;
-
     @FXML private TableView<Paciente> tableBusca;
     @FXML private TableColumn<Paciente, String> colBuscaNome;
     @FXML private TableColumn<Paciente, String> colBuscaCpf;
@@ -51,7 +47,7 @@ public class PacienteController {
 
     @FXML private CheckBox chkMostrarInativosBusca;
 
-    // ✅ botões da busca
+    // ✅ NOVO: botões da busca
     @FXML private Button btnEditarSelecionado;
     @FXML private Button btnHistoricoSelecionado;
 
@@ -79,9 +75,11 @@ public class PacienteController {
 
     private final PacienteDAO pacienteDAO = new PacienteDAO();
     private final ObservableList<Paciente> pacientes = FXCollections.observableArrayList();
+    private Paciente pacienteSelecionado;
 
-    private Paciente pacienteSelecionado = null;
 
+    // ✅ Se entrou no cadastro vindo da busca (Editar), o Voltar deve retornar para a busca
+    private boolean voltarParaBusca = false;
     private final DateTimeFormatter fmtBr = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private boolean updatingDateEditor = false;
 
@@ -96,6 +94,7 @@ public class PacienteController {
         setMensagem("");
         setBotoesAtivo(null);
 
+        // ✅ começa desabilitado até selecionar paciente
         if (btnEditarSelecionado != null) btnEditarSelecionado.setDisable(true);
         if (btnHistoricoSelecionado != null) btnHistoricoSelecionado.setDisable(true);
     }
@@ -106,6 +105,13 @@ public class PacienteController {
 
     @FXML
     private void voltarEscolha() {
+        // ✅ Se veio da busca e entrou no cadastro para editar, ao voltar retorna para a busca
+        if (scrollCadastro != null && scrollCadastro.isVisible() && voltarParaBusca) {
+            voltarParaBusca = false;
+            irParaBusca();
+            return;
+        }
+
         showTelaEscolha();
         setMensagem("");
         clearSelectionBusca();
@@ -113,6 +119,11 @@ public class PacienteController {
 
     @FXML
     private void irParaCadastro() {
+        // ✅ Se não estiver editando (novo cadastro), não deve voltar para a busca
+        if (pacienteSelecionado == null) {
+            voltarParaBusca = false;
+        }
+
         show(boxEscolha, false);
         show(boxBusca, false);
         show(scrollCadastro, true);
@@ -142,49 +153,9 @@ public class PacienteController {
     // BUSCA
     // =========================================================
 
-    private void setupTabelaBusca() {
-        if (tableBusca == null) return;
-
-        tableBusca.setItems(pacientes);
-
-        if (colBuscaNome != null) colBuscaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        if (colBuscaCpf != null) colBuscaCpf.setCellValueFactory(new PropertyValueFactory<>("cpf"));
-
-        if (colBuscaTelefone != null) {
-            colBuscaTelefone.setCellValueFactory(c -> new SimpleStringProperty(safe(c.getValue().getTelefone())));
-        }
-
-        if (colBuscaDataNascimento != null) {
-            colBuscaDataNascimento.setCellValueFactory(c -> new SimpleStringProperty(
-                    c.getValue().getDataNascimento() == null ? "" : c.getValue().getDataNascimento().format(fmtBr)
-            ));
-        }
-
-        if (colBuscaAtivo != null) {
-            colBuscaAtivo.setCellValueFactory(c -> new SimpleStringProperty(
-                    c.getValue().isAtivo() ? "SIM" : "NÃO"
-            ));
-        }
-
-        tableBusca.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            pacienteSelecionado = sel;
-            boolean tem = sel != null;
-
-            if (btnEditarSelecionado != null) btnEditarSelecionado.setDisable(!tem);
-            if (btnHistoricoSelecionado != null) btnHistoricoSelecionado.setDisable(!tem);
-
-            setBotoesAtivo(sel);
-        });
-
-        if (cbFiltro != null) {
-            cbFiltro.setItems(FXCollections.observableArrayList("Nome", "CPF", "Telefone"));
-            cbFiltro.getSelectionModel().selectFirst();
-        }
-    }
-
     @FXML
     private void onBuscarPaciente() {
-        String query = txtBusca != null && txtBusca.getText() != null ? txtBusca.getText().trim() : "";
+        String query = txtBusca != null ? txtBusca.getText().trim() : "";
         boolean incluirInativos = chkMostrarInativosBusca != null && chkMostrarInativosBusca.isSelected();
 
         List<Paciente> lista = pacienteDAO.listarTodos(incluirInativos);
@@ -209,24 +180,246 @@ public class PacienteController {
     @FXML
     private void onLimparBusca() {
         if (txtBusca != null) txtBusca.clear();
+        if (chkMostrarInativosBusca != null) chkMostrarInativosBusca.setSelected(false);
+        onBuscarPaciente();
+    }
+
+    private void setupTabelaBusca() {
+        if (tableBusca == null) return;
+
+        if (colBuscaNome != null) colBuscaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
+        if (colBuscaCpf != null) colBuscaCpf.setCellValueFactory(c ->
+                new SimpleStringProperty(ValidationUtils.formatCpf(safe(c.getValue().getCpf())))
+        );
+        if (colBuscaTelefone != null) colBuscaTelefone.setCellValueFactory(c ->
+                new SimpleStringProperty(ValidationUtils.formatPhoneBr(safe(c.getValue().getTelefone())))
+        );
+        if (colBuscaDataNascimento != null) colBuscaDataNascimento.setCellValueFactory(c -> {
+            LocalDate dt = c.getValue().getDataNascimento();
+            return new SimpleStringProperty(dt == null ? "" : dt.format(fmtBr));
+        });
+        if (colBuscaAtivo != null) colBuscaAtivo.setCellValueFactory(c ->
+                new SimpleStringProperty(c.getValue().isAtivo() ? "Sim" : "Não")
+        );
+
+        tableBusca.setItems(pacientes);
+
+        // ✅ Seleção apenas seleciona (não navega)
+        tableBusca.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            pacienteSelecionado = newSel;
+
+            boolean tem = newSel != null;
+            if (btnEditarSelecionado != null) btnEditarSelecionado.setDisable(!tem);
+            if (btnHistoricoSelecionado != null) btnHistoricoSelecionado.setDisable(!tem);
+        });
+    }
+
+    private void clearSelectionBusca() {
+        if (tableBusca != null) tableBusca.getSelectionModel().clearSelection();
+        pacienteSelecionado = null;
+
+        if (btnEditarSelecionado != null) btnEditarSelecionado.setDisable(true);
+        if (btnHistoricoSelecionado != null) btnHistoricoSelecionado.setDisable(true);
+    }
+
+    // =========================================================
+    // ✅ AÇÕES NOVAS: EDITAR / HISTÓRICO
+    // =========================================================
+
+    @FXML
+    private void onEditarSelecionado() {
+        Paciente p = (tableBusca == null) ? null : tableBusca.getSelectionModel().getSelectedItem();
+        if (p == null) {
+            new Alert(Alert.AlertType.WARNING, "Selecione um paciente para editar.").showAndWait();
+            return;
+        }
+        pacienteSelecionado = p;
+        voltarParaBusca = true;
+
+        irParaCadastro();
+        fillForm(p);
+        setBotoesAtivo(p);
+    }
+
+    @FXML
+    private void onVerHistoricoSelecionado() {
+        Paciente p = (tableBusca == null) ? null : tableBusca.getSelectionModel().getSelectedItem();
+        if (p == null) {
+            new Alert(Alert.AlertType.WARNING, "Selecione um paciente para ver o histórico.").showAndWait();
+            return;
+        }
+        abrirHistoricoPaciente(p);
+    }
+
+    // =========================================================
+    // CADASTRO / EDIÇÃO (mantido)
+    // =========================================================
+
+    @FXML
+    private void onNovo() {
+        pacienteSelecionado = null;
+        voltarParaBusca = false;
+        clearForm();
+        setBotoesAtivo(null);
+        setMensagem("");
+    }
+
+    @FXML
+    private void onSalvar() {
+        setMensagem("");
+
+        String nome = safe(txtNome.getText()).trim();
+        String cpf = digits(safe(txtCpf.getText()));
+        LocalDate dataNascimento = dpDataNascimento != null ? dpDataNascimento.getValue() : null;
+        String telefone = digits(safe(txtTelefone.getText()));
+
+        String rua = safe(txtRua.getText()).trim();
+        String numero = safe(txtNumero.getText()).trim();
+        boolean semNumero = chkSemNumero != null && chkSemNumero.isSelected();
+
+        String bairro = safe(txtBairro.getText()).trim();
+        String cidade = safe(txtCidade.getText()).trim();
+        String cep = digits(safe(txtCep.getText()));
+        String uf = safe(txtUf.getText()).trim().toUpperCase();
+        String responsavel = safe(txtResponsavelLegal.getText()).trim();
+
+        if (nome.isBlank()) { setMensagem("Nome é obrigatório."); return; }
+        if (!ValidationUtils.isValidCpf(cpf)) { setMensagem("CPF inválido."); return; }
+        if (dataNascimento == null) { setMensagem("Data de nascimento é obrigatória."); return; }
+        if (telefone.length() < 10) { setMensagem("Telefone inválido. Informe DDD + número."); return; }
+        if (rua.isBlank() || cidade.isBlank()) { setMensagem("Endereço incompleto. Informe pelo menos Rua e Cidade."); return; }
+        if (!semNumero && numero.isBlank()) { setMensagem("Informe o número do endereço ou marque 'Sem número'."); return; }
+        if (semNumero) numero = "S/N";
+        if (!cep.isBlank() && !ValidationUtils.isValidCep(cep)) { setMensagem("CEP inválido. Informe 8 dígitos."); return; }
+        if (!uf.isBlank() && uf.length() != 2) { setMensagem("UF inválida. Use 2 letras (ex: CE, SP)."); return; }
+
+        int idade = Period.between(dataNascimento, LocalDate.now()).getYears();
+        if (idade < 18 && responsavel.isBlank()) { setMensagem("Responsável legal é obrigatório para menores de 18 anos."); return; }
+
+        try {
+            if (pacienteSelecionado == null) {
+                Paciente p = new Paciente();
+                applyFormToPaciente(p, nome, cpf, dataNascimento, telefone, rua, numero, bairro, cidade, cep, uf, responsavel);
+                p.setAtivo(true);
+                pacienteDAO.salvar(p);
+                pacienteSelecionado = p;
+                setMensagem("Paciente salvo com sucesso.");
+            } else {
+                applyFormToPaciente(pacienteSelecionado, nome, cpf, dataNascimento, telefone, rua, numero, bairro, cidade, cep, uf, responsavel);
+                pacienteDAO.atualizar(pacienteSelecionado);
+                setMensagem("Paciente atualizado com sucesso.");
+            }
+
+            setBotoesAtivo(pacienteSelecionado);
+            onAtualizarLista();
+            onBuscarPaciente();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            setMensagem("Erro ao salvar paciente.");
+        }
+    }
+
+    @FXML
+    private void onInativar() {
+        if (pacienteSelecionado == null || pacienteSelecionado.getId() == null) { setMensagem("Selecione um paciente para inativar."); return; }
+        pacienteDAO.inativar(pacienteSelecionado.getId());
+        pacienteSelecionado.setAtivo(false);
+        setBotoesAtivo(pacienteSelecionado);
+        setMensagem("Paciente inativado com sucesso.");
+        onAtualizarLista();
+        onBuscarPaciente();
+    }
+
+    @FXML
+    private void onAtivar() {
+        if (pacienteSelecionado == null || pacienteSelecionado.getId() == null) { setMensagem("Selecione um paciente para ativar."); return; }
+        pacienteDAO.ativar(pacienteSelecionado.getId());
+        pacienteSelecionado.setAtivo(true);
+        setBotoesAtivo(pacienteSelecionado);
+        setMensagem("Paciente ativado com sucesso.");
+        onAtualizarLista();
         onBuscarPaciente();
     }
 
     @FXML
     private void onAtualizarLista() {
-        onBuscarPaciente();
+        boolean incluir = chkMostrarInativos != null && chkMostrarInativos.isSelected();
+        pacientes.setAll(pacienteDAO.listarTodos(incluir));
     }
 
-    private void clearSelectionBusca() {
-        pacienteSelecionado = null;
-        if (tableBusca != null) tableBusca.getSelectionModel().clearSelection();
-        if (btnEditarSelecionado != null) btnEditarSelecionado.setDisable(true);
-        if (btnHistoricoSelecionado != null) btnHistoricoSelecionado.setDisable(true);
-        setBotoesAtivo(null);
+    private void applyFormToPaciente(Paciente p,
+                                     String nome, String cpf, LocalDate dataNascimento, String telefone,
+                                     String rua, String numero, String bairro, String cidade,
+                                     String cep, String uf, String responsavelLegal) {
+        p.setNome(nome);
+        p.setCpf(cpf);
+        p.setDataNascimento(dataNascimento);
+        p.setTelefone(telefone);
+
+        p.setRua(rua);
+        p.setNumero(numero);
+        p.setBairro(bairro);
+        p.setCidade(cidade);
+        p.setCep(cep);
+        p.setUf(uf);
+
+        p.setResponsavelLegal(responsavelLegal);
+
+        String enderecoCompleto = rua + ", " + numero + " - " + bairro + " - " + cidade;
+        if (!cep.isBlank()) enderecoCompleto += " - CEP: " + ValidationUtils.formatCep(cep);
+        if (!uf.isBlank()) enderecoCompleto += "/" + uf;
+        p.setEndereco(enderecoCompleto);
+    }
+
+    private void fillForm(Paciente p) {
+        if (p == null) return;
+
+        if (txtNome != null) txtNome.setText(safe(p.getNome()));
+        if (txtCpf != null) txtCpf.setText(ValidationUtils.formatCpf(safe(p.getCpf())));
+        if (dpDataNascimento != null) dpDataNascimento.setValue(p.getDataNascimento());
+        if (txtTelefone != null) txtTelefone.setText(ValidationUtils.formatPhoneBr(safe(p.getTelefone())));
+
+        if (txtRua != null) txtRua.setText(safe(p.getRua()));
+        if (txtNumero != null) txtNumero.setText(safe(p.getNumero()));
+        if (txtBairro != null) txtBairro.setText(safe(p.getBairro()));
+        if (txtCidade != null) txtCidade.setText(safe(p.getCidade()));
+        if (txtCep != null) txtCep.setText(ValidationUtils.formatCep(safe(p.getCep())));
+        if (txtUf != null) txtUf.setText(safe(p.getUf()));
+        if (txtResponsavelLegal != null) txtResponsavelLegal.setText(safe(p.getResponsavelLegal()));
+
+        if (chkSemNumero != null) chkSemNumero.setSelected("S/N".equalsIgnoreCase(safe(p.getNumero())));
+
+        setMensagem("");
+    }
+
+    private void clearForm() {
+        if (txtNome != null) txtNome.clear();
+        if (txtCpf != null) txtCpf.clear();
+        if (dpDataNascimento != null) dpDataNascimento.setValue(null);
+        if (txtTelefone != null) txtTelefone.clear();
+
+        if (txtRua != null) txtRua.clear();
+        if (txtNumero != null) txtNumero.clear();
+        if (chkSemNumero != null) chkSemNumero.setSelected(false);
+
+        if (txtBairro != null) txtBairro.clear();
+        if (txtCidade != null) txtCidade.clear();
+        if (txtCep != null) txtCep.clear();
+        if (txtUf != null) txtUf.clear();
+        if (txtResponsavelLegal != null) txtResponsavelLegal.clear();
+    }
+
+    private void setBotoesAtivo(Paciente p) {
+        boolean temPaciente = p != null && p.getId() != null;
+        boolean ativo = temPaciente && p.isAtivo();
+
+        if (btnInativar != null) btnInativar.setDisable(!temPaciente || !ativo);
+        if (btnAtivar != null) btnAtivar.setDisable(!temPaciente || ativo);
     }
 
     // =========================================================
-    // MÁSCARAS / REGRAS
+    // MÁSCARAS / CEP / DATAPICKER
     // =========================================================
 
     private void setupMasksAndRules() {
@@ -248,48 +441,16 @@ public class PacienteController {
         }
 
         if (txtTelefone != null) {
-            // ✅ ALTERAÇÃO NECESSÁRIA: máscara sem travar ao apagar "(", ")" e "-"
-            txtTelefone.setTextFormatter(new TextFormatter<String>(change -> {
-                if (!change.isContentChange()) return change;
-
-                String oldText = change.getControlText() == null ? "" : change.getControlText();
-                String newText = change.getControlNewText() == null ? "" : change.getControlNewText();
-
-                String oldDigits = digits(oldText);
-                String newDigits = digits(newText);
-
-                // Limite: DDD + 9 dígitos
-                if (newDigits.length() > 11) return null;
-
-                boolean isDeletion = (change.getText() != null && change.getText().isEmpty());
-
-                // Se tentou apagar um caractere da máscara, os dígitos não mudam.
-                // Então removemos um dígito "real" para o usuário conseguir apagar.
-                if (isDeletion && oldDigits.equals(newDigits)) {
-                    int pos = change.getRangeStart(); // posição no texto antigo onde ocorreu a deleção
-
-                    // índice do dígito imediatamente antes de 'pos'
-                    int digitIndex = 0;
-                    for (int i = 0; i < Math.min(pos, oldText.length()); i++) {
-                        if (Character.isDigit(oldText.charAt(i))) digitIndex++;
-                    }
-                    int removeAt = Math.max(0, digitIndex - 1);
-
-                    if (!oldDigits.isEmpty() && removeAt < oldDigits.length()) {
-                        newDigits = oldDigits.substring(0, removeAt) + oldDigits.substring(removeAt + 1);
-                    }
+            txtTelefone.textProperty().addListener((obs, old, val) -> {
+                if (val == null) return;
+                String dig = digits(val);
+                if (dig.length() > 11) dig = dig.substring(0, 11);
+                String fmt = ValidationUtils.formatPhoneBr(dig);
+                if (!fmt.equals(val)) {
+                    txtTelefone.setText(fmt);
+                    txtTelefone.positionCaret(fmt.length());
                 }
-
-                String formatted = ValidationUtils.formatPhoneBr(newDigits);
-
-                int oldLen = oldText.length();
-                change.setText(formatted);
-                change.setRange(0, oldLen);
-
-                // cursor no fim (evita comportamento estranho)
-                change.selectRange(formatted.length(), formatted.length());
-                return change;
-            }));
+            });
         }
 
         if (txtCep != null) {
@@ -316,74 +477,31 @@ public class PacienteController {
     private void setupDatePickerMaskFix() {
         if (dpDataNascimento == null) return;
 
-        dpDataNascimento.setEditable(true);
-
         TextField editor = dpDataNascimento.getEditor();
         if (editor == null) return;
 
-        editor.setPromptText("dd/MM/aaaa");
-
-        // ✅ ALTERAÇÃO NECESSÁRIA: máscara dd/MM/aaaa + limite + apagar sem travar
-        editor.setTextFormatter(new TextFormatter<String>(change -> {
-            if (!change.isContentChange()) return change;
-
-            String oldText = change.getControlText() == null ? "" : change.getControlText();
-            String newText = change.getControlNewText() == null ? "" : change.getControlNewText();
-
-            String digits = newText.replaceAll("\\D", "");
-            if (digits.length() > 8) return null;
-
-            if (digits.isEmpty()) {
-                int oldLen = oldText.length();
-                change.setText("");
-                change.setRange(0, oldLen);
-                change.selectRange(0, 0);
-                return change;
+        editor.textProperty().addListener((obs, oldText, newText) -> {
+            if (updatingDateEditor) return;
+            updatingDateEditor = true;
+            try {
+                String cleaned = newText.replaceAll("[^0-9/]", "");
+                editor.setText(cleaned);
+                editor.positionCaret(cleaned.length());
+            } finally {
+                updatingDateEditor = false;
             }
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < digits.length(); i++) {
-                sb.append(digits.charAt(i));
-                if (i == 1 && digits.length() > 2) sb.append('/');
-                if (i == 3 && digits.length() > 4) sb.append('/');
-            }
-
-            String formatted = sb.toString();
-            int oldLen = oldText.length();
-            change.setText(formatted);
-            change.setRange(0, oldLen);
-
-            change.selectRange(formatted.length(), formatted.length());
-            return change;
-        }));
+        });
 
         editor.focusedProperty().addListener((obs, was, is) -> {
             if (!is) {
-                String t = editor.getText() == null ? "" : editor.getText().trim();
-
+                String t = editor.getText().trim();
                 if (t.isBlank()) {
                     dpDataNascimento.setValue(null);
                     return;
                 }
-
-                String digits = t.replaceAll("\\D", "");
-                if (digits.length() < 8) {
-                    setMensagem("Data de nascimento incompleta. Use dd/MM/aaaa.");
-                    dpDataNascimento.setValue(null);
-                    return;
-                }
-
                 try {
                     LocalDate dt = LocalDate.parse(t, fmtBr);
-
-                    if (dt.isAfter(LocalDate.now())) {
-                        setMensagem("Data de nascimento não pode ser no futuro.");
-                        dpDataNascimento.setValue(null);
-                        return;
-                    }
-
                     dpDataNascimento.setValue(dt);
-                    editor.setText(dt.format(fmtBr));
                 } catch (DateTimeParseException e) {
                     setMensagem("Data de nascimento inválida.");
                     dpDataNascimento.setValue(null);
@@ -404,171 +522,39 @@ public class PacienteController {
 
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(HttpResponse::body)
-                    .thenAccept(this::preencherEnderecoViaCep)
+                    .thenAccept(json -> Platform.runLater(() -> preencherEnderecoViaCep(json)))
                     .exceptionally(ex -> {
-                        ex.printStackTrace();
                         Platform.runLater(() -> setMensagem("Não foi possível buscar o CEP."));
                         return null;
                     });
 
         } catch (Exception e) {
-            e.printStackTrace();
-            setMensagem("Erro ao buscar CEP.");
+            setMensagem("Não foi possível buscar o CEP.");
         }
     }
 
     private void preencherEnderecoViaCep(String json) {
-        // mantém seu comportamento original (não alterei)
-        Platform.runLater(() -> setMensagem(""));
-    }
+        Function<String, String> get = (key) -> {
+            String pattern = "\"" + key + "\":";
+            int idx = json.indexOf(pattern);
+            if (idx < 0) return "";
+            int start = json.indexOf("\"", idx + pattern.length()) + 1;
+            int end = json.indexOf("\"", start);
+            if (start <= 0 || end < 0) return "";
+            return json.substring(start, end);
+        };
 
-    // =========================================================
-    // AÇÕES CADASTRO
-    // =========================================================
+        String rua = get.apply("logradouro");
+        String bairro = get.apply("bairro");
+        String cidade = get.apply("localidade");
+        String uf = get.apply("uf");
 
-    @FXML
-    private void onNovo() {
-        limparFormulario();
-        pacienteSelecionado = null;
-        setBotoesAtivo(null);
+        if (txtRua != null && !rua.isBlank()) txtRua.setText(rua);
+        if (txtBairro != null && !bairro.isBlank()) txtBairro.setText(bairro);
+        if (txtCidade != null && !cidade.isBlank()) txtCidade.setText(cidade);
+        if (txtUf != null && !uf.isBlank()) txtUf.setText(uf);
+
         setMensagem("");
-        irParaCadastro();
-    }
-
-    @FXML
-    private void onEditarSelecionado() {
-        if (pacienteSelecionado == null) {
-            setMensagem("Selecione um paciente na lista.");
-            return;
-        }
-        preencherFormulario(pacienteSelecionado);
-        irParaCadastro();
-    }
-
-    @FXML
-    private void onSalvar() {
-        try {
-            Paciente p = (pacienteSelecionado != null) ? pacienteSelecionado : new Paciente();
-
-            p.setNome(safe(txtNome != null ? txtNome.getText() : "").trim());
-            p.setCpf(safe(txtCpf != null ? txtCpf.getText() : "").trim());
-            p.setTelefone(safe(txtTelefone != null ? txtTelefone.getText() : "").trim());
-            p.setDataNascimento(dpDataNascimento != null ? dpDataNascimento.getValue() : null);
-
-            p.setRua(safe(txtRua != null ? txtRua.getText() : "").trim());
-            p.setNumero(safe(txtNumero != null ? txtNumero.getText() : "").trim());
-            p.setBairro(safe(txtBairro != null ? txtBairro.getText() : "").trim());
-            p.setCidade(safe(txtCidade != null ? txtCidade.getText() : "").trim());
-            p.setCep(safe(txtCep != null ? txtCep.getText() : "").trim());
-            p.setUf(safe(txtUf != null ? txtUf.getText() : "").trim());
-            p.setResponsavelLegal(safe(txtResponsavelLegal != null ? txtResponsavelLegal.getText() : "").trim());
-
-            if (p.getNome() == null || p.getNome().isBlank()) {
-                setMensagem("Nome é obrigatório.");
-                return;
-            }
-
-            pacienteDAO.salvar(p);
-
-            setMensagem("Paciente salvo com sucesso.");
-            limparFormulario();
-            pacienteSelecionado = null;
-            setBotoesAtivo(null);
-            irParaBusca();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            setMensagem("Erro ao salvar: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void onInativar() {
-        if (pacienteSelecionado == null || pacienteSelecionado.getId() == null) {
-            setMensagem("Selecione um paciente.");
-            return;
-        }
-        pacienteDAO.inativar(pacienteSelecionado.getId());
-        setMensagem("Paciente inativado.");
-        onBuscarPaciente();
-    }
-
-    @FXML
-    private void onAtivar() {
-        if (pacienteSelecionado == null || pacienteSelecionado.getId() == null) {
-            setMensagem("Selecione um paciente.");
-            return;
-        }
-        pacienteDAO.ativar(pacienteSelecionado.getId());
-        setMensagem("Paciente ativado.");
-        onBuscarPaciente();
-    }
-
-    @FXML
-    private void onVerHistoricoSelecionado() {
-        if (pacienteSelecionado == null) {
-            setMensagem("Selecione um paciente.");
-            return;
-        }
-
-        // mantém seu comportamento original (não alterei)
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/historico-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Histórico do paciente");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            setMensagem("Erro ao abrir histórico.");
-        }
-    }
-
-    // =========================================================
-    // UTIL
-    // =========================================================
-
-    private void preencherFormulario(Paciente p) {
-        if (p == null) return;
-
-        if (txtNome != null) txtNome.setText(safe(p.getNome()));
-        if (txtCpf != null) txtCpf.setText(safe(p.getCpf()));
-        if (txtTelefone != null) txtTelefone.setText(safe(p.getTelefone()));
-        if (dpDataNascimento != null) dpDataNascimento.setValue(p.getDataNascimento());
-
-        if (txtRua != null) txtRua.setText(safe(p.getRua()));
-        if (txtNumero != null) txtNumero.setText(safe(p.getNumero()));
-        if (txtBairro != null) txtBairro.setText(safe(p.getBairro()));
-        if (txtCidade != null) txtCidade.setText(safe(p.getCidade()));
-        if (txtCep != null) txtCep.setText(safe(p.getCep()));
-        if (txtUf != null) txtUf.setText(safe(p.getUf()));
-        if (txtResponsavelLegal != null) txtResponsavelLegal.setText(safe(p.getResponsavelLegal()));
-    }
-
-    private void limparFormulario() {
-        if (txtNome != null) txtNome.clear();
-        if (txtCpf != null) txtCpf.clear();
-        if (txtTelefone != null) txtTelefone.clear();
-
-        if (dpDataNascimento != null) {
-            dpDataNascimento.setValue(null);
-            if (dpDataNascimento.getEditor() != null) dpDataNascimento.getEditor().clear();
-        }
-
-        if (txtRua != null) txtRua.clear();
-        if (txtNumero != null) txtNumero.clear();
-        if (txtBairro != null) txtBairro.clear();
-        if (txtCidade != null) txtCidade.clear();
-        if (txtCep != null) txtCep.clear();
-        if (txtUf != null) txtUf.clear();
-        if (txtResponsavelLegal != null) txtResponsavelLegal.clear();
-    }
-
-    private void setBotoesAtivo(Paciente p) {
-        boolean temSelecionado = p != null && p.getId() != null;
-        if (btnInativar != null) btnInativar.setDisable(!temSelecionado || (p != null && !p.isAtivo()));
-        if (btnAtivar != null) btnAtivar.setDisable(!temSelecionado || (p != null && p.isAtivo()));
     }
 
     private void setMensagem(String msg) {
@@ -580,12 +566,32 @@ public class PacienteController {
     }
 
     private String digits(String s) {
-        if (s == null) return "";
-        return s.replaceAll("\\D", "");
+        return safe(s).replaceAll("\\D", "");
     }
 
-    private int idade(LocalDate nascimento) {
-        if (nascimento == null) return 0;
-        return Period.between(nascimento, LocalDate.now()).getYears();
+    // =========================================================
+    // HISTÓRICO
+    // =========================================================
+    private void abrirHistoricoPaciente(Paciente paciente) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/paciente-historico-view.fxml"));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller != null) {
+                try {
+                    controller.getClass().getMethod("setPaciente", Paciente.class).invoke(controller, paciente);
+                } catch (Exception ignored) { }
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Histórico do Paciente");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Erro ao abrir histórico do paciente.").showAndWait();
+        }
     }
 }
