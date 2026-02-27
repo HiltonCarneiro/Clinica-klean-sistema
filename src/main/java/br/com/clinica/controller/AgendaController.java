@@ -13,6 +13,7 @@ import br.com.clinica.model.enums.StatusAgendamento;
 import br.com.clinica.session.Session;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
@@ -21,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -67,33 +69,28 @@ public class AgendaController {
 
     private final ContextMenu menuSugestoes = new ContextMenu();
 
-    // Guarda o último valor válido para ajudar a evitar “sumir” o texto ao digitar
     private LocalDate ultimaDataValida = null;
 
     @FXML
     public void initialize() {
-        // ✅ Data não deve vir preenchida com hoje
         dpData.setValue(null);
         dpData.getEditor().clear();
-
-        // garante que o usuário possa digitar no campo
         dpData.setEditable(true);
-
-        // ✅ Máscara ao digitar + bloqueio no calendário (sem “sumir” ao perder foco)
         configurarDatePickerData();
 
         cbProfissional.setItems(FXCollections.observableArrayList(usuarioDAO.listarProfissionaisAtivos()));
+        configurarPesquisaProfissional();
+
         cbPaciente.setItems(FXCollections.observableArrayList(pacienteDAO.listarTodos()));
+        configurarPesquisaPaciente(); // ✅ NOVO: pesquisa no paciente
+
         cbSala.setItems(FXCollections.observableArrayList(SalaAtendimento.values()));
 
-        // máscara HH:mm
         txtHoraInicio.setTextFormatter(criarTextFormatterHora());
         txtHoraFim.setTextFormatter(criarTextFormatterHora());
 
-        // sugestão procedimento (mantém recurso do sistema)
         configurarSugestoesProcedimento();
 
-        // colunas
         colHora.setCellValueFactory(c ->
                 new javafx.beans.property.SimpleStringProperty(
                         (c.getValue().getHoraInicio() != null ? c.getValue().getHoraInicio().format(HORA_FORMATTER) : "") +
@@ -153,7 +150,6 @@ public class AgendaController {
             }
         });
 
-        // Bloqueia datas passadas no popup do calendário
         dpData.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate item, boolean empty) {
@@ -163,8 +159,6 @@ public class AgendaController {
             }
         });
 
-        // Evita que o DatePicker “apague” o texto do editor quando value = null
-        // (comum em alguns skins quando o usuário digita e sai do campo)
         dpData.valueProperty().addListener((obs, old, val) -> {
             if (val != null) {
                 ultimaDataValida = val;
@@ -174,62 +168,47 @@ public class AgendaController {
             }
         });
 
-        // Máscara ao digitar: 01022026 -> 01/02/2026 (não apaga ao sair)
         dpData.getEditor().setTextFormatter(new TextFormatter<String>(change -> {
             if (!change.isContentChange()) return change;
 
             String newText = change.getControlNewText();
             if (newText == null) return change;
 
-            // pega só números
-            String digits = newText.replaceAll("\\D", "");
-            if (digits.length() > 8) digits = digits.substring(0, 8);
+            String rawDigits = newText.replaceAll("\\D", "");
+            if (rawDigits.length() > 8) return null;
 
-            // se apagou tudo, deixa vazio (sem barras)
-            if (digits.isEmpty()) {
+            if (rawDigits.isEmpty()) {
                 change.setText("");
                 change.setRange(0, change.getControlText().length());
                 change.selectRange(0, 0);
                 return change;
             }
 
-            // monta dd/MM/yyyy conforme vai digitando
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < digits.length(); i++) {
-                sb.append(digits.charAt(i));
-                if (i == 1 && digits.length() > 2) sb.append('/');
-                if (i == 3 && digits.length() > 4) sb.append('/');
+            for (int i = 0; i < rawDigits.length(); i++) {
+                sb.append(rawDigits.charAt(i));
+                if (i == 1 && rawDigits.length() > 2) sb.append('/');
+                if (i == 3 && rawDigits.length() > 4) sb.append('/');
             }
             String formatted = sb.toString();
 
-            // tenta preservar o "sentido" do cursor
-            int oldCaret = dpData.getEditor().getCaretPosition();
             int oldLen = change.getControlText() == null ? 0 : change.getControlText().length();
-
             change.setText(formatted);
             change.setRange(0, oldLen);
-
-            int newCaret = Math.min(formatted.length(), oldCaret);
-            change.selectRange(newCaret, newCaret);
-
+            change.selectRange(formatted.length(), formatted.length());
             return change;
         }));
 
-        // Ao perder foco: valida, normaliza e impede passado.
-        // Se inválido, NÃO APAGA (usuário corrige) e mostra mensagem.
         dpData.getEditor().focusedProperty().addListener((obs, old, focused) -> {
             if (focused) return;
 
             String texto = dpData.getEditor().getText() == null ? "" : dpData.getEditor().getText().trim();
 
-            // se está vazio, tudo bem
             if (texto.isEmpty()) {
                 dpData.setValue(null);
                 return;
             }
 
-            // se ainda não completou dd/MM/aaaa, não força parse nem limpa
-            // (evita o “sumiu” quando o usuário sai com data incompleta)
             String digits = texto.replaceAll("\\D", "");
             if (digits.length() < 8) {
                 setMsg("Digite a data completa (dd/MM/aaaa). ");
@@ -239,7 +218,6 @@ public class AgendaController {
             LocalDate parsed = dpData.getConverter().fromString(texto);
             if (parsed == null) {
                 setMsg("Data inválida. Use o formato dd/MM/aaaa.");
-                // mantém o texto para o usuário corrigir
                 dpData.setValue(null);
                 return;
             }
@@ -247,17 +225,206 @@ public class AgendaController {
             if (parsed.isBefore(LocalDate.now())) {
                 setMsg("❌ Não é permitido selecionar data no passado.");
                 dpData.setValue(null);
-                // mantém o texto e volta o foco pro campo para corrigir
                 Platform.runLater(() -> dpData.getEditor().requestFocus());
                 tbAgenda.getItems().clear();
                 return;
             }
 
-            // válido: normaliza e carrega a agenda
             dpData.setValue(parsed);
             dpData.getEditor().setText(dpData.getConverter().toString(parsed));
             carregarAgendaDoDia();
         });
+    }
+
+    // =========================
+    // Pesquisa: Profissional e Paciente
+    // =========================
+    private void configurarPesquisaProfissional() {
+        if (cbProfissional == null) return;
+
+        cbProfissional.setEditable(true);
+
+        var orig = FXCollections.observableArrayList(cbProfissional.getItems());
+        FilteredList<Usuario> filtrados = new FilteredList<>(orig, u -> true);
+        cbProfissional.setItems(filtrados);
+
+        StringConverter<Usuario> conv = new StringConverter<>() {
+            @Override
+            public String toString(Usuario u) {
+                return u == null ? "" : textoProfissional(u);
+            }
+            @Override
+            public Usuario fromString(String s) {
+                return cbProfissional.getValue();
+            }
+        };
+
+        cbProfissional.setConverter(conv);
+
+        cbProfissional.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(Usuario item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
+            }
+        });
+        cbProfissional.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(Usuario item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
+            }
+        });
+
+        TextField editor = cbProfissional.getEditor();
+
+        editor.textProperty().addListener((obs, old, texto) -> {
+            Usuario sel = cbProfissional.getSelectionModel().getSelectedItem();
+            if (sel != null && conv.toString(sel).equals(texto)) return;
+
+            String t = texto == null ? "" : texto.trim().toLowerCase();
+
+            filtrados.setPredicate(u -> t.isBlank() || textoProfissional(u).toLowerCase().contains(t));
+
+            if (!cbProfissional.isShowing()) cbProfissional.show();
+        });
+
+        cbProfissional.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
+            if (novo != null) {
+                Platform.runLater(() -> {
+                    cbProfissional.getEditor().setText(conv.toString(novo));
+                    cbProfissional.hide();
+                });
+            }
+        });
+
+        editor.focusedProperty().addListener((obs, old, focado) -> {
+            if (Boolean.TRUE.equals(focado)) return;
+
+            String digitado = editor.getText() == null ? "" : editor.getText().trim();
+            if (digitado.isBlank()) {
+                cbProfissional.getSelectionModel().clearSelection();
+                editor.clear();
+                filtrados.setPredicate(u -> true);
+                return;
+            }
+
+            Usuario exato = null;
+            for (Usuario u : orig) {
+                if (textoProfissional(u).equalsIgnoreCase(digitado)) {
+                    exato = u;
+                    break;
+                }
+            }
+            if (exato == null && !filtrados.isEmpty()) exato = filtrados.get(0);
+
+            if (exato != null) {
+                cbProfissional.getSelectionModel().select(exato);
+                editor.setText(conv.toString(exato));
+            }
+
+            filtrados.setPredicate(u -> true);
+            cbProfissional.hide();
+        });
+
+        cbProfissional.setOnHidden(e -> filtrados.setPredicate(u -> true));
+    }
+
+    // ✅ NOVO: Pesquisa no Paciente
+    private void configurarPesquisaPaciente() {
+        if (cbPaciente == null) return;
+
+        cbPaciente.setEditable(true);
+
+        var orig = FXCollections.observableArrayList(cbPaciente.getItems());
+        FilteredList<Paciente> filtrados = new FilteredList<>(orig, p -> true);
+        cbPaciente.setItems(filtrados);
+
+        StringConverter<Paciente> conv = new StringConverter<>() {
+            @Override
+            public String toString(Paciente p) {
+                return p == null ? "" : safe(p.getNome());
+            }
+            @Override
+            public Paciente fromString(String s) {
+                return cbPaciente.getValue();
+            }
+        };
+
+        cbPaciente.setConverter(conv);
+
+        cbPaciente.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(Paciente item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
+            }
+        });
+        cbPaciente.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(Paciente item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : conv.toString(item));
+            }
+        });
+
+        TextField editor = cbPaciente.getEditor();
+
+        editor.textProperty().addListener((obs, old, texto) -> {
+            Paciente sel = cbPaciente.getSelectionModel().getSelectedItem();
+            if (sel != null && conv.toString(sel).equals(texto)) return;
+
+            String t = texto == null ? "" : texto.trim().toLowerCase();
+
+            filtrados.setPredicate(p -> t.isBlank() || safe(p.getNome()).toLowerCase().contains(t));
+
+            if (!cbPaciente.isShowing()) cbPaciente.show();
+        });
+
+        cbPaciente.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
+            if (novo != null) {
+                Platform.runLater(() -> {
+                    cbPaciente.getEditor().setText(conv.toString(novo));
+                    cbPaciente.hide();
+                });
+            }
+        });
+
+        editor.focusedProperty().addListener((obs, old, focado) -> {
+            if (Boolean.TRUE.equals(focado)) return;
+
+            String digitado = editor.getText() == null ? "" : editor.getText().trim();
+            if (digitado.isBlank()) {
+                cbPaciente.getSelectionModel().clearSelection();
+                editor.clear();
+                filtrados.setPredicate(p -> true);
+                return;
+            }
+
+            Paciente exato = null;
+            for (Paciente p : orig) {
+                if (safe(p.getNome()).equalsIgnoreCase(digitado)) {
+                    exato = p;
+                    break;
+                }
+            }
+            if (exato == null && !filtrados.isEmpty()) exato = filtrados.get(0);
+
+            if (exato != null) {
+                cbPaciente.getSelectionModel().select(exato);
+                editor.setText(conv.toString(exato));
+            }
+
+            filtrados.setPredicate(p -> true);
+            cbPaciente.hide();
+        });
+
+        cbPaciente.setOnHidden(e -> filtrados.setPredicate(p -> true));
+    }
+
+    private String textoProfissional(Usuario u) {
+        if (u == null) return "";
+        String pessoa = safe(u.getPessoaNome());
+        String cargo = safe(u.getNome());
+        if (pessoa.isBlank() && !safe(u.getLogin()).isBlank()) pessoa = u.getLogin();
+        if (cargo.isBlank()) return pessoa;
+        return pessoa + " (" + cargo + ")";
     }
 
     // =========================
@@ -301,30 +468,39 @@ public class AgendaController {
         });
     }
 
+    // =========================
+    // Hora: máscara HH:mm sem prender ':'
+    // =========================
     private TextFormatter<String> criarTextFormatterHora() {
         return new TextFormatter<>(change -> {
+            if (!change.isContentChange()) return change;
+
             String txt = change.getControlNewText();
-            if (txt == null || txt.isEmpty()) return change;
+            if (txt == null) return change;
+            if (txt.isEmpty()) return change;
 
-            String digits = txt.replaceAll("\\D", "");
-            if (digits.length() > 4) digits = digits.substring(0, 4);
+            String rawDigits = txt.replaceAll("\\D", "");
+            if (rawDigits.length() > 4) return null;
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < digits.length(); i++) {
-                sb.append(digits.charAt(i));
-                if (i == 1) sb.append(':');
+            String formatted;
+            if (rawDigits.length() <= 2) {
+                formatted = rawDigits;
+            } else {
+                String hh = rawDigits.substring(0, 2);
+                String mm = rawDigits.substring(2);
+                formatted = hh + ":" + mm;
             }
 
-            String formatted = sb.toString();
+            int oldLen = change.getControlText() == null ? 0 : change.getControlText().length();
             change.setText(formatted);
-            change.setRange(0, change.getControlText().length());
+            change.setRange(0, oldLen);
             change.selectRange(formatted.length(), formatted.length());
             return change;
         });
     }
 
     // =========================
-    // PERFIL: mantém padrão do seu projeto (constantes Perfis)
+    // PERFIL
     // =========================
     private boolean podeVerTodos() {
         Usuario logado = Session.getUsuario();
@@ -339,7 +515,6 @@ public class AgendaController {
         if (logado == null || logado.getPerfil() == null || logado.getPerfil().getNome() == null) return false;
 
         String perfil = logado.getPerfil().getNome();
-        // admin e profissionais da saúde podem finalizar (recepção normalmente não)
         return Perfis.ADMIN.equals(perfil) || !Perfis.RECEPCIONISTA.equals(perfil);
     }
 
@@ -358,13 +533,12 @@ public class AgendaController {
     }
 
     // =========================
-    // HANDLERS DO FXML (todos)
+    // HANDLERS DO FXML
     // =========================
     @FXML
     private void onNovo() {
         limparFormulario();
 
-        // ✅ data deve ficar vazia ao criar novo agendamento
         dpData.setValue(null);
         dpData.getEditor().clear();
 
@@ -385,7 +559,6 @@ public class AgendaController {
 
             if (data == null) { setMsg("Selecione uma data."); return; }
 
-            // ✅ mensagem/validação se usuário colocar data no passado
             if (data.isBefore(LocalDate.now())) {
                 setMsg("❌ Não é permitido agendar no passado.");
                 return;
@@ -506,7 +679,6 @@ public class AgendaController {
         LocalDate data = dpData.getValue();
         if (data == null) return;
 
-        // ✅ mensagem ao selecionar data no passado (sem “sumir” durante digitação)
         if (data.isBefore(LocalDate.now())) {
             setMsg("❌ Não é permitido selecionar data no passado.");
             dpData.setValue(null);
@@ -518,9 +690,6 @@ public class AgendaController {
         carregarAgendaDoDia();
     }
 
-    // =========================
-    // Carregar / preencher
-    // =========================
     private void carregarAgendaDoDia() {
         LocalDate data = dpData.getValue();
         if (data == null) {
@@ -529,7 +698,6 @@ public class AgendaController {
             return;
         }
 
-        // segurança extra
         if (data.isBefore(LocalDate.now())) {
             setMsg("❌ Não é permitido selecionar data no passado.");
             tbAgenda.getItems().clear();
@@ -582,9 +750,6 @@ public class AgendaController {
         }
     }
 
-    // =========================
-    // Regras e util
-    // =========================
     private LocalTime parseHora(String s) {
         if (s == null) return null;
         String t = s.trim();
@@ -609,7 +774,6 @@ public class AgendaController {
         txtObservacoes.clear();
         cbPaciente.getSelectionModel().clearSelection();
         cbSala.getSelectionModel().clearSelection();
-        // profissional não limpa para não atrapalhar filtro
     }
 
     private void setMsg(String s) {
