@@ -1,117 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.AgendaController">
-
-    <top>
-        <VBox spacing="8.0">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <Label text="Agenda | Clínica Klean - Saúde Integrativa"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-
-            <GridPane hgap="10.0" vgap="8.0">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="80.0" />
-                    <ColumnConstraints hgrow="ALWAYS" />
-                    <ColumnConstraints minWidth="80.0" />
-                    <ColumnConstraints hgrow="ALWAYS" />
-                </columnConstraints>
-
-                <rowConstraints>
-                    <RowConstraints minHeight="30.0" />
-                    <RowConstraints minHeight="30.0" />
-                    <RowConstraints minHeight="30.0" />
-                    <RowConstraints minHeight="60.0" />
-                </rowConstraints>
-
-                <!-- Data / Profissional -->
-                <Label text="Data:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="dpData"
-                            onAction="#onDataAlterada"
-                            GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-                <Label text="Profissional:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                <ComboBox fx:id="cbProfissional"
-                          prefWidth="200"
-                          GridPane.rowIndex="0" GridPane.columnIndex="3"/>
-
-                <!-- Paciente / Sala -->
-                <Label text="Paciente:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cbPaciente"
-                          prefWidth="200"
-                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-                <Label text="Sala:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                <ComboBox fx:id="cbSala"
-                          prefWidth="150"
-                          GridPane.rowIndex="1" GridPane.columnIndex="3"/>
-
-                <!-- Horários -->
-                <Label text="Hora início:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtHoraInicio"
-                           promptText="08:00"
-                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                <Label text="Hora fim:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                <TextField fx:id="txtHoraFim"
-                           promptText="09:00"
-                           GridPane.rowIndex="2" GridPane.columnIndex="3"/>
-
-                <!-- Procedimento / Observações -->
-                <Label text="Procedimento:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtProcedimento"
-                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-                <Label text="Observações:" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-                <TextArea fx:id="txtObservacoes"
-                          prefRowCount="2"
-                          GridPane.rowIndex="3" GridPane.columnIndex="3"/>
-            </GridPane>
-
-            <!-- Botões -->
-            <HBox spacing="10.0">
-                <Button text="Novo" onAction="#onNovo"/>
-                <Button text="Salvar" onAction="#onSalvar"/>
-                <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento"/>
-
-                <!-- ✅ NOVO BOTÃO -->
-                <Button fx:id="btnFinalizarConsulta"
-                        text="Finalizar consulta"
-                        onAction="#onFinalizarConsulta"/>
-
-                <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
-                <Label fx:id="lblMensagem"
-                       textFill="#008007"
-                       style="-fx-font-weight: bold;"
-                       HBox.hgrow="ALWAYS"/>
-            </HBox>
-        </VBox>
-    </top>
+            fx:controller="br.com.clinica.controller.AgendaController"
+            styleClass="page-form-root">
 
     <center>
-        <VBox>
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
+        <ScrollPane fitToWidth="true" styleClass="page-scroll">
+            <content>
+                <StackPane styleClass="page-center">
+                    <VBox spacing="16" styleClass="form-card agenda-card">
 
-            <TableView fx:id="tbAgenda" prefHeight="400.0">
-                <columns>
-                    <TableColumn fx:id="colHora" text="Horário" prefWidth="120.0"/>
-                    <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="160.0"/>
-                    <TableColumn fx:id="colSala" text="Sala" prefWidth="140.0"/>
-                    <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="220.0"/>
-                    <TableColumn fx:id="colStatus" text="Status" prefWidth="120.0"/>
-                </columns>
-            </TableView>
-        </VBox>
+                        <!-- TÍTULO -->
+                        <VBox spacing="2">
+                            <Label text="Agenda | Clínica Klean - Saúde Integrativa" styleClass="page-title"/>
+                            <Label text="Selecione a data e gerencie os atendimentos." styleClass="page-subtitle"/>
+                        </VBox>
+
+                        <!-- BLOCO PRINCIPAL (ficha) -->
+                        <GridPane hgap="18" vgap="14" styleClass="agenda-grid">
+
+                            <!-- Colunas mais bonitas: Label / Campo / Label / Campo -->
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="130"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="130"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <!-- Linha 1 -->
+                            <Label text="Data:" styleClass="form-label"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <DatePicker fx:id="dpData" onAction="#onDataAlterada"
+                                        styleClass="field-date"
+                                        GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Profissional:" styleClass="form-label"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <ComboBox fx:id="cbProfissional"
+                                      styleClass="field"
+                                      GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <!-- Linha 2 -->
+                            <Label text="Paciente:" styleClass="form-label"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="cbPaciente"
+                                      styleClass="field"
+                                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Sala:" styleClass="form-label"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <ComboBox fx:id="cbSala"
+                                      styleClass="field"
+                                      GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <!-- Linha 3 -->
+                            <Label text="Hora início:" styleClass="form-label"
+                                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtHoraInicio" promptText="08:00"
+                                       styleClass="field-time"
+                                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Hora fim:" styleClass="form-label"
+                                   GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <TextField fx:id="txtHoraFim" promptText="09:00"
+                                       styleClass="field-time"
+                                       GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                            <!-- Linha 4 -->
+                            <Label text="Procedimento:" styleClass="form-label"
+                                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtProcedimento"
+                                       styleClass="field"
+                                       GridPane.rowIndex="3" GridPane.columnIndex="1"
+                                       GridPane.columnSpan="1"/>
+
+                            <Label text="Observações:" styleClass="form-label"
+                                   GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                            <TextArea fx:id="txtObservacoes" prefRowCount="2"
+                                      styleClass="field"
+                                      GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+                        </GridPane>
+
+                        <!-- AÇÕES -->
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="form-actions">
+                            <Button text="Novo" onAction="#onNovo" styleClass="btn-ghost"/>
+                            <Button text="Salvar" onAction="#onSalvar" styleClass="btn-primary"/>
+                            <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento" styleClass="btn-ghost"/>
+
+                            <Button fx:id="btnFinalizarConsulta"
+                                    text="Finalizar consulta"
+                                    onAction="#onFinalizarConsulta"
+                                    styleClass="btn-ghost"/>
+
+                            <Button text="Atualizar lista" onAction="#onAtualizarLista" styleClass="btn-ghost"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label fx:id="lblMensagem" styleClass="hint-text"/>
+                        </HBox>
+
+                        <!-- TABELA -->
+                        <TableView fx:id="tbAgenda" prefHeight="460" styleClass="table-soft">
+                            <columns>
+                                <TableColumn fx:id="colHora" text="Horário" prefWidth="120"/>
+                                <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="210"/>
+                                <TableColumn fx:id="colSala" text="Sala" prefWidth="150"/>
+                                <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="320"/>
+                                <TableColumn fx:id="colStatus" text="Status" prefWidth="140"/>
+                            </columns>
+                        </TableView>
+
+                    </VBox>
+                </StackPane>
+            </content>
+        </ScrollPane>
     </center>
 
 </BorderPane>

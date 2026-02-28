@@ -1,164 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.CaixaController">
+            fx:controller="br.com.clinica.controller.CaixaController"
+            styleClass="page-form-root">
 
-    <!-- TOPO: Título + dados principais da nota -->
-    <top>
-        <VBox spacing="8">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <Label text="Caixa / Notas - Clínica Integração"
-                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-
-            <GridPane hgap="10" vgap="8">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="15"/>
-                    <ColumnConstraints percentWidth="35"/>
-                    <ColumnConstraints percentWidth="15"/>
-                    <ColumnConstraints percentWidth="35"/>
-                </columnConstraints>
-
-                <!-- Paciente -->
-                <Label text="Paciente:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cbPaciente"
-                          promptText="Selecione o paciente"
-                          GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-                <!-- Profissional -->
-                <Label text="Profissional:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                <ComboBox fx:id="cbProfissional"
-                          promptText="Selecione o profissional"
-                          GridPane.rowIndex="0" GridPane.columnIndex="3"/>
-
-                <!-- Forma de pagamento -->
-                <Label text="Forma de pagamento:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cbFormaPagamento"
-                          promptText="Selecione"
-                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-                <!-- Observação -->
-                <Label text="Observação:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextArea fx:id="txtObservacao"
-                          prefRowCount="2"
-                          GridPane.rowIndex="2" GridPane.columnIndex="1"
-                          GridPane.columnSpan="3"/>
-            </GridPane>
-        </VBox>
-    </top>
-
-    <!-- CENTRO: área de itens -->
     <center>
-        <VBox spacing="10">
-            <padding>
-                <Insets top="5" right="10" bottom="10" left="10"/>
-            </padding>
+        <ScrollPane fitToWidth="true" styleClass="page-scroll">
+            <content>
+                <StackPane styleClass="page-center">
+                    <VBox spacing="14" styleClass="form-card">
 
-            <!-- Seção de inclusão de item -->
-            <TitledPane text="Adicionar Item" expanded="true">
-                <content>
-                    <VBox spacing="8">
+                        <!-- TÍTULO -->
+                        <VBox spacing="2">
+                            <Label text="Caixa / Notas - Clínica Integração" styleClass="page-title"/>
+                            <Label text="Preencha os dados e adicione os itens da nota." styleClass="page-subtitle"/>
+                        </VBox>
 
-                        <!-- Tipo do item: Produto ou Procedimento -->
-                        <HBox spacing="10">
-                            <Label text="Tipo do item:"/>
-                            <!-- O ToggleGroup será configurado no Controller -->
-                            <RadioButton fx:id="rbProduto" text="Produto"/>
-                            <RadioButton fx:id="rbProcedimento" text="Procedimento"/>
-                        </HBox>
-
-                        <!-- Linha de dados do item -->
-                        <GridPane hgap="10" vgap="8">
+                        <!-- DADOS PRINCIPAIS -->
+                        <GridPane hgap="12" vgap="10">
                             <columnConstraints>
-                                <ColumnConstraints percentWidth="12"/>
-                                <ColumnConstraints percentWidth="28"/>
-                                <ColumnConstraints percentWidth="10"/>
-                                <ColumnConstraints percentWidth="10"/>
-                                <ColumnConstraints percentWidth="15"/>
-                                <ColumnConstraints percentWidth="25"/>
+                                <ColumnConstraints minWidth="140"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
                             </columnConstraints>
 
-                            <!-- Produto -->
-                            <Label text="Produto:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                            <ComboBox fx:id="cbProduto"
-                                      promptText="Selecione o produto"
+                            <Label text="Paciente:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                            <ComboBox fx:id="cbPaciente"
+                                      promptText="Selecione o paciente"
                                       GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                            <!-- Descrição procedimento -->
-                            <Label text="Descrição (procedimento):"
-                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                            <TextField fx:id="txtDescricaoProcedimento"
-                                       promptText="Ex: Sessão de massagem"
-                                       GridPane.rowIndex="1" GridPane.columnIndex="1"
-                                       GridPane.columnSpan="5"/>
+                            <Label text="Profissional:" GridPane.rowIndex="0" GridPane.columnIndex="2" styleClass="form-label"/>
+                            <ComboBox fx:id="cbProfissional"
+                                      promptText="Selecione o profissional"
+                                      GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                            <!-- Quantidade -->
-                            <Label text="Qtd:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                            <TextField fx:id="txtQuantidade"
-                                       promptText="1"
-                                       GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                            <Label text="Forma de pagamento:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                            <ComboBox fx:id="cbFormaPagamento"
+                                      promptText="Selecione"
+                                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                            <!-- Valor unitário -->
-                            <Label text="Valor unitário:" GridPane.rowIndex="0" GridPane.columnIndex="4"/>
-                            <TextField fx:id="txtValorUnitario"
-                                       promptText="0,00"
-                                       GridPane.rowIndex="0" GridPane.columnIndex="5"/>
-
+                            <Label text="Observação:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label"/>
+                            <TextArea fx:id="txtObservacao"
+                                      prefRowCount="2"
+                                      GridPane.rowIndex="2" GridPane.columnIndex="1"
+                                      GridPane.columnSpan="3"/>
                         </GridPane>
 
-                        <!-- Botões de item -->
-                        <HBox spacing="10">
-                            <Button fx:id="btnAdicionarItem"
-                                    text="Adicionar item"
-                                    onAction="#onAdicionarItem"/>
-                            <Button fx:id="btnRemoverItem"
-                                    text="Remover item selecionado"
-                                    onAction="#onRemoverItem"/>
+                        <!-- ADICIONAR ITEM (clicar no título abre/fecha) -->
+                        <TitledPane text="Adicionar item"
+                                    expanded="true"
+                                    collapsible="true"
+                                    animated="true"
+                                    styleClass="soft-pane">
+                            <content>
+                                <VBox spacing="10">
+
+                                    <HBox spacing="12" alignment="CENTER_LEFT">
+                                        <Label text="Tipo do item:" styleClass="form-label"/>
+                                        <RadioButton fx:id="rbProduto" text="Produto"/>
+                                        <RadioButton fx:id="rbProcedimento" text="Procedimento"/>
+                                    </HBox>
+
+                                    <GridPane hgap="12" vgap="10">
+                                        <columnConstraints>
+                                            <ColumnConstraints minWidth="120"/>
+                                            <ColumnConstraints hgrow="ALWAYS"/>
+                                            <ColumnConstraints minWidth="70"/>
+                                            <ColumnConstraints minWidth="90"/>
+                                            <ColumnConstraints minWidth="110"/>
+                                            <ColumnConstraints hgrow="ALWAYS"/>
+                                        </columnConstraints>
+
+                                        <Label text="Produto:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                                        <ComboBox fx:id="cbProduto"
+                                                  promptText="Selecione o produto"
+                                                  GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                        <Label text="Qtd:" GridPane.rowIndex="0" GridPane.columnIndex="2" styleClass="form-label"/>
+                                        <TextField fx:id="txtQuantidade"
+                                                   promptText="1"
+                                                   GridPane.rowIndex="0" GridPane.columnIndex="3"
+                                                   styleClass="field-sm"/>
+
+                                        <Label text="Valor unitário:" GridPane.rowIndex="0" GridPane.columnIndex="4" styleClass="form-label"/>
+                                        <TextField fx:id="txtValorUnitario"
+                                                   promptText="0,00"
+                                                   GridPane.rowIndex="0" GridPane.columnIndex="5"/>
+
+                                        <Label text="Descrição (procedimento):" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                                        <TextField fx:id="txtDescricaoProcedimento"
+                                                   promptText="Ex: Sessão de massagem"
+                                                   GridPane.rowIndex="1" GridPane.columnIndex="1"
+                                                   GridPane.columnSpan="5"/>
+                                    </GridPane>
+
+                                    <HBox spacing="10" styleClass="form-actions">
+                                        <Button fx:id="btnAdicionarItem" text="Adicionar item" onAction="#onAdicionarItem" styleClass="btn-primary"/>
+                                        <Button fx:id="btnRemoverItem" text="Remover item selecionado" onAction="#onRemoverItem" styleClass="btn-ghost"/>
+                                    </HBox>
+
+                                </VBox>
+                            </content>
+                        </TitledPane>
+
+                        <!-- TABELA -->
+                        <TableView fx:id="tblItens" prefHeight="280" styleClass="table-soft">
+                            <columns>
+                                <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="250"/>
+                                <TableColumn fx:id="colTipo" text="Tipo" prefWidth="100"/>
+                                <TableColumn fx:id="colQuantidade" text="Qtd" prefWidth="80"/>
+                                <TableColumn fx:id="colValorUnitario" text="Valor unitário" prefWidth="120"/>
+                                <TableColumn fx:id="colValorTotal" text="Valor total" prefWidth="120"/>
+                            </columns>
+                        </TableView>
+
+                        <!-- RODAPÉ -->
+                        <HBox spacing="12" alignment="CENTER_RIGHT">
+                            <Label text="Total da nota:" styleClass="total-label"/>
+                            <Label fx:id="lblTotal" text="R$ 0,00" styleClass="total-value"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Button fx:id="btnFinalizar" text="Finalizar nota" onAction="#onFinalizarNota" styleClass="btn-primary"/>
+                            <Button fx:id="btnFechar" text="Fechar" onAction="#onFechar" styleClass="btn-ghost"/>
                         </HBox>
+
                     </VBox>
-                </content>
-            </TitledPane>
-
-            <!-- Tabela de itens da nota -->
-            <TableView fx:id="tblItens" prefHeight="300">
-                <columns>
-                    <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="250"/>
-                    <TableColumn fx:id="colTipo" text="Tipo" prefWidth="100"/>
-                    <TableColumn fx:id="colQuantidade" text="Qtd" prefWidth="80"/>
-                    <TableColumn fx:id="colValorUnitario" text="Valor unitário" prefWidth="120"/>
-                    <TableColumn fx:id="colValorTotal" text="Valor total" prefWidth="120"/>
-                </columns>
-            </TableView>
-        </VBox>
+                </StackPane>
+            </content>
+        </ScrollPane>
     </center>
-
-    <!-- RODAPÉ: total + botões -->
-    <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <padding>
-                <Insets top="5" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <Label text="Total da nota:" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Label fx:id="lblTotal" text="R$ 0,00" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <Button fx:id="btnFinalizar"
-                    text="Finalizar nota"
-                    onAction="#onFinalizarNota"/>
-
-            <Button fx:id="btnFechar"
-                    text="Fechar"
-                    onAction="#onFechar"/>
-        </HBox>
-    </bottom>
 
 </BorderPane>
