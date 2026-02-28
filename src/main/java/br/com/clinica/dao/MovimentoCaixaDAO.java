@@ -2,7 +2,7 @@ package br.com.clinica.dao;
 
 import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.MovimentoCaixa;
-import br.com.clinica.model.TipoMovimento;
+import br.com.clinica.model.enums.TipoMovimento;
 
 import java.sql.*;
 import java.time.LocalDate;

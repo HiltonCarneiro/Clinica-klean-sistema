@@ -2,7 +2,7 @@ package br.com.clinica.controller;
 
 import br.com.clinica.dao.MovimentoCaixaDAO;
 import br.com.clinica.model.MovimentoCaixa;
-import br.com.clinica.model.TipoMovimento;
+import br.com.clinica.model.enums.TipoMovimento;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

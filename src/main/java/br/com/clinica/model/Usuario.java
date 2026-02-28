@@ -3,8 +3,8 @@ package br.com.clinica.model;
 public class Usuario {
 
     private Integer id;
-    private String nome;        // no seu projeto, isso é o CARGO (ex: ENFERMEIRA)
-    private String pessoaNome;  // nome da pessoa
+    private String nome;
+    private String pessoaNome;
     private String login;
     private String senha;
     private boolean ativo;

@@ -2,7 +2,7 @@ package br.com.clinica.service;
 
 import br.com.clinica.model.Nota;
 import br.com.clinica.model.NotaItem;
-import br.com.clinica.model.TipoItemNota;
+import br.com.clinica.model.enums.TipoItemNota;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;

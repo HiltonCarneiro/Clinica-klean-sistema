@@ -1,7 +1,7 @@
 package br.com.clinica.service;
 
 import br.com.clinica.model.MovimentoCaixa;
-import br.com.clinica.model.TipoMovimento;
+import br.com.clinica.model.enums.TipoMovimento;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;

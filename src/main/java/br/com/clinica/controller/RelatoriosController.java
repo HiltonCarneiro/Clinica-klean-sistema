@@ -7,7 +7,7 @@ import br.com.clinica.dao.UsuarioDAO;
 import br.com.clinica.model.Agendamento;
 import br.com.clinica.model.MovimentoCaixa;
 import br.com.clinica.model.Nota;
-import br.com.clinica.model.TipoMovimento;
+import br.com.clinica.model.enums.TipoMovimento;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.service.NotaPdfService;
 import br.com.clinica.service.RelatorioAgendamentosPdfService;

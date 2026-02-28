@@ -2,7 +2,7 @@ package br.com.clinica.controller;
 
 import br.com.clinica.dao.ProdutoDAO;
 import br.com.clinica.model.Produto;
-import br.com.clinica.model.TipoProduto;
+import br.com.clinica.model.enums.TipoProduto;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;

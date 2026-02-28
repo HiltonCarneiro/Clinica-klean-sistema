@@ -1,5 +1,7 @@
 package br.com.clinica.model;
 
+import br.com.clinica.model.enums.TipoProduto;
+
 import java.time.LocalDate;
 
 

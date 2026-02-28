@@ -1,4 +1,4 @@
-package br.com.clinica.model;
+package br.com.clinica.model.enums;
 
 /**
  * Tipo de produto para o estoque.

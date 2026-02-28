@@ -5,6 +5,7 @@ import br.com.clinica.dao.PacienteDAO;
 import br.com.clinica.dao.ProdutoDAO;
 import br.com.clinica.dao.UsuarioDAO;
 import br.com.clinica.model.*;
+import br.com.clinica.model.enums.TipoItemNota;
 import br.com.clinica.service.NotaPdfService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;

@@ -2,8 +2,7 @@ package br.com.clinica.dao;
 
 import br.com.clinica.database.DatabaseConfig;
 import br.com.clinica.model.Produto;
-import br.com.clinica.model.TipoProduto;
-import br.com.clinica.session.Session;
+import br.com.clinica.model.enums.TipoProduto;
 
 import java.sql.*;
 import java.time.LocalDate;
