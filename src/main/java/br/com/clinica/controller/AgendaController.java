@@ -550,7 +550,10 @@ public class AgendaController {
     private void onSalvar() {
         try {
             LocalDate data = dpData.getValue();
-            Usuario profissional = cbProfissional.getValue();
+
+            // ✅ ÚNICA MUDANÇA DO PROBLEMA: pega profissional de forma confiável (value OU texto do editor)
+            Usuario profissional = obterProfissionalSelecionado();
+
             Paciente paciente = cbPaciente.getValue();
             SalaAtendimento sala = cbSala.getValue();
 
@@ -631,7 +634,7 @@ public class AgendaController {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/com/clinica/view/anamnese-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/anamnese-view.fxml"));
             Parent root = loader.load();
 
             AnamneseController controller = loader.getController();
@@ -782,5 +785,54 @@ public class AgendaController {
 
     private String safe(String s) {
         return s == null ? "" : s;
+    }
+
+    // =========================================================
+    // ✅ ADICIONADO (mínimo): resolver profissional quando o ComboBox é editável
+    // =========================================================
+    private Usuario obterProfissionalSelecionado() {
+        if (cbProfissional == null) return null;
+
+        // 1) Se já tem value, ok
+        Usuario v = cbProfissional.getValue();
+        if (v != null) return v;
+
+        // 2) Se não tem value, tenta resolver pelo texto visível no editor
+        if (!cbProfissional.isEditable() || cbProfissional.getEditor() == null) return null;
+
+        String digitado = cbProfissional.getEditor().getText();
+        if (digitado == null || digitado.trim().isBlank()) return null;
+
+        Usuario achado = buscarProfissionalPorTexto(digitado.trim());
+        if (achado != null) {
+            cbProfissional.getSelectionModel().select(achado);
+            cbProfissional.setValue(achado);
+        }
+        return achado;
+    }
+
+    private Usuario buscarProfissionalPorTexto(String texto) {
+        if (texto == null) return null;
+        String alvo = texto.trim();
+        if (alvo.isBlank()) return null;
+
+        // Primeiro tenta nos itens atuais (filtrados)
+        if (cbProfissional != null && cbProfissional.getItems() != null) {
+            for (Usuario u : cbProfissional.getItems()) {
+                if (u == null) continue;
+                if (textoProfissional(u).equalsIgnoreCase(alvo)) return u;
+            }
+        }
+
+        // Fallback: tenta na lista completa (se o filtro ocultou algo)
+        try {
+            List<Usuario> todos = usuarioDAO.listarProfissionaisAtivos();
+            for (Usuario u : todos) {
+                if (u == null) continue;
+                if (textoProfissional(u).equalsIgnoreCase(alvo)) return u;
+            }
+        } catch (Exception ignored) { }
+
+        return null;
     }
 }
