@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.UnaryOperator; // ✅ ADICIONADO
 
 public class PacienteController {
 
@@ -77,7 +78,6 @@ public class PacienteController {
     private final ObservableList<Paciente> pacientes = FXCollections.observableArrayList();
     private Paciente pacienteSelecionado;
 
-
     // ✅ Se entrou no cadastro vindo da busca (Editar), o Voltar deve retornar para a busca
     private boolean voltarParaBusca = false;
     private final DateTimeFormatter fmtBr = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -89,6 +89,7 @@ public class PacienteController {
 
         setupTabelaBusca();
         setupMasksAndRules();
+        applyDateMask(dpDataNascimento); // ✅ ADICIONADO (máscara dd/MM/yyyy digitando)
         setupDatePickerMaskFix();
 
         setMensagem("");
@@ -427,44 +428,25 @@ public class PacienteController {
             txtBusca.setOnAction(e -> onBuscarPaciente());
         }
 
-        if (txtCpf != null) {
-            txtCpf.textProperty().addListener((obs, old, val) -> {
-                if (val == null) return;
-                String dig = digits(val);
-                if (dig.length() > 11) dig = dig.substring(0, 11);
-                String fmt = ValidationUtils.formatCpf(dig);
-                if (!fmt.equals(val)) {
-                    txtCpf.setText(fmt);
-                    txtCpf.positionCaret(fmt.length());
-                }
+        // ✅ FILTROS (nome/número)
+        applyNameFilter(txtNome);
+        applyDigitsOnly(txtNumero, 6);
+
+        // ✅ MÁSCARAS SEGURAS (CPF/Telefone/CEP apagando normal)
+        applyMaskSafe(txtCpf, 11, ValidationUtils::formatCpf);
+        applyMaskSafe(txtTelefone, 11, ValidationUtils::formatPhoneBr);
+        applyMaskSafe(txtCep, 8, ValidationUtils::formatCep);
+
+        // ✅ Sem número: desabilita campo e limpa
+        if (chkSemNumero != null && txtNumero != null) {
+            chkSemNumero.selectedProperty().addListener((obs, o, semNumero) -> {
+                txtNumero.setDisable(semNumero);
+                if (semNumero) txtNumero.clear();
             });
         }
 
-        if (txtTelefone != null) {
-            txtTelefone.textProperty().addListener((obs, old, val) -> {
-                if (val == null) return;
-                String dig = digits(val);
-                if (dig.length() > 11) dig = dig.substring(0, 11);
-                String fmt = ValidationUtils.formatPhoneBr(dig);
-                if (!fmt.equals(val)) {
-                    txtTelefone.setText(fmt);
-                    txtTelefone.positionCaret(fmt.length());
-                }
-            });
-        }
-
+        // mantém sua busca de CEP ao perder foco
         if (txtCep != null) {
-            txtCep.textProperty().addListener((obs, old, val) -> {
-                if (val == null) return;
-                String dig = digits(val);
-                if (dig.length() > 8) dig = dig.substring(0, 8);
-                String fmt = ValidationUtils.formatCep(dig);
-                if (!fmt.equals(val)) {
-                    txtCep.setText(fmt);
-                    txtCep.positionCaret(fmt.length());
-                }
-            });
-
             txtCep.focusedProperty().addListener((obs, oldVal, newVal) -> {
                 if (!newVal) {
                     String cepDigits = digits(safe(txtCep.getText()));
@@ -567,6 +549,107 @@ public class PacienteController {
 
     private String digits(String s) {
         return safe(s).replaceAll("\\D", "");
+    }
+
+    // =========================================================
+    // FILTROS / MÁSCARAS (ADICIONADO)
+    // =========================================================
+
+    private void applyMaskSafe(TextField field, int maxDigits, Function<String, String> formatter) {
+        if (field == null) return;
+
+        UnaryOperator<TextFormatter.Change> filter = change -> {
+            if (!change.isContentChange()) return change;
+
+            // Texto depois da mudança do usuário (já incluindo o backspace)
+            String newText = change.getControlNewText();
+            int caret = change.getCaretPosition();
+
+            // Conta quantos dígitos existiam antes do cursor
+            int digitsBeforeCaret = 0;
+            for (int i = 0; i < Math.min(caret, newText.length()); i++) {
+                if (Character.isDigit(newText.charAt(i))) digitsBeforeCaret++;
+            }
+
+            // Mantém só dígitos e limita tamanho
+            String dig = newText.replaceAll("\\D", "");
+            if (dig.length() > maxDigits) dig = dig.substring(0, maxDigits);
+
+            // Formata
+            String formatted = formatter.apply(dig);
+
+            // Substitui o texto inteiro pelo formatado
+            change.setText(formatted);
+            change.setRange(0, change.getControlText().length());
+
+            // Reposiciona o cursor no ponto equivalente (mesma qtd de dígitos antes)
+            int targetCaret = caretPosFromDigits(formatted, digitsBeforeCaret);
+            change.selectRange(targetCaret, targetCaret);
+
+            return change;
+        };
+
+        field.setTextFormatter(new TextFormatter<>(filter));
+    }
+    private int caretPosFromDigits(String formatted, int digitsBeforeCaret) {
+        if (digitsBeforeCaret <= 0) return 0;
+
+        int count = 0;
+        for (int i = 0; i < formatted.length(); i++) {
+            if (Character.isDigit(formatted.charAt(i))) {
+                count++;
+                if (count == digitsBeforeCaret) return i + 1;
+            }
+        }
+        return formatted.length();
+    }
+    private void applyNameFilter(TextField field) {
+        if (field == null) return;
+
+        field.setTextFormatter(new TextFormatter<>(change -> {
+            if (!change.isContentChange()) return change;
+            // só letras (com acento) e espaço
+            return change.getControlNewText().matches("[\\p{L} ]*") ? change : null;
+        }));
+    }
+
+    private void applyDigitsOnly(TextField field, int maxLen) {
+        if (field == null) return;
+
+        field.setTextFormatter(new TextFormatter<>(change -> {
+            if (!change.isContentChange()) return change;
+
+            String d = change.getControlNewText().replaceAll("\\D", "");
+            if (d.length() > maxLen) d = d.substring(0, maxLen);
+
+            change.setText(d);
+            change.setRange(0, change.getControlText().length());
+            change.selectRange(d.length(), d.length());
+            return change;
+        }));
+    }
+
+    private void applyDateMask(DatePicker dp) {
+        if (dp == null) return;
+
+        TextField editor = dp.getEditor();
+        if (editor == null) return;
+
+        editor.setTextFormatter(new TextFormatter<>(change -> {
+            if (!change.isContentChange()) return change;
+
+            String d = change.getControlNewText().replaceAll("\\D", "");
+            if (d.length() > 8) d = d.substring(0, 8);
+
+            StringBuilder sb = new StringBuilder(d);
+            if (sb.length() > 2) sb.insert(2, '/');
+            if (sb.length() > 5) sb.insert(5, '/');
+
+            change.setText(sb.toString());
+            change.setRange(0, change.getControlText().length());
+            change.selectRange(sb.length(), sb.length());
+            return change;
+        }));
     }
 
     // =========================================================
