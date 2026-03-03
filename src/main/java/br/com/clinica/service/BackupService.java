@@ -37,6 +37,13 @@ public class BackupService {
     /** Backup manual (ex: botão "Fazer backup agora"). */
     public static BackupResult fazerBackupAgora(Path pastaDestino) {
         try {
+            // ✅ Postgres/Supabase: não existe "VACUUM INTO" para gerar backup .db
+            // O backup deve ser feito pelo provedor (Supabase) / export.
+            if (isPostgres()) {
+                return new BackupResult(true, null,
+                        "Banco PostgreSQL (Supabase): backup local .db não se aplica. Use os backups/exports do Supabase.");
+            }
+
             Files.createDirectories(pastaDestino);
 
             String nome = "backup_" + LocalDateTime.now().format(TS) + ".db";
@@ -60,6 +67,15 @@ public class BackupService {
 
         } catch (Exception e) {
             return new BackupResult(false, null, "Falha ao gerar backup: " + e.getMessage());
+        }
+    }
+
+    private static boolean isPostgres() {
+        try (var conn = DatabaseConfig.getConnection()) {
+            String prod = conn.getMetaData().getDatabaseProductName();
+            return prod != null && prod.toLowerCase().contains("postgres");
+        } catch (Exception e) {
+            return false;
         }
     }
 

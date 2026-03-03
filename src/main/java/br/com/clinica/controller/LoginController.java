@@ -4,6 +4,7 @@ import br.com.clinica.dao.AuditoriaDAO;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.service.LoginService;
 import br.com.clinica.session.Session;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,7 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class LoginController {
-//teste
+    //teste
     @FXML private ImageView imgLogoLogin;
 
     @FXML private TextField txtUsuario;
@@ -53,6 +54,12 @@ public class LoginController {
             System.out.println("Logo não encontrada: /images/logo-klean.png");
         }
 
+        // Pré-aquecer conexão (evita primeira autenticação muito lenta)
+        new Thread(() -> {
+            try (java.sql.Connection c = br.com.clinica.database.DatabaseConfig.getConnection()) {
+                // abrir/fechar já aquece pool/SSL
+            } catch (Exception ignored) {}
+        }, "db-warmup").start();
     }
 
     @FXML
@@ -106,43 +113,94 @@ public class LoginController {
             return;
         }
 
-        Usuario u = loginService.autenticar(login.trim(), senha);
+        final String loginFinal = login.trim();
+        final String senhaFinal = senha;
 
-        if (u == null) {
-            if (lblErro != null) lblErro.setText("Usuário ou senha inválidos.");
-            // Nunca registrar senha
-            auditoria.registrar("LOGIN_FALHA", "USUARIO", login.trim(), "falha de autenticação");
-            return;
-        }
+        if (lblErro != null) lblErro.setText("");
 
-        // sucesso
-        Session.setUsuario(u);
-        auditoria.registrar("LOGIN_OK", "USUARIO", String.valueOf(u.getId()), "login realizado");
+        // feedback/anti-double-click
+        if (txtUsuario != null) txtUsuario.setDisable(true);
+        if (txtSenha != null) txtSenha.setDisable(true);
+        if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(true);
+        if (btnToggleSenha != null) btnToggleSenha.setDisable(true);
 
-        // abrir tela principal
-        try {
-            Stage stage = (Stage) txtUsuario.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
-            Parent root = loader.load();
-
-            Scene scene = new Scene(root, 1100, 720);
-
-            //css seguro:
-            var cssUrl = getClass().getResource("/styles/app.css");
-            if (cssUrl != null) {
-                scene.getStylesheets().add(cssUrl.toExternalForm());
-            } else {
-                System.out.println("CSS NÃO ENCONTRADO: /styles/app.css");
+        Task<Usuario> task = new Task<>() {
+            @Override
+            protected Usuario call() {
+                return loginService.autenticar(loginFinal, senhaFinal);
             }
+        };
 
-            stage.setTitle("Clínica Klean - Saúde Integrativa | Sistema");
-            stage.setScene(scene);
-            stage.setResizable(true);
-            stage.centerOnScreen();
+        task.setOnSucceeded(evt -> {
+            try {
+                Usuario u = task.getValue();
 
-        } catch (Exception e) {
-            if (lblErro != null) lblErro.setText("Erro ao abrir tela principal.");
-            throw new RuntimeException("Erro ao abrir main-view.fxml", e);
-        }
+                if (u == null) {
+                    if (lblErro != null) lblErro.setText("Usuário ou senha inválidos.");
+
+                    // Auditoria em background (não travar a UI)
+                    new Thread(() ->
+                            auditoria.registrar("LOGIN_FALHA", "USUARIO", loginFinal, "falha de autenticação"),
+                            "auditoria-login-falha"
+                    ).start();
+                    return;
+                }
+
+                // sucesso
+                Session.setUsuario(u);
+
+                // Auditoria em background (não travar a troca de tela)
+                new Thread(() ->
+                        auditoria.registrar("LOGIN_OK", "USUARIO", String.valueOf(u.getId()), "login realizado"),
+                        "auditoria-login-ok"
+                ).start();
+
+                // abrir tela principal
+                Stage stage = (Stage) txtUsuario.getScene().getWindow();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
+                Parent root = loader.load();
+
+                Scene scene = new Scene(root, 1100, 720);
+
+                //css seguro:
+                var cssUrl = getClass().getResource("/styles/app.css");
+                if (cssUrl != null) {
+                    scene.getStylesheets().add(cssUrl.toExternalForm());
+                } else {
+                    System.out.println("CSS NÃO ENCONTRADO: /styles/app.css");
+                }
+
+                stage.setTitle("Clínica Klean - Saúde Integrativa | Sistema");
+                stage.setScene(scene);
+                stage.setResizable(true);
+                stage.centerOnScreen();
+
+            } catch (Exception e) {
+                if (lblErro != null) lblErro.setText("Erro ao abrir tela principal.");
+                throw new RuntimeException("Erro ao abrir main-view.fxml", e);
+            } finally {
+                if (txtUsuario != null) txtUsuario.setDisable(false);
+                if (txtSenha != null) txtSenha.setDisable(false);
+                if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(false);
+                if (btnToggleSenha != null) btnToggleSenha.setDisable(false);
+            }
+        });
+
+        task.setOnFailed(evt -> {
+            try {
+                Throwable ex = task.getException();
+                if (lblErro != null) lblErro.setText("Erro ao autenticar. Verifique conexão com o banco.");
+                if (ex != null) ex.printStackTrace();
+            } finally {
+                if (txtUsuario != null) txtUsuario.setDisable(false);
+                if (txtSenha != null) txtSenha.setDisable(false);
+                if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(false);
+                if (btnToggleSenha != null) btnToggleSenha.setDisable(false);
+            }
+        });
+
+        Thread th = new Thread(task, "login-auth-task");
+        th.setDaemon(true);
+        th.start();
     }
 }

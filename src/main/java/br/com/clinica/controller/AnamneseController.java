@@ -8,7 +8,9 @@ import br.com.clinica.model.Anamnese;
 import br.com.clinica.model.Paciente;
 import br.com.clinica.model.Usuario;
 import br.com.clinica.session.Session;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
@@ -148,26 +150,85 @@ public class AnamneseController {
         atualizarVisibilidadeBotoes(cbTipo.getValue());
     }
 
+    // ✅ ALTERAÇÃO PRINCIPAL: NÃO TRAVA A UI (carrega tudo em background)
     public void setAgendamento(Agendamento agendamento) {
         this.agendamento = agendamento;
 
-        Integer pacienteIdInt = (agendamento != null) ? agendamento.getPacienteId() : null;
-        if (pacienteIdInt != null) {
-            this.paciente = pacienteDAO.buscarPorId(Long.valueOf(pacienteIdInt));
-        } else {
-            this.paciente = null;
-        }
+        // UI imediata (sem banco)
+        this.paciente = null;
+        this.anamneseInicialAtual = null;
+        this.selecionada = null;
+        this.inicialJaSalva = false;
+
+        limparFormulario();
+        tvHistorico.setItems(FXCollections.observableArrayList());
+        tvAnexos.setItems(FXCollections.observableArrayList());
+        atualizarBotoesAnexos();
 
         preencherCabecalho();
-        carregarInicialEvolucoes();
+        setInfo("Carregando...");
 
-        cbTipo.getSelectionModel().select(inicialJaSalva ? "EVOLUCAO" : "ANAMNESE_INICIAL");
-        atualizarVisibilidadeBotoes(cbTipo.getValue());
+        // carrega paciente + histórico + anexos em background
+        carregarTudoAsync();
+    }
 
-        selecionada = null;
-        limparFormulario();
-        carregarAnexosDoPaciente();
-        setInfo("");
+    private void carregarTudoAsync() {
+        final Agendamento ag = this.agendamento;
+
+        Task<Void> task = new Task<>() {
+            Paciente pac = null;
+            Anamnese inicial = null;
+            List<Anamnese> historico = List.of();
+            List<AnexoPacienteDAO.AnexoPacienteItem> anexos = List.of();
+
+            @Override
+            protected Void call() {
+                Integer pacienteIdInt = (ag != null) ? ag.getPacienteId() : null;
+
+                if (pacienteIdInt != null) {
+                    pac = pacienteDAO.buscarPorId(Long.valueOf(pacienteIdInt));
+                }
+
+                if (pac != null && pac.getId() != null) {
+                    inicial = anamneseDAO.buscarInicialPorPaciente(pac.getId());
+                    historico = anamneseDAO.listarPorPaciente(pac.getId());
+                    anexos = anexoDAO.listarPorPaciente(pac.getId());
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                Platform.runLater(() -> {
+                    paciente = pac;
+                    anamneseInicialAtual = inicial;
+                    inicialJaSalva = (anamneseInicialAtual != null && anamneseInicialAtual.getId() != null);
+
+                    preencherCabecalho();
+
+                    tvHistorico.setItems(FXCollections.observableArrayList(historico));
+                    tvAnexos.setItems(FXCollections.observableArrayList(anexos));
+                    atualizarBotoesAnexos();
+
+                    cbTipo.getSelectionModel().select(inicialJaSalva ? "EVOLUCAO" : "ANAMNESE_INICIAL");
+                    atualizarVisibilidadeBotoes(cbTipo.getValue());
+
+                    setInfo("");
+                });
+            }
+
+            @Override
+            protected void failed() {
+                Throwable ex = getException();
+                if (ex != null) ex.printStackTrace();
+                Platform.runLater(() -> setInfo("Erro ao carregar anamnese: " + (ex != null ? ex.getMessage() : "")));
+            }
+        };
+
+        Thread t = new Thread(task, "anamnese-load");
+        t.setDaemon(true);
+        t.start();
     }
 
     private void preencherCabecalho() {
@@ -222,7 +283,6 @@ public class AnamneseController {
             return;
         }
 
-        // ✅ garante formatação final antes de salvar (se o usuário não saiu do campo)
         normalizarDecimaisAntesDeSalvar();
 
         Anamnese a = new Anamnese();
@@ -241,7 +301,9 @@ public class AnamneseController {
                 anamneseInicialAtual = a;
                 inicialJaSalva = true;
 
+                // recarrega histórico (pode manter sync porque é uma ação do usuário; se quiser, dá pra por async também)
                 carregarInicialEvolucoes();
+
                 setInfo("Anamnese inicial salva/atualizada. Evoluções liberadas.");
                 cbTipo.getSelectionModel().select("EVOLUCAO");
                 atualizarVisibilidadeBotoes("EVOLUCAO");
@@ -276,7 +338,6 @@ public class AnamneseController {
     }
 
     private void normalizarDecimaisAntesDeSalvar() {
-        // Se ainda estiver só números, formata para salvar bonitinho
         if (tfTemp != null) tfTemp.setText(formatarDecimalSeSomenteDigitos(tfTemp.getText(), 1, 2));
         if (tfPeso != null) tfPeso.setText(formatarDecimalSeSomenteDigitos(tfPeso.getText(), 1, 3));
         if (tfAltura != null) tfAltura.setText(formatarDecimalSeSomenteDigitos(tfAltura.getText(), 2, 1));
@@ -287,7 +348,6 @@ public class AnamneseController {
         String t = texto.trim();
         if (t.isEmpty()) return "";
 
-        // se já tem vírgula, não mexe
         if (t.contains(",")) return t;
 
         String digits = t.replaceAll("\\D", "");
@@ -299,6 +359,7 @@ public class AnamneseController {
         return formatarDecimalPorDigitos(digits, decimais);
     }
 
+    // Mantido (usado após salvar)
     private void carregarInicialEvolucoes() {
         if (paciente == null) return;
         anamneseInicialAtual = anamneseDAO.buscarInicialPorPaciente(paciente.getId());
@@ -365,22 +426,13 @@ public class AnamneseController {
     // ===================== ✅ MÁSCARAS (todas) =====================
 
     private void configurarMascarasSinaisVitais() {
-        aplicarPAautomatico(tfPA);               // 12080 -> 120/80
-        aplicarSomenteNumeros(tfFC, 3);          // 111
-        aplicarSomenteNumeros(tfFR, 3);          // 111
-        aplicarSomenteNumeros(tfSpO2, 3);        // 97 / 100
+        aplicarPAautomatico(tfPA);
+        aplicarSomenteNumeros(tfFC, 3);
+        aplicarSomenteNumeros(tfFR, 3);
+        aplicarSomenteNumeros(tfSpO2, 3);
 
-        // ✅ decimal em tempo real, SEM travar:
-        // Temperatura: "367" -> "36,7"
         aplicarDecimalTempoReal(tfTemp, 1, 2, false);
-
-        // Peso: "2428" -> "242,8"
         aplicarDecimalTempoReal(tfPeso, 1, 3, false);
-
-        // Altura: quer UX mais natural:
-        // 1 dígito => mostra "1" (não 0,01)
-        // 2 dígitos => "1,7" (ex: 17 -> 1,7)
-        // 3 dígitos => "1,72" (ex: 172 -> 1,72)
         aplicarDecimalTempoReal(tfAltura, 2, 1, true);
     }
 
@@ -437,25 +489,18 @@ public class AnamneseController {
         }));
     }
 
-    /**
-     * Decimal em tempo real com UX clínica:
-     * - permite apagar até vazio sem “prender” em 0,00
-     * - modoAltura=true melhora altura para não virar 0,01 ao digitar 1 dígito
-     */
     private void aplicarDecimalTempoReal(TextField tf, int decimais, int maxInteiros, boolean modoAltura) {
         if (tf == null) return;
 
         tf.setTextFormatter(new TextFormatter<String>(change -> {
             String novoTexto = change.getControlNewText();
 
-            // se apagou tudo, fica vazio
             if (novoTexto == null || novoTexto.isEmpty()) {
                 return change;
             }
 
             String digits = novoTexto.replaceAll("\\D", "");
 
-            // se ficou sem dígitos, vazio
             if (digits.isEmpty() || digits.matches("0+")) {
                 change.setText("");
                 change.setRange(0, change.getControlText().length());
@@ -463,14 +508,9 @@ public class AnamneseController {
                 return change;
             }
 
-            // limita tamanho: inteiros + decimais
             int maxLen = maxInteiros + decimais;
             if (digits.length() > maxLen) digits = digits.substring(0, maxLen);
 
-            // ✅ modo especial para altura:
-            // 1 dígito => mostra "1"
-            // 2 dígitos => "1,7" (decimais=2, então 2 dígitos vira 1 decimal só pra UX)
-            // 3+ => formato normal "1,72"
             if (modoAltura) {
                 if (digits.length() == 1) {
                     String formatado = digits;
@@ -480,7 +520,6 @@ public class AnamneseController {
                     return change;
                 }
                 if (digits.length() == 2) {
-                    // Ex: 17 => 1,7 (mais natural pra altura)
                     String formatado = digits.charAt(0) + "," + digits.charAt(1);
                     change.setText(formatado);
                     change.setRange(0, change.getControlText().length());
@@ -713,19 +752,32 @@ public class AnamneseController {
 
     @FXML
     private void onAnexarPdf() {
-        if (paciente == null) { setInfo("Selecione um paciente."); return; }
+        Long pacienteId = null;
+        if (paciente != null && paciente.getId() != null) {
+            pacienteId = paciente.getId();
+        } else if (agendamento != null && agendamento.getPacienteId() != null) {
+            pacienteId = Long.valueOf(agendamento.getPacienteId());
+        }
+
+        if (pacienteId == null) {
+            setInfo("Selecione um paciente.");
+            return;
+        }
 
         FileChooser fc = new FileChooser();
         fc.setTitle("Selecionar PDF");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-        File f = fc.showOpenDialog(btnAnexarPdf.getScene().getWindow());
+
+        var owner = (btnAnexarPdf.getScene() != null) ? btnAnexarPdf.getScene().getWindow() : null;
+        File f = fc.showOpenDialog(owner);
         if (f == null) return;
 
         String descricao = safeTrim(tfDescricaoAnexo.getText());
         Integer anamneseId = getContextoAnamneseIdParaAnexo();
 
         try {
-            anexoDAO.anexarPdf(paciente.getId(), anamneseId, f, descricao);
+            anexoDAO.anexarPdf(pacienteId, anamneseId, f, descricao);
+
             tfDescricaoAnexo.clear();
             carregarAnexosDoPaciente();
             setInfo("PDF anexado com sucesso.");

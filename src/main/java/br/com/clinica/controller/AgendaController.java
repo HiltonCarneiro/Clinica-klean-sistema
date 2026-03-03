@@ -30,6 +30,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
+import javafx.util.Duration;
+
 public class AgendaController {
 
     private static final Locale LOCALE_PT_BR = Locale.forLanguageTag("pt-BR");
@@ -68,6 +72,8 @@ public class AgendaController {
     @FXML private TableColumn<Agendamento, String> colStatus;
 
     private final ContextMenu menuSugestoes = new ContextMenu();
+    private final PauseTransition debounceProc = new PauseTransition(Duration.millis(250));
+    private long procReqSeq = 0;
 
     private LocalDate ultimaDataValida = null;
 
@@ -82,7 +88,7 @@ public class AgendaController {
         configurarPesquisaProfissional();
 
         cbPaciente.setItems(FXCollections.observableArrayList(pacienteDAO.listarTodos()));
-        configurarPesquisaPaciente(); // ✅ NOVO: pesquisa no paciente
+        configurarPesquisaPaciente(); // ✅ pesquisa no paciente
 
         cbSala.setItems(FXCollections.observableArrayList(SalaAtendimento.values()));
 
@@ -328,7 +334,7 @@ public class AgendaController {
         cbProfissional.setOnHidden(e -> filtrados.setPredicate(u -> true));
     }
 
-    // ✅ NOVO: Pesquisa no Paciente
+    // Pesquisa no Paciente
     private void configurarPesquisaPaciente() {
         if (cbPaciente == null) return;
 
@@ -431,40 +437,84 @@ public class AgendaController {
     // Sugestões de procedimento
     // =========================
     private void configurarSugestoesProcedimento() {
-        txtProcedimento.textProperty().addListener((obs, old, novo) -> {
-            menuSugestoes.getItems().clear();
 
-            String termo = (novo == null) ? "" : novo.trim();
+        // dispara somente depois de 250ms sem digitar
+        debounceProc.setOnFinished(ev -> {
+            String termo = (txtProcedimento.getText() == null) ? "" : txtProcedimento.getText().trim();
             if (termo.length() < 2) {
                 menuSugestoes.hide();
                 return;
             }
 
-            SalaAtendimento sala = cbSala.getValue();
-            List<String> sugestoes = procedimentoDAO.sugerir(termo, sala, 8);
+            final SalaAtendimento sala = cbSala.getValue();
+            final long myReq = ++procReqSeq; // marca esta requisição
+            final String termoSnapshot = termo;
 
-            if (sugestoes == null || sugestoes.isEmpty()) {
+            Task<List<String>> task = new Task<>() {
+                @Override
+                protected List<String> call() {
+                    // roda fora do JavaFX thread
+                    return procedimentoDAO.sugerir(termoSnapshot, sala, 8);
+                }
+            };
+
+            task.setOnSucceeded(e -> {
+                // se já chegou uma requisição mais nova, ignora esta resposta
+                if (myReq != procReqSeq) return;
+
+                // se o usuário mudou o texto, ignora também
+                String agora = (txtProcedimento.getText() == null) ? "" : txtProcedimento.getText().trim();
+                if (!agora.equals(termoSnapshot)) return;
+
+                List<String> sugestoes = task.getValue();
+                menuSugestoes.getItems().clear();
+
+                if (sugestoes == null || sugestoes.isEmpty()) {
+                    menuSugestoes.hide();
+                    return;
+                }
+
+                for (String s : sugestoes) {
+                    MenuItem item = new MenuItem(s);
+                    item.setOnAction(ev2 -> {
+                        txtProcedimento.setText(s);
+                        txtProcedimento.positionCaret(s.length());
+                        menuSugestoes.hide();
+                    });
+                    menuSugestoes.getItems().add(item);
+                }
+
+                if (!menuSugestoes.isShowing()) {
+                    menuSugestoes.show(txtProcedimento, Side.BOTTOM, 0, 0);
+                }
+            });
+
+            task.setOnFailed(e -> {
+                // falha silenciosa pra não travar UX (mas printa pra debug)
+                task.getException().printStackTrace();
+                menuSugestoes.hide();
+            });
+
+            Thread t = new Thread(task, "proc-suggest");
+            t.setDaemon(true);
+            t.start();
+        });
+
+        txtProcedimento.textProperty().addListener((obs, old, novo) -> {
+            String termo = (novo == null) ? "" : novo.trim();
+            if (termo.length() < 2) {
+                procReqSeq++; // invalida requisições pendentes
                 menuSugestoes.hide();
                 return;
             }
-
-            for (String s : sugestoes) {
-                MenuItem item = new MenuItem(s);
-                item.setOnAction(e -> {
-                    txtProcedimento.setText(s);
-                    txtProcedimento.positionCaret(s.length());
-                    menuSugestoes.hide();
-                });
-                menuSugestoes.getItems().add(item);
-            }
-
-            if (!menuSugestoes.isShowing()) {
-                menuSugestoes.show(txtProcedimento, Side.BOTTOM, 0, 0);
-            }
+            debounceProc.playFromStart();
         });
 
         txtProcedimento.focusedProperty().addListener((obs, old, foc) -> {
-            if (!foc) menuSugestoes.hide();
+            if (!foc) {
+                procReqSeq++; // invalida requisições pendentes ao sair
+                menuSugestoes.hide();
+            }
         });
     }
 
@@ -551,10 +601,12 @@ public class AgendaController {
         try {
             LocalDate data = dpData.getValue();
 
-            // ✅ ÚNICA MUDANÇA DO PROBLEMA: pega profissional de forma confiável (value OU texto do editor)
+            // profissional confiável (value OU texto do editor)
             Usuario profissional = obterProfissionalSelecionado();
 
-            Paciente paciente = cbPaciente.getValue();
+            // ✅ ALTERAÇÃO MÍNIMA: paciente confiável (value OU texto do editor)
+            Paciente paciente = obterPacienteSelecionado();
+
             SalaAtendimento sala = cbSala.getValue();
 
             LocalTime horaInicio = parseHora(txtHoraInicio.getText());
@@ -600,6 +652,9 @@ public class AgendaController {
             if (paciente != null) {
                 ag.setPacienteId(Math.toIntExact(paciente.getId()));
                 ag.setPacienteNome(paciente.getNome());
+            } else {
+                ag.setPacienteId(null);
+                ag.setPacienteNome(null);
             }
 
             ag.setSala(sala);
@@ -788,16 +843,14 @@ public class AgendaController {
     }
 
     // =========================================================
-    // ✅ ADICIONADO (mínimo): resolver profissional quando o ComboBox é editável
+    // Profissional (já existia)
     // =========================================================
     private Usuario obterProfissionalSelecionado() {
         if (cbProfissional == null) return null;
 
-        // 1) Se já tem value, ok
         Usuario v = cbProfissional.getValue();
         if (v != null) return v;
 
-        // 2) Se não tem value, tenta resolver pelo texto visível no editor
         if (!cbProfissional.isEditable() || cbProfissional.getEditor() == null) return null;
 
         String digitado = cbProfissional.getEditor().getText();
@@ -816,7 +869,6 @@ public class AgendaController {
         String alvo = texto.trim();
         if (alvo.isBlank()) return null;
 
-        // Primeiro tenta nos itens atuais (filtrados)
         if (cbProfissional != null && cbProfissional.getItems() != null) {
             for (Usuario u : cbProfissional.getItems()) {
                 if (u == null) continue;
@@ -824,12 +876,71 @@ public class AgendaController {
             }
         }
 
-        // Fallback: tenta na lista completa (se o filtro ocultou algo)
         try {
             List<Usuario> todos = usuarioDAO.listarProfissionaisAtivos();
             for (Usuario u : todos) {
                 if (u == null) continue;
                 if (textoProfissional(u).equalsIgnoreCase(alvo)) return u;
+            }
+        } catch (Exception ignored) { }
+
+        return null;
+    }
+
+    // =========================================================
+    // ✅ ADICIONADO (mínimo): Paciente confiável quando ComboBox é editável
+    // =========================================================
+    private Paciente obterPacienteSelecionado() {
+        if (cbPaciente == null) return null;
+
+        // 1) Se já tem value, ok
+        Paciente v = cbPaciente.getValue();
+        if (v != null) return v;
+
+        // 2) Se não tem value, tenta resolver pelo texto visível no editor
+        if (!cbPaciente.isEditable() || cbPaciente.getEditor() == null) return null;
+
+        String digitado = cbPaciente.getEditor().getText();
+        if (digitado == null || digitado.trim().isBlank()) return null;
+
+        Paciente achado = buscarPacientePorTexto(digitado.trim());
+        if (achado != null) {
+            cbPaciente.getSelectionModel().select(achado);
+            cbPaciente.setValue(achado);
+        }
+        return achado;
+    }
+
+    private Paciente buscarPacientePorTexto(String texto) {
+        if (texto == null) return null;
+        String alvo = texto.trim();
+        if (alvo.isBlank()) return null;
+
+        // tenta nos itens atuais (filtrados)
+        if (cbPaciente != null && cbPaciente.getItems() != null) {
+            for (Paciente p : cbPaciente.getItems()) {
+                if (p == null) continue;
+                if (safe(p.getNome()).equalsIgnoreCase(alvo)) return p;
+            }
+        }
+
+        // fallback: lista completa do DAO
+        try {
+            List<Paciente> todos = pacienteDAO.listarTodos();
+            for (Paciente p : todos) {
+                if (p == null) continue;
+                if (safe(p.getNome()).equalsIgnoreCase(alvo)) return p;
+            }
+        } catch (Exception ignored) { }
+
+        // fallback final: contém
+        try {
+            String alvoLc = alvo.toLowerCase(LOCALE_PT_BR);
+            List<Paciente> todos = pacienteDAO.listarTodos();
+            for (Paciente p : todos) {
+                if (p == null) continue;
+                String nome = safe(p.getNome()).toLowerCase(LOCALE_PT_BR);
+                if (!nome.isBlank() && nome.contains(alvoLc)) return p;
             }
         } catch (Exception ignored) { }
 

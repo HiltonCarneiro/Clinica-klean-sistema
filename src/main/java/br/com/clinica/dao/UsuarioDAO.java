@@ -28,23 +28,25 @@ public class UsuarioDAO {
             ps.setString(1, login);
             ps.setString(2, senha);
 
-            ResultSet rs = ps.executeQuery();
+            // ✅ MUDANÇA MÍNIMA: fechar o ResultSet corretamente
+            try (ResultSet rs = ps.executeQuery()) {
 
-            if (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNome(rs.getString("nome")); // cargo
-                u.setPessoaNome(rs.getString("pessoa_nome")); // nome da pessoa
-                u.setLogin(rs.getString("login"));
-                u.setSenha(rs.getString("senha"));
-                u.setAtivo(rs.getInt("ativo") == 1);
+                if (rs.next()) {
+                    Usuario u = new Usuario();
+                    u.setId(rs.getInt("id"));
+                    u.setNome(rs.getString("nome")); // cargo
+                    u.setPessoaNome(rs.getString("pessoa_nome")); // nome da pessoa
+                    u.setLogin(rs.getString("login"));
+                    u.setSenha(rs.getString("senha"));
+                    u.setAtivo(rs.getInt("ativo") == 1);
 
-                Perfil perfil = new Perfil();
-                perfil.setId(rs.getLong("perfil_id"));
-                perfil.setNome(rs.getString("perfil_nome"));
-                u.setPerfil(perfil);
+                    Perfil perfil = new Perfil();
+                    perfil.setId(rs.getLong("perfil_id"));
+                    perfil.setNome(rs.getString("perfil_nome"));
+                    u.setPerfil(perfil);
 
-                return u;
+                    return u;
+                }
             }
 
         } catch (SQLException e) {
@@ -60,7 +62,8 @@ public class UsuarioDAO {
      */
     public List<Usuario> listarProfissionaisAtivos() {
         String sql = """
-            SELECT u.id, u.nome, u.pessoa_nome, u.login, u.senha, u.ativo,
+ 
+           SELECT u.id, u.nome, u.pessoa_nome, u.login, u.senha, u.ativo,
                    p.id AS perfil_id, p.nome AS perfil_nome
             FROM usuario u
             JOIN perfil p ON p.id = u.perfil_id
