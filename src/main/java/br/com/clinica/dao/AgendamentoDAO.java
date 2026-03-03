@@ -31,7 +31,7 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, ag.getData().toString());
+            ps.setString(1, ag.getData().toString()); // coluna data é text
             ps.setString(2, ag.getHoraInicio().format(HORA_FORMATTER));
             ps.setString(3, ag.getHoraFim().format(HORA_FORMATTER));
             ps.setInt(4, ag.getProfissionalId());
@@ -53,7 +53,6 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorData(LocalDate data) {
-        // ✅ agora NÃO traz CONCLUIDO (assim finalizado some da agenda)
         String sql = "SELECT * FROM agendamento WHERE data = ? AND status <> ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
 
@@ -74,7 +73,6 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorDataEProfissional(LocalDate data, int profissionalId) {
-        // ✅ agora NÃO traz CONCLUIDO
         String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? AND status <> ? ORDER BY hora_inicio";
         List<Agendamento> lista = new ArrayList<>();
 
@@ -155,8 +153,9 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, inicio.toString());
-            ps.setString(2, fim.toString());
+            // ✅ fix do erro date >= varchar
+            ps.setObject(1, inicio);
+            ps.setObject(2, fim);
             ps.setString(3, StatusAgendamento.CONCLUIDO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -183,8 +182,9 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, inicio.toString());
-            ps.setString(2, fim.toString());
+            // ✅ fix do erro date >= varchar
+            ps.setObject(1, inicio);
+            ps.setObject(2, fim);
             ps.setInt(3, profissionalId);
             ps.setString(4, StatusAgendamento.CONCLUIDO.name());
 
@@ -202,7 +202,7 @@ public class AgendamentoDAO {
 
     private Agendamento mapearAgendamento(ResultSet rs) throws SQLException {
         Agendamento a = new Agendamento();
-        a.setId(rs.getInt("id"));
+        a.setId(rs.getInt("id")); // ✅ mantém int/Integer (como seu model)
         a.setData(LocalDate.parse(rs.getString("data")));
         a.setHoraInicio(LocalTime.parse(rs.getString("hora_inicio"), HORA_FORMATTER));
         a.setHoraFim(LocalTime.parse(rs.getString("hora_fim"), HORA_FORMATTER));

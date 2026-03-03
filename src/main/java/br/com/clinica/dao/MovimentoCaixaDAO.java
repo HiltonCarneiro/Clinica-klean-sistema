@@ -17,7 +17,7 @@ public class MovimentoCaixaDAO {
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, mov.getData().toString()); // LocalDate -> TEXT
+            stmt.setString(1, mov.getData().toString()); // LocalDate -> TEXT (coluna é text)
             stmt.setString(2, mov.getDescricao());
             stmt.setString(3, mov.getTipo().name());
             stmt.setDouble(4, mov.getValor());
@@ -48,8 +48,9 @@ public class MovimentoCaixaDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, inicio.toString());
-            stmt.setString(2, fim.toString());
+            // ✅ aqui é o fix do erro: date BETWEEN (date) e não BETWEEN (varchar)
+            stmt.setObject(1, inicio);
+            stmt.setObject(2, fim);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
