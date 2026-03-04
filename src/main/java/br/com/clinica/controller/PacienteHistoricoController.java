@@ -158,14 +158,21 @@ public class PacienteHistoricoController {
             return;
         }
 
-        File f = item.getFile();
-        if (f == null || !f.exists()) {
-            new Alert(Alert.AlertType.ERROR, "Arquivo não encontrado no caminho salvo.").showAndWait();
-            return;
-        }
-
         try {
+            // Novo: abre do Supabase Storage no navegador
+            if (item.isNuvem()) {
+                anexoDAO.abrirNoNavegadorSignedUrl(item.getStoragePath());
+                return;
+            }
+
+            // Legado: abre arquivo local (se existir)
+            File f = item.getFileLegado();
+            if (f == null || !f.exists()) {
+                new Alert(Alert.AlertType.ERROR, "Arquivo não encontrado. (anexo antigo/local)").showAndWait();
+                return;
+            }
             anexoDAO.abrirNoSistema(f);
+
         } catch (Exception e) {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Não foi possível abrir o arquivo.").showAndWait();

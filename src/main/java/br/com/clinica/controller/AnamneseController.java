@@ -790,10 +790,31 @@ public class AnamneseController {
     @FXML
     private void onAbrirPdf() {
         var sel = tvAnexos.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
+        if (sel == null) {
+            setInfo("Selecione um anexo para abrir.");
+            return;
+        }
 
         try {
-            anexoDAO.abrirNoSistema(sel.getFile());
+            // NOVO: anexo na nuvem (Supabase Storage) -> abre no navegador (signed URL)
+            if (sel.isNuvem()) {
+                anexoDAO.abrirNoNavegadorSignedUrl(sel.getStoragePath());
+                return;
+            }
+
+            // LEGADO: anexo local -> abre no sistema
+            File f = sel.getFile(); // compatibilidade
+            if (f == null) {
+                setInfo("Arquivo nulo.");
+                return;
+            }
+            if (!f.exists()) {
+                setInfo("Arquivo não encontrado: " + f.getAbsolutePath());
+                return;
+            }
+
+            anexoDAO.abrirNoSistema(f);
+
         } catch (Exception e) {
             e.printStackTrace();
             setInfo("Erro ao abrir: " + e.getMessage());
