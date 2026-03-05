@@ -6,10 +6,11 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="br.com.clinica.controller.AnamneseController">
+            fx:controller="br.com.clinica.controller.AnamneseController"
+            styleClass="page-clean">
 
     <top>
-        <VBox spacing="6">
+        <VBox spacing="6" styleClass="top-clean">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
@@ -21,18 +22,30 @@
 
             <Separator/>
 
-            <HBox spacing="10">
-                <Label text="Tipo:"/>
+            <HBox spacing="10" styleClass="actions-clean">
+                <Label text="Tipo:" styleClass="label-muted"/>
                 <ComboBox fx:id="cbTipo"/>
-                <Button fx:id="btnNovaEvolucao" text="Nova evolução" onAction="#onNovaEvolucao"/>
-                <Button fx:id="btnSalvarInicial" text="Salvar anamnese inicial" onAction="#onSalvarInicial"/>
-                <Button fx:id="btnSalvarEvolucao" text="Salvar evolução" onAction="#onSalvarEvolucao"/>
+
+                <Button fx:id="btnNovaEvolucao"
+                        text="Nova evolução"
+                        onAction="#onNovaEvolucao"
+                        styleClass="btn-ghost"/>
+
+                <Button fx:id="btnSalvarInicial"
+                        text="Salvar anamnese inicial"
+                        onAction="#onSalvarInicial"
+                        styleClass="btn-primary"/>
+
+                <Button fx:id="btnSalvarEvolucao"
+                        text="Salvar evolução"
+                        onAction="#onSalvarEvolucao"
+                        styleClass="btn-primary"/>
             </HBox>
         </VBox>
     </top>
 
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
+        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tabs-clean">
             <tabs>
 
                 <Tab text="Principal">
@@ -42,13 +55,13 @@
                         </padding>
 
                         <Label text="Queixa principal"/>
-                        <TextArea fx:id="taQueixa"/>
+                        <TextArea fx:id="taQueixa" styleClass="area-clean"/>
 
                         <Label text="Evolução"/>
-                        <TextArea fx:id="taEvolucao"/>
+                        <TextArea fx:id="taEvolucao" styleClass="area-clean"/>
 
                         <Label text="Observações"/>
-                        <TextArea fx:id="taObservacoes"/>
+                        <TextArea fx:id="taObservacoes" styleClass="area-clean"/>
                     </VBox>
                 </Tab>
 
@@ -59,25 +72,25 @@
                         </padding>
 
                         <Label text="PA:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfPA" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfPA" styleClass="field-clean" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
                         <Label text="FC:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfFC" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfFC" styleClass="field-clean" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
                         <Label text="FR:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfFR" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfFR" styleClass="field-clean" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                         <Label text="Temperatura:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfTemp" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfTemp" styleClass="field-clean" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
                         <Label text="Peso:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfPeso" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfPeso" styleClass="field-clean" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                         <Label text="Altura:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfAltura" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfAltura" styleClass="field-clean" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
                         <Label text="SpO2:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                        <TextField fx:id="tfSpO2" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                        <TextField fx:id="tfSpO2" styleClass="field-clean" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
                     </GridPane>
                 </Tab>
 
@@ -107,7 +120,7 @@
                         </FlowPane>
 
                         <Label text="Outros / detalhes (opcional)"/>
-                        <TextArea fx:id="taAntecedentes" prefRowCount="4"/>
+                        <TextArea fx:id="taAntecedentes" prefRowCount="4" styleClass="area-clean"/>
 
                         <Separator/>
 
@@ -116,21 +129,24 @@
                             <Region HBox.hgrow="ALWAYS"/>
                             <CheckBox fx:id="chkSemMedicacoes" text="Não faz uso"/>
                         </HBox>
-                        <TextArea fx:id="taMedicacoes" prefRowCount="4"/>
+
+                        <TextArea fx:id="taMedicacoes" prefRowCount="4" styleClass="area-clean"/>
 
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Alergias"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <CheckBox fx:id="chkNegaAlergias" text="Nega alergias"/>
                         </HBox>
-                        <TextArea fx:id="taAlergias" prefRowCount="4"/>
+
+                        <TextArea fx:id="taAlergias" prefRowCount="4" styleClass="area-clean"/>
 
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Cirurgias"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <CheckBox fx:id="chkNegaCirurgias" text="Nega cirurgias"/>
                         </HBox>
-                        <TextArea fx:id="taCirurgias" prefRowCount="4"/>
+
+                        <TextArea fx:id="taCirurgias" prefRowCount="4" styleClass="area-clean"/>
                     </VBox>
                 </Tab>
 
@@ -151,13 +167,13 @@
                         </HBox>
 
                         <Label text="Sono"/>
-                        <TextArea fx:id="taSono"/>
+                        <TextArea fx:id="taSono" styleClass="area-clean"/>
 
                         <Label text="Atividade Física"/>
-                        <TextArea fx:id="taAtividadeFisica"/>
+                        <TextArea fx:id="taAtividadeFisica" styleClass="area-clean"/>
 
                         <Label text="Alimentação"/>
-                        <TextArea fx:id="taAlimentacao"/>
+                        <TextArea fx:id="taAlimentacao" styleClass="area-clean"/>
                     </VBox>
                 </Tab>
 
@@ -168,10 +184,10 @@
                         </padding>
 
                         <Label text="Exame geral"/>
-                        <TextArea fx:id="taExameGeral"/>
+                        <TextArea fx:id="taExameGeral" styleClass="area-clean"/>
 
                         <Label text="Exame segmentar"/>
-                        <TextArea fx:id="taExameSegmentar"/>
+                        <TextArea fx:id="taExameSegmentar" styleClass="area-clean"/>
                     </VBox>
                 </Tab>
 
@@ -181,7 +197,7 @@
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
 
-                        <TableView fx:id="tvHistorico" prefHeight="350">
+                        <TableView fx:id="tvHistorico" prefHeight="350" styleClass="table-soft">
                             <columns>
                                 <TableColumn fx:id="colData" text="Data/Hora" prefWidth="220"/>
                                 <TableColumn fx:id="colTipo" text="Tipo" prefWidth="220"/>
@@ -198,13 +214,25 @@
 
                         <HBox spacing="10">
                             <Label text="Descrição:"/>
-                            <TextField fx:id="tfDescricaoAnexo" HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="btnAnexarPdf" text="Anexar PDF" onAction="#onAnexarPdf"/>
-                            <Button fx:id="btnAbrirPdf" text="Abrir" onAction="#onAbrirPdf"/>
-                            <Button fx:id="btnRemoverPdf" text="Remover" onAction="#onRemoverPdf"/>
+                            <TextField fx:id="tfDescricaoAnexo" styleClass="field-clean" HBox.hgrow="ALWAYS"/>
+
+                            <Button fx:id="btnAnexarPdf"
+                                    text="Anexar PDF"
+                                    onAction="#onAnexarPdf"
+                                    styleClass="btn-primary"/>
+
+                            <Button fx:id="btnAbrirPdf"
+                                    text="Abrir"
+                                    onAction="#onAbrirPdf"
+                                    styleClass="btn-ghost"/>
+
+                            <Button fx:id="btnRemoverPdf"
+                                    text="Remover"
+                                    onAction="#onRemoverPdf"
+                                    styleClass="btn-ghost"/>
                         </HBox>
 
-                        <TableView fx:id="tvAnexos" prefHeight="320">
+                        <TableView fx:id="tvAnexos" prefHeight="320" styleClass="table-soft">
                             <columns>
                                 <TableColumn fx:id="colAnexoData" text="Data/Hora" prefWidth="190"/>
                                 <TableColumn fx:id="colAnexoArquivo" text="Arquivo" prefWidth="240"/>

@@ -6,22 +6,24 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.PacienteHistoricoController">
+            fx:controller="br.com.clinica.controller.PacienteHistoricoController"
+            styleClass="page-clean"
+            stylesheets="@/styles/app.css">
 
     <!-- ======= TOPO ======= -->
     <top>
-        <VBox spacing="10">
+        <VBox spacing="10" styleClass="top-clean">
             <padding>
                 <Insets top="14" right="16" bottom="10" left="16"/>
             </padding>
 
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Histórico do Paciente" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Label text="Histórico do Paciente" styleClass="header-title"/>
                 <Pane HBox.hgrow="ALWAYS"/>
-                <Button text="Fechar" onAction="#onFechar"/>
+                <Button text="Fechar" onAction="#onFechar" styleClass="btn-ghost"/>
             </HBox>
 
-            <GridPane hgap="14" vgap="6">
+            <GridPane hgap="14" vgap="6" styleClass="info-grid">
                 <columnConstraints>
                     <ColumnConstraints minWidth="110" halignment="RIGHT"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
@@ -29,19 +31,19 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
-                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label text="Nome:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                 <Label fx:id="lblNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="CPF:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <Label text="CPF:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                 <Label fx:id="lblCpf" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                <Label text="Telefone:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label text="Telefone:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                 <Label fx:id="lblTelefone" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Data nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <Label text="Data nasc.:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
                 <Label fx:id="lblDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                <Label text="Ativo:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label text="Ativo:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
                 <Label fx:id="lblAtivo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             </GridPane>
 
@@ -51,22 +53,23 @@
 
     <!-- ======= CENTRO: ABAS ======= -->
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
+        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tabs-clean">
+
             <!-- ======================= ANEXOS ======================= -->
             <Tab text="Anexos / Exames">
-                <VBox spacing="10">
+                <VBox spacing="10" styleClass="tab-body">
                     <padding>
                         <Insets top="10" right="16" bottom="16" left="16"/>
                     </padding>
 
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Anexos do paciente" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label text="Anexos do paciente" styleClass="section-title"/>
                         <Pane HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="btnAtualizarAnexos" text="Atualizar" onAction="#onAtualizarAnexos"/>
-                        <Button fx:id="btnAbrirAnexo" text="Abrir" onAction="#onAbrirAnexo" disable="true"/>
+                        <Button fx:id="btnAtualizarAnexos" text="Atualizar" onAction="#onAtualizarAnexos" styleClass="btn-ghost"/>
+                        <Button fx:id="btnAbrirAnexo" text="Abrir" onAction="#onAbrirAnexo" disable="true" styleClass="btn-primary"/>
                     </HBox>
 
-                    <TableView fx:id="tableAnexos" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="tableAnexos" VBox.vgrow="ALWAYS" styleClass="table-soft">
                         <columns>
                             <TableColumn fx:id="colAnexoNome" text="Arquivo" prefWidth="320"/>
                             <TableColumn fx:id="colAnexoDescricao" text="Descrição" prefWidth="240"/>
@@ -75,28 +78,28 @@
                     </TableView>
 
                     <Label text="Dica: selecione um anexo e clique em “Abrir” para visualizar o PDF no leitor padrão."
-                           style="-fx-text-fill: #666;"/>
+                           styleClass="hint-text"/>
                 </VBox>
             </Tab>
 
             <!-- ======================= ANAMNESE & EVOLUÇÕES ======================= -->
             <Tab text="Anamnese &amp; Evoluções">
-                <BorderPane>
+                <BorderPane styleClass="tab-body">
                     <padding>
                         <Insets top="10" right="16" bottom="16" left="16"/>
                     </padding>
 
                     <top>
                         <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Label text="Histórico de Anamnese e Evoluções" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                            <Label text="Histórico de Anamnese e Evoluções" styleClass="section-title"/>
                             <Pane HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="btnAtualizarAnamnese" text="Atualizar" onAction="#onAtualizarAnamnese"/>
+                            <Button fx:id="btnAtualizarAnamnese" text="Atualizar" onAction="#onAtualizarAnamnese" styleClass="btn-ghost"/>
                         </HBox>
                     </top>
 
                     <left>
                         <VBox spacing="8" prefWidth="360">
-                            <TableView fx:id="tableAnamnese" VBox.vgrow="ALWAYS">
+                            <TableView fx:id="tableAnamnese" VBox.vgrow="ALWAYS" styleClass="table-soft">
                                 <columns>
                                     <TableColumn fx:id="colAnaDataHora" text="Data/Hora" prefWidth="170"/>
                                     <TableColumn fx:id="colAnaTipo" text="Tipo" prefWidth="160"/>
@@ -104,21 +107,21 @@
                             </TableView>
 
                             <Label text="Selecione um item para ver os detalhes à direita."
-                                   style="-fx-text-fill: #666;"/>
+                                   styleClass="hint-text"/>
                         </VBox>
                     </left>
 
                     <center>
                         <VBox spacing="10">
-                            <Label text="Observações" style="-fx-font-weight: bold;"/>
-                            <TextArea fx:id="txtObservacoes" prefRowCount="4" wrapText="true" editable="false"/>
+                            <Label text="Observações" styleClass="field-title"/>
+                            <TextArea fx:id="txtObservacoes" prefRowCount="4" wrapText="true" editable="false" styleClass="area-clean"/>
 
-                            <Label text="Resumo do registro" style="-fx-font-weight: bold;"/>
-                            <TextArea fx:id="txtResumo" prefRowCount="14" wrapText="true" editable="false"/>
+                            <Label text="Resumo do registro" styleClass="field-title"/>
+                            <TextArea fx:id="txtResumo" prefRowCount="14" wrapText="true" editable="false" styleClass="area-clean"/>
 
-                            <TitledPane fx:id="tpJson" text="Dados técnicos (JSON)" expanded="false">
+                            <TitledPane fx:id="tpJson" text="Dados técnicos (JSON)" expanded="false" styleClass="tp-clean">
                                 <content>
-                                    <TextArea fx:id="txtJson" prefRowCount="10" wrapText="false" editable="false"/>
+                                    <TextArea fx:id="txtJson" prefRowCount="10" wrapText="false" editable="false" styleClass="area-clean mono"/>
                                 </content>
                             </TitledPane>
                         </VBox>

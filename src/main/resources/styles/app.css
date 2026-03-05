@@ -763,3 +763,278 @@
 .agenda-grid {
     -fx-padding: 6 0 2 0;
 }
+    /* =========================
+       ANAMNESE / HISTÓRICO - CLEAN
+       ========================= */
+
+.page-clean {
+    -fx-background-color: #ffffff;
+}
+
+.top-clean {
+    -fx-background-color: transparent;
+}
+
+    /* Labels do topo mais discretos */
+
+.top-clean .label {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 700;
+}
+
+.label-muted {
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 800;
+}
+
+    /* Separador mais leve */
+.separator {
+    -fx-opacity: 0.55;
+}
+
+    /* Barra de ações */
+
+.actions-clean {
+    -fx-padding: 6 0 0 0;
+}
+
+    /* Campos clean */
+
+.field-clean, .area-clean {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-font-size: 13px;
+}
+
+.field-clean:focused, .area-clean:focused {
+    -fx-border-color: #22c55e;
+    -fx-effect: dropshadow(gaussian, rgba(34, 197, 94, 0.12), 10, 0.2, 0, 0);
+}
+
+    /* TextArea com padding melhor */
+
+.area-clean {
+    -fx-padding: 8 10;
+}
+
+    /* Tabs clean */
+.tabs-clean .tab-header-area {
+    -fx-padding: 6 0 0 0;
+}
+
+.tabs-clean .tab-header-background {
+    -fx-background-color: transparent;
+}
+.tabs-clean .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8 14;
+}
+
+    .tabs-clean .tab .tab-label {
+        -fx-text-fill: #475569;
+        -fx-font-weight: 800;
+    }
+
+    .tabs-clean .tab:selected .tab-label {
+        -fx-text-fill: #14532d;
+    }
+
+    /* Conteúdo das abas com “respiro” */
+
+    .tab-content-area {
+        -fx-background-color: transparent;
+    }
+
+/* =========================
+   HISTÓRICO DO PACIENTE - CLEAN
+   ========================= */
+
+.page-clean {
+    -fx-background-color: #ffffff;
+}
+
+/* Topo */
+.top-clean .header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.label-muted {
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 800;
+}
+
+/* Aba: espaçamento do conteúdo */
+.tab-body {
+    -fx-background-color: transparent;
+}
+
+/* Títulos internos */
+.section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.field-title {
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.hint-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+}
+
+/* Tabs clean */
+.tabs-clean .tab-header-background {
+    -fx-background-color: transparent;
+}
+.tabs-clean .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 6 12;
+}
+.tabs-clean .tab .tab-label {
+    -fx-text-fill: #475569;
+    -fx-font-weight: 800;
+}
+.tabs-clean .tab:selected .tab-label {
+    -fx-text-fill: #14532d;
+}
+
+/* Inputs clean */
+.area-clean, .field-clean {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-font-size: 13px;
+}
+.area-clean {
+    -fx-padding: 8 10;
+}
+.area-clean:focused, .field-clean:focused {
+    -fx-border-color: #22c55e;
+    -fx-effect: dropshadow(gaussian, rgba(34,197,94,0.12), 10, 0.2, 0, 0);
+}
+
+/* monoespaço pro JSON */
+.mono {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 12px;
+}
+
+/* TitledPane clean */
+.tp-clean > .title {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-padding: 8 10;
+}
+.tp-clean > .content {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 1 1 1;
+    -fx-background-radius: 0 0 10 10;
+    -fx-border-radius: 0 0 10 10;
+    -fx-padding: 10;
+}
+/* =========================
+   TABLEVIEW - SELEÇÃO LEGÍVEL (CLIQUE)
+   ========================= */
+
+/* Fundo da seleção */
+.table-view .table-row-cell:filled:selected,
+.table-view .table-row-cell:filled:selected:focused,
+.table-view .table-row-cell:filled:selected:hover,
+.table-view .table-row-cell:filled:selected:focused:hover {
+    -fx-background-color: #e7f7ee;
+}
+
+/* MUITO IMPORTANTE: o texto fica na célula, não na row */
+.table-view .table-cell:filled:selected,
+.table-view:focused .table-cell:filled:selected {
+    -fx-text-fill: #0f172a;
+}
+
+/* Também força o "text" interno */
+.table-view .table-cell:filled:selected .text,
+.table-view:focused .table-cell:filled:selected .text {
+    -fx-fill: #0f172a;
+}
+
+/* Evita overlay que clareia */
+.table-view .table-row-cell:filled:selected,
+.table-view .table-row-cell:filled:selected:focused {
+    -fx-background-insets: 0;
+}
+
+/* Hover suave */
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #f1fbf5;
+}
+
+
+
+
+/* =====================================================
+   FIX GLOBAL DE SELEÇÃO - TABLEVIEW
+   Resolve texto ilegível ao clicar na linha
+   ===================================================== */
+
+/* Linha selecionada */
+.table-row-cell:filled:selected {
+    -fx-background-color: #e7f7ee;
+}
+
+/* Linha selecionada quando tabela está focada */
+.table-view:focused .table-row-cell:filled:selected {
+    -fx-background-color: #e7f7ee;
+}
+
+/* Hover (passar mouse) */
+.table-row-cell:filled:hover {
+    -fx-background-color: #f1fbf5;
+}
+
+/* CÉLULAS da linha selecionada */
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #0f172a;
+}
+
+/* Quando tabela está focada */
+.table-view:focused .table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #0f172a;
+}
+
+/* Alguns componentes usam .text dentro da célula */
+.table-row-cell:filled:selected .text {
+    -fx-fill: #0f172a;
+}
+
+.table-view:focused .table-row-cell:filled:selected .text {
+    -fx-fill: #0f172a;
+}
+
+/* Remove barras de foco do TableView */
+
+.table-view {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.table-view .table-cell {
+    -fx-border-color: transparent;
+}
+
+.table-row-cell:filled:selected .table-cell {
+    -fx-border-color: transparent;
+}
