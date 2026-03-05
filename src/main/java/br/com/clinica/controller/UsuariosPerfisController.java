@@ -50,8 +50,7 @@ public class UsuariosPerfisController {
     @FXML private TableColumn<AdminUsuariosPerfisDAO.PerfilRow, String> colPNome;
     @FXML private TextField txtRenomearPerfil;
     @FXML private Label lblMsgPerfis;
-
-    // ✅ novo
+    
     @FXML private Button btnExcluirPerfil;
 
     // ===================== PERMISSÕES =====================
@@ -368,8 +367,12 @@ public class UsuariosPerfisController {
         Arrays.sort(vals, Comparator.comparing(Enum::name));
 
         for (Permissao p : vals) {
-            CheckBox cb = new CheckBox(p.name());
+            // Mostra texto amigável
+            CheckBox cb = new CheckBox(p.getLabel());
+
+            // Guarda o "código" real pra salvar/carregar sem mudar seu DAO
             checks.put(p.name(), cb);
+
             boxPermissoes.getChildren().add(cb);
         }
     }
