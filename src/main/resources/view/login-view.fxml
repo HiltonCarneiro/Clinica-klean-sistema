@@ -70,7 +70,8 @@
         <Button text="Entrar"
                 onAction="#onEntrar"
                 prefWidth="220"
-                styleClass="login-button"/>
+                styleClass="login-button"
+                defaultButton="true"/>
 
     </VBox>
 </StackPane>

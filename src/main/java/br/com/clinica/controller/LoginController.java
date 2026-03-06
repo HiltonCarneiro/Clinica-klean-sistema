@@ -60,6 +60,21 @@ public class LoginController {
                 // abrir/fechar já aquece pool/SSL
             } catch (Exception ignored) {}
         }, "db-warmup").start();
+        // foco inicial no usuário
+        txtUsuario.requestFocus();
+
+// ENTER no usuário vai para senha
+        txtUsuario.setOnAction(e -> {
+            if (senhaVisivel) {
+                txtSenhaVisivel.requestFocus();
+            } else {
+                txtSenha.requestFocus();
+            }
+        });
+
+// ENTER na senha faz login
+        txtSenha.setOnAction(e -> onEntrar());
+        txtSenhaVisivel.setOnAction(e -> onEntrar());
     }
 
     @FXML
