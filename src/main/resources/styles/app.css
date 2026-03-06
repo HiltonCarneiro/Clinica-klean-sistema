@@ -1038,3 +1038,98 @@
 .table-row-cell:filled:selected .table-cell {
     -fx-border-color: transparent;
 }
+
+/* =====================================================
+   ATENDIMENTO (ANAMNESE) - CLEAN
+   ===================================================== */
+
+/* Topo da tela (infos do paciente/profissional) */
+.page-clean .top-clean {
+    -fx-background-color: #ffffff;
+}
+
+/* labels do topo (Paciente/Profissional/Agendamento) */
+.page-clean .top-clean .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 700;
+    -fx-font-size: 12.5px;
+}
+
+/* label auxiliar (tipo) */
+.label-muted {
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 800;
+}
+
+/* Barra de ações */
+.actions-clean {
+    -fx-padding: 6 0 0 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ComboBox do tipo (fica no mesmo padrão clean) */
+.actions-clean .combo-box {
+    -fx-max-width: 220;
+}
+
+/* Conteúdo das abas com respiro */
+.tabs-clean .tab-content-area {
+    -fx-background-color: transparent;
+}
+
+/* Títulos dentro das abas (Queixa, Evolução etc) */
+.page-clean .tab-pane .tab-content-area .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 800;
+}
+
+/* Campos (TextField/TextArea) já têm base; aqui só melhora altura visual */
+.area-clean {
+    -fx-pref-row-count: 6;
+    -fx-background-insets: 0;
+}
+.field-clean {
+    -fx-background-insets: 0;
+}
+
+/* CheckBox mais clean */
+.check-box {
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+}
+.check-box .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+.check-box:selected .mark {
+    -fx-background-color: #16a34a; /* verde */
+}
+
+/* FlowPane dos antecedentes (não fica “apertado”) */
+.flow-pane {
+    -fx-padding: 4 0 0 0;
+}
+
+/* TableView do histórico e anexos já usa table-soft.
+   Só garante que o header fique mais discreto nesta tela */
+.table-soft .column-header-background {
+    -fx-background-color: #f8fafc;
+}
+.table-soft .column-header .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 900;
+}
+
+/* Remover barras de foco feias (as azuis) */
+.table-view {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.table-view .table-cell {
+    -fx-border-color: transparent;
+}
+.table-row-cell:filled:selected .table-cell {
+    -fx-border-color: transparent;
+}
