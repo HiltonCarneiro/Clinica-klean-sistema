@@ -3,8 +3,8 @@ package br.com.clinica;
 import br.com.clinica.service.BackupService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
@@ -28,14 +28,23 @@ public class MainApp extends Application {
         var cssUrl = getClass().getResource("/styles/app.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 
+        // Título + ÍCONE da janela/app
         stage.setTitle("Clínica Klean - Saúde Integrativa | Login");
+
+        var iconStream = getClass().getResourceAsStream("/images/logo-klean.png");
+        if (iconStream != null) {
+            stage.getIcons().add(new Image(iconStream));
+        } else {
+            System.out.println("Ícone não encontrado: /images/logo-klean.png");
+        }
+
         stage.setScene(scene);
         stage.setResizable(true);
         stage.centerOnScreen();
         stage.show();
     }
 
-        public static void main(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 }
