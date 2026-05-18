@@ -1,23 +1,15 @@
-package br.com.clinica.model;
+package br.com.clinica.dto;
 
 import java.time.LocalDate;
-import java.time.Period;
 
-public class Paciente {
+public class PacienteFormData {
 
-    private Long id;
     private String nome;
     private String cpf;
     private String rg;
     private LocalDate dataNascimento;
     private String telefone;
-    private String responsavelLegal;
-    private boolean ativo = true;
 
-    // Endereço COMPLETO
-    private String endereco;
-
-    // Endereço detalhado
     private String rua;
     private String numero;
     private String complemento;
@@ -26,18 +18,7 @@ public class Paciente {
     private String cep;
     private String uf;
 
-    public Paciente() {
-    }
-
-    // ===== Getters / Setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private String responsavelLegal;
 
     public String getNome() {
         return nome;
@@ -71,16 +52,6 @@ public class Paciente {
         this.dataNascimento = dataNascimento;
     }
 
-    public int getIdade() {
-        if (dataNascimento == null) return 0;
-        return Period.between(dataNascimento, LocalDate.now()).getYears();
-    }
-
-    public String getIdadeTexto() {
-        if (dataNascimento == null) return "";
-        return String.valueOf(getIdade());
-    }
-
     public String getTelefone() {
         return telefone;
     }
@@ -88,33 +59,6 @@ public class Paciente {
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
-
-    public String getResponsavelLegal() {
-        return responsavelLegal;
-    }
-
-    public void setResponsavelLegal(String responsavelLegal) {
-        this.responsavelLegal = responsavelLegal;
-    }
-
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
-    }
-
-    // ===== Endereço completo (campo da tela) =====
-    public String getEndereco() {
-        return endereco;
-    }
-
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
-    }
-
-    // ===== Endereço detalhado (campos novos) =====
 
     public String getRua() {
         return rua;
@@ -172,8 +116,11 @@ public class Paciente {
         this.uf = uf;
     }
 
-    @Override
-    public String toString() {
-        return nome == null ? "" : nome;
+    public String getResponsavelLegal() {
+        return responsavelLegal;
+    }
+
+    public void setResponsavelLegal(String responsavelLegal) {
+        this.responsavelLegal = responsavelLegal;
     }
 }

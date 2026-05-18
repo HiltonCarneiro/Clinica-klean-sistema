@@ -20,6 +20,7 @@ import javafx.scene.control.TitledPane;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -28,8 +29,11 @@ public class PacienteHistoricoController {
     // ======= CABEÇALHO =======
     @FXML private Label lblNome;
     @FXML private Label lblCpf;
+    @FXML private Label lblRg;
     @FXML private Label lblTelefone;
     @FXML private Label lblDataNascimento;
+    @FXML private Label lblIdade;
+    @FXML private Label lblEndereco;
     @FXML private Label lblAtivo;
 
     // ======= ABA ANEXOS =======
@@ -123,12 +127,94 @@ public class PacienteHistoricoController {
 
         if (lblNome != null) lblNome.setText(safe(paciente.getNome()));
         if (lblCpf != null) lblCpf.setText(ValidationUtils.formatCpf(safe(paciente.getCpf())));
+        if (lblRg != null) lblRg.setText(formatRg(safe(paciente.getRg())));
         if (lblTelefone != null) lblTelefone.setText(ValidationUtils.formatPhoneBr(safe(paciente.getTelefone())));
 
         LocalDate dn = paciente.getDataNascimento();
         if (lblDataNascimento != null) lblDataNascimento.setText(dn == null ? "" : dn.format(fmtBr));
+        if (lblIdade != null) lblIdade.setText(calcularIdadeTexto(dn));
+
+        if (lblEndereco != null) lblEndereco.setText(montarEnderecoCompleto(paciente));
 
         if (lblAtivo != null) lblAtivo.setText(paciente.isAtivo() ? "Sim" : "Não");
+    }
+
+    private String calcularIdadeTexto(LocalDate dn) {
+        if (dn == null) return "";
+        int idade = Period.between(dn, LocalDate.now()).getYears();
+        if (idade < 0) idade = 0;
+        return idade + " anos";
+    }
+
+    private String montarEnderecoCompleto(Paciente p) {
+        if (p == null) return "";
+
+        String rua = safe(p.getRua()).trim();
+        String numero = safe(p.getNumero()).trim();
+        String complemento = safe(p.getComplemento()).trim();
+        String bairro = safe(p.getBairro()).trim();
+        String cidade = safe(p.getCidade()).trim();
+        String cep = safe(p.getCep()).trim();
+        String uf = safe(p.getUf()).trim();
+
+        StringBuilder sb = new StringBuilder();
+
+        if (!rua.isBlank()) {
+            sb.append(rua);
+        }
+
+        if (!numero.isBlank()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(numero);
+        }
+
+        if (!complemento.isBlank()) {
+            if (sb.length() > 0) sb.append(" - ");
+            sb.append(complemento);
+        }
+
+        if (!bairro.isBlank()) {
+            if (sb.length() > 0) sb.append(" - ");
+            sb.append(bairro);
+        }
+
+        if (!cidade.isBlank()) {
+            if (sb.length() > 0) sb.append(" - ");
+            sb.append(cidade);
+        }
+
+        if (!uf.isBlank()) {
+            if (sb.length() > 0) sb.append("/").append(uf);
+            else sb.append(uf);
+        }
+
+        if (!cep.isBlank()) {
+            String cepFmt = ValidationUtils.formatCep(cep);
+            if (!cepFmt.isBlank()) {
+                if (sb.length() > 0) sb.append(" - CEP: ").append(cepFmt);
+                else sb.append("CEP: ").append(cepFmt);
+            }
+        }
+
+        if (sb.length() == 0) {
+            return safe(p.getEndereco());
+        }
+
+        return sb.toString();
+    }
+
+    private String formatRg(String rg) {
+        String digits = safe(rg).replaceAll("\\D", "");
+        if (digits.isBlank()) return "";
+
+        if (digits.length() > 7) digits = digits.substring(0, 7);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < digits.length(); i++) {
+            if (i == 1 || i == 4) sb.append('.');
+            sb.append(digits.charAt(i));
+        }
+        return sb.toString();
     }
 
     // ===============================

@@ -11,7 +11,6 @@
     <center>
         <StackPane>
 
-            <!-- ====================== TELA DE ESCOLHA ====================== -->
             <VBox fx:id="boxEscolha"
                   alignment="CENTER"
                   spacing="18"
@@ -39,7 +38,6 @@
                 </VBox>
             </VBox>
 
-            <!-- ====================== TELA DE CADASTRO ====================== -->
             <ScrollPane fx:id="scrollCadastro"
                         fitToWidth="true"
                         visible="false"
@@ -71,36 +69,46 @@
                                 <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                                 <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                                <Label text="Data Nasc.:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                                <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                                <Label text="RG:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtRg" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                                <Label text="Telefone:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtTelefone" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                <Label text="Data Nasc.:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                                <Label text="Rua:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtRua" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                <Label text="Idade:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtIdade" editable="false" focusTraversable="false"
+                                           GridPane.rowIndex="2" GridPane.columnIndex="3"/>
 
-                                <Label text="Número:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtNumero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                <Label text="Telefone:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtTelefone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                <Label text="Rua:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtRua" GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+
+                                <Label text="Número:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtNumero" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
                                 <CheckBox fx:id="chkSemNumero" text="Sem número"
-                                          GridPane.rowIndex="4" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
+                                          GridPane.rowIndex="5" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
 
-                                <Label text="Bairro:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtBairro" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                <Label text="Complemento:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtComplemento" GridPane.rowIndex="6" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
 
-                                <Label text="Cidade:" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtCidade" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
+                                <Label text="Bairro:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtBairro" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
 
-                                <Label text="CEP:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtCep" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                                <Label text="Cidade:" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtCidade" GridPane.rowIndex="7" GridPane.columnIndex="3"/>
 
-                                <Label text="UF:" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtUf" GridPane.rowIndex="6" GridPane.columnIndex="3"/>
+                                <Label text="CEP:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtCep" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
 
-                                <Label text="Responsável legal:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                                <Label text="UF:" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
+                                <TextField fx:id="txtUf" GridPane.rowIndex="8" GridPane.columnIndex="3"/>
+
+                                <Label text="Responsável legal:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
                                 <TextField fx:id="txtResponsavelLegal"
-                                           GridPane.rowIndex="7" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                           GridPane.rowIndex="9" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
                             </GridPane>
 
                             <HBox spacing="10">
@@ -120,7 +128,6 @@
                 </content>
             </ScrollPane>
 
-            <!-- ====================== TELA DE BUSCA ====================== -->
             <VBox fx:id="boxBusca" spacing="12" visible="false" managed="false" styleClass="page-content">
                 <padding>
                     <Insets top="14" right="16" bottom="16" left="16"/>
@@ -130,13 +137,12 @@
                     <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
                     <Label text="Buscar Paciente" styleClass="section-title"/>
                     <Pane HBox.hgrow="ALWAYS"/>
-                    <!-- ✅ BOTÕES -->
                     <Button fx:id="btnEditarSelecionado" text="Editar" onAction="#onEditarSelecionado" disable="true"/>
                     <Button fx:id="btnHistoricoSelecionado" text="Ver histórico" onAction="#onVerHistoricoSelecionado" disable="true"/>
                 </HBox>
 
                 <HBox spacing="10">
-                    <TextField fx:id="txtBusca" promptText="Nome, CPF ou telefone..." HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="txtBusca" promptText="Nome, CPF, RG ou telefone..." HBox.hgrow="ALWAYS"/>
                     <Button text="Buscar" onAction="#onBuscarPaciente"/>
                     <Button text="Limpar" onAction="#onLimparBusca"/>
                 </HBox>
@@ -147,8 +153,8 @@
 
                 <TableView fx:id="tableBusca" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colBuscaNome" text="Nome" prefWidth="260"/>
-                        <TableColumn fx:id="colBuscaCpf" text="CPF" prefWidth="140"/>
+                        <TableColumn fx:id="colBuscaNome" text="Nome" prefWidth="280"/>
+                        <TableColumn fx:id="colBuscaCpf" text="CPF / RG" prefWidth="150"/>
                         <TableColumn fx:id="colBuscaTelefone" text="Telefone" prefWidth="140"/>
                         <TableColumn fx:id="colBuscaDataNascimento" text="Data Nasc." prefWidth="110"/>
                         <TableColumn fx:id="colBuscaAtivo" text="Ativo" prefWidth="70"/>

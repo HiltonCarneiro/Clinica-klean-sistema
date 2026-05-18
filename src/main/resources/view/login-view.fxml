@@ -63,6 +63,12 @@
                     styleClass="login-eye"
                     prefWidth="44"
                     GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+            <!-- LEMBRAR USUÁRIO -->
+            <CheckBox fx:id="chkLembrarUsuario"
+                      text="Lembrar usuário"
+                      GridPane.rowIndex="2" GridPane.columnIndex="1"
+                      GridPane.columnSpan="2"/>
         </GridPane>
 
         <Label fx:id="lblErro" styleClass="login-error"/>

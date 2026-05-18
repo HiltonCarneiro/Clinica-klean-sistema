@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -17,8 +18,10 @@ import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.prefs.Preferences;
+
 public class LoginController {
-    //teste
+
     @FXML private ImageView imgLogoLogin;
 
     @FXML private TextField txtUsuario;
@@ -31,11 +34,15 @@ public class LoginController {
 
     @FXML private Button btnToggleSenha;
     @FXML private Label lblErro;
+    @FXML private CheckBox chkLembrarUsuario;
 
     private boolean senhaVisivel = false;
 
     private final LoginService loginService = new LoginService();
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
+
+    private final Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
+    private static final String KEY_USUARIO = "login_usuario";
 
     @FXML
     public void initialize() {
@@ -47,6 +54,7 @@ public class LoginController {
         senhaVisivel = false;
 
         if (lblErro != null) lblErro.setText("");
+
         var logoUrl = getClass().getResource("/images/logo-klean.png");
         if (logoUrl != null && imgLogoLogin != null) {
             imgLogoLogin.setImage(new Image(logoUrl.toExternalForm()));
@@ -58,23 +66,39 @@ public class LoginController {
         new Thread(() -> {
             try (java.sql.Connection c = br.com.clinica.database.DatabaseConfig.getConnection()) {
                 // abrir/fechar já aquece pool/SSL
-            } catch (Exception ignored) {}
-        }, "db-warmup").start();
-        // foco inicial no usuário
-        txtUsuario.requestFocus();
-
-// ENTER no usuário vai para senha
-        txtUsuario.setOnAction(e -> {
-            if (senhaVisivel) {
-                txtSenhaVisivel.requestFocus();
-            } else {
-                txtSenha.requestFocus();
+            } catch (Exception ignored) {
             }
-        });
+        }, "db-warmup").start();
 
-// ENTER na senha faz login
-        txtSenha.setOnAction(e -> onEntrar());
-        txtSenhaVisivel.setOnAction(e -> onEntrar());
+        // ENTER no usuário vai para senha
+        if (txtUsuario != null) {
+            txtUsuario.setOnAction(e -> {
+                if (senhaVisivel) {
+                    if (txtSenhaVisivel != null) txtSenhaVisivel.requestFocus();
+                } else {
+                    if (txtSenha != null) txtSenha.requestFocus();
+                }
+            });
+        }
+
+        // ENTER na senha faz login
+        if (txtSenha != null) txtSenha.setOnAction(e -> onEntrar());
+        if (txtSenhaVisivel != null) txtSenhaVisivel.setOnAction(e -> onEntrar());
+
+        // carregar usuário salvo
+        String usuarioSalvo = prefs.get(KEY_USUARIO, "");
+        if (!usuarioSalvo.isBlank()) {
+            if (txtUsuario != null) txtUsuario.setText(usuarioSalvo);
+            if (chkLembrarUsuario != null) chkLembrarUsuario.setSelected(true);
+
+            if (txtSenha != null) {
+                txtSenha.requestFocus();
+            } else if (txtSenhaVisivel != null) {
+                txtSenhaVisivel.requestFocus();
+            }
+        } else {
+            if (txtUsuario != null) txtUsuario.requestFocus();
+        }
     }
 
     @FXML
@@ -83,30 +107,34 @@ public class LoginController {
 
         if (senhaVisivel) {
             // copiar senha para o campo visível
-            txtSenhaVisivel.setText(txtSenha.getText());
+            if (txtSenhaVisivel != null && txtSenha != null) {
+                txtSenhaVisivel.setText(txtSenha.getText());
 
-            txtSenhaVisivel.setVisible(true);
-            txtSenhaVisivel.setManaged(true);
+                txtSenhaVisivel.setVisible(true);
+                txtSenhaVisivel.setManaged(true);
 
-            txtSenha.setVisible(false);
-            txtSenha.setManaged(false);
+                txtSenha.setVisible(false);
+                txtSenha.setManaged(false);
 
-            txtSenhaVisivel.requestFocus();
-            txtSenhaVisivel.positionCaret(txtSenhaVisivel.getText().length());
+                txtSenhaVisivel.requestFocus();
+                txtSenhaVisivel.positionCaret(txtSenhaVisivel.getText().length());
+            }
 
             if (btnToggleSenha != null) btnToggleSenha.setText("🙈");
         } else {
             // copiar de volta para passwordfield
-            txtSenha.setText(txtSenhaVisivel.getText());
+            if (txtSenha != null && txtSenhaVisivel != null) {
+                txtSenha.setText(txtSenhaVisivel.getText());
 
-            txtSenha.setVisible(true);
-            txtSenha.setManaged(true);
+                txtSenha.setVisible(true);
+                txtSenha.setManaged(true);
 
-            txtSenhaVisivel.setVisible(false);
-            txtSenhaVisivel.setManaged(false);
+                txtSenhaVisivel.setVisible(false);
+                txtSenhaVisivel.setManaged(false);
 
-            txtSenha.requestFocus();
-            txtSenha.positionCaret(txtSenha.getText().length());
+                txtSenha.requestFocus();
+                txtSenha.positionCaret(txtSenha.getText().length());
+            }
 
             if (btnToggleSenha != null) btnToggleSenha.setText("👁");
         }
@@ -138,6 +166,7 @@ public class LoginController {
         if (txtSenha != null) txtSenha.setDisable(true);
         if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(true);
         if (btnToggleSenha != null) btnToggleSenha.setDisable(true);
+        if (chkLembrarUsuario != null) chkLembrarUsuario.setDisable(true);
 
         Task<Usuario> task = new Task<>() {
             @Override
@@ -164,6 +193,13 @@ public class LoginController {
                 // sucesso
                 Session.setUsuario(u);
 
+                // salvar ou limpar usuário lembrado
+                if (chkLembrarUsuario != null && chkLembrarUsuario.isSelected()) {
+                    prefs.put(KEY_USUARIO, loginFinal);
+                } else {
+                    prefs.remove(KEY_USUARIO);
+                }
+
                 // Auditoria em background (não travar a troca de tela)
                 new Thread(() ->
                         auditoria.registrar("LOGIN_OK", "USUARIO", String.valueOf(u.getId()), "login realizado"),
@@ -177,7 +213,7 @@ public class LoginController {
 
                 Scene scene = new Scene(root, 1100, 720);
 
-                //css seguro:
+                // css seguro
                 var cssUrl = getClass().getResource("/styles/app.css");
                 if (cssUrl != null) {
                     scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -198,6 +234,7 @@ public class LoginController {
                 if (txtSenha != null) txtSenha.setDisable(false);
                 if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(false);
                 if (btnToggleSenha != null) btnToggleSenha.setDisable(false);
+                if (chkLembrarUsuario != null) chkLembrarUsuario.setDisable(false);
             }
         });
 
@@ -211,6 +248,7 @@ public class LoginController {
                 if (txtSenha != null) txtSenha.setDisable(false);
                 if (txtSenhaVisivel != null) txtSenhaVisivel.setDisable(false);
                 if (btnToggleSenha != null) btnToggleSenha.setDisable(false);
+                if (chkLembrarUsuario != null) chkLembrarUsuario.setDisable(false);
             }
         });
 

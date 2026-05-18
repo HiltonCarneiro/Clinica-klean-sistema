@@ -10,7 +10,6 @@
             styleClass="page-clean"
             stylesheets="@/styles/app.css">
 
-    <!-- ======= TOPO ======= -->
     <top>
         <VBox spacing="10" styleClass="top-clean">
             <padding>
@@ -37,25 +36,35 @@
                 <Label text="CPF:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                 <Label fx:id="lblCpf" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                <Label text="Telefone:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <Label fx:id="lblTelefone" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="RG:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label fx:id="lblRg" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Data nasc.:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                <Label fx:id="lblDataNascimento" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                <Label text="Telefone:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <Label fx:id="lblTelefone" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                <Label text="Ativo:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <Label fx:id="lblAtivo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="Data nasc.:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label fx:id="lblDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Idade:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                <Label fx:id="lblIdade" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                <Label text="Endereço:" styleClass="label-muted" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <Label fx:id="lblEndereco"
+                       wrapText="true"
+                       maxWidth="1.7976931348623157E308"
+                       GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+
+                <Label text="Ativo:" styleClass="label-muted" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <Label fx:id="lblAtivo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
             </GridPane>
 
             <Separator/>
         </VBox>
     </top>
 
-    <!-- ======= CENTRO: ABAS ======= -->
     <center>
         <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tabs-clean">
 
-            <!-- ======================= ANEXOS ======================= -->
             <Tab text="Anexos / Exames">
                 <VBox spacing="10" styleClass="tab-body">
                     <padding>
@@ -82,7 +91,6 @@
                 </VBox>
             </Tab>
 
-            <!-- ======================= ANAMNESE & EVOLUÇÕES ======================= -->
             <Tab text="Anamnese &amp; Evoluções">
                 <BorderPane styleClass="tab-body">
                     <padding>

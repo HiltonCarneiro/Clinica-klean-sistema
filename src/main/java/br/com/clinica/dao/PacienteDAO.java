@@ -24,28 +24,35 @@ public class PacienteDAO {
 
     private void inserir(Paciente p) {
         String sql = "INSERT INTO paciente (" +
-                "nome, cpf, data_nascimento, telefone, endereco, responsavel_legal, ativo, " +
-                "rua, numero, bairro, cidade, cep, uf" +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "nome, cpf, rg, data_nascimento, telefone, endereco, responsavel_legal, ativo, " +
+                "rua, numero, complemento, bairro, cidade, cep, uf" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // valida duplicidade (quando CPF informado)
             String cpfNorm = normalizarDocumento(p.getCpf());
+            String rgNorm = normalizarDocumento(p.getRg());
+
             if (cpfNorm != null && cpfJaExisteParaOutro(conn, null, cpfNorm)) {
                 throw new RuntimeException("CPF já cadastrado para outro paciente.");
             }
-            p.setCpf(cpfNorm); // garante armazenamento consistente (digits-only)
+            if (rgNorm != null && rgJaExisteParaOutro(conn, null, rgNorm)) {
+                throw new RuntimeException("RG já cadastrado para outro paciente.");
+            }
+
+            p.setCpf(cpfNorm);
+            p.setRg(rgNorm);
 
             preencherStatementBasico(stmt, p);
 
-            stmt.setString(8, nvlTrim(p.getRua()));
-            stmt.setString(9, nvlTrim(p.getNumero()));
-            stmt.setString(10, nvlTrim(p.getBairro()));
-            stmt.setString(11, nvlTrim(p.getCidade()));
-            stmt.setString(12, normalizarDocumento(p.getCep()));
-            stmt.setString(13, nvlTrim(p.getUf()));
+            stmt.setString(9, nvlTrim(p.getRua()));
+            stmt.setString(10, nvlTrim(p.getNumero()));
+            stmt.setString(11, nvlTrim(p.getComplemento()));
+            stmt.setString(12, nvlTrim(p.getBairro()));
+            stmt.setString(13, nvlTrim(p.getCidade()));
+            stmt.setString(14, normalizarDocumento(p.getCep()));
+            stmt.setString(15, nvlTrim(p.getUf()));
 
             stmt.executeUpdate();
 
@@ -55,14 +62,12 @@ public class PacienteDAO {
 
             audit.registrarAuto("CRIAR", "PACIENTE",
                     String.valueOf(p.getId()),
-                    "nome=" + p.getNome() + ", cpf=" + (p.getCpf() == null ? "" : p.getCpf()));
+                    "nome=" + p.getNome()
+                            + ", cpf=" + (p.getCpf() == null ? "" : p.getCpf())
+                            + ", rg=" + (p.getRg() == null ? "" : p.getRg()));
 
         } catch (SQLException e) {
-            // erro mais amigável quando a constraint estoura (caso o banco ainda tenha formato antigo)
-            if (isUniqueCpfError(e)) {
-                throw new RuntimeException("CPF já cadastrado para outro paciente.");
-            }
-            throw new RuntimeException("Erro ao inserir paciente", e);
+            tratarErroSql(e);
         }
     }
 
@@ -70,74 +75,79 @@ public class PacienteDAO {
         if (p.getId() == null) throw new IllegalArgumentException("Paciente sem ID para atualizar");
 
         String sql = "UPDATE paciente SET " +
-                "nome = ?, cpf = ?, data_nascimento = ?, telefone = ?, endereco = ?, " +
+                "nome = ?, cpf = ?, rg = ?, data_nascimento = ?, telefone = ?, endereco = ?, " +
                 "responsavel_legal = ?, ativo = ?, " +
-                "rua = ?, numero = ?, bairro = ?, cidade = ?, cep = ?, uf = ? " +
+                "rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, cep = ?, uf = ? " +
                 "WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // valida duplicidade (quando CPF informado)
             String cpfNorm = normalizarDocumento(p.getCpf());
+            String rgNorm = normalizarDocumento(p.getRg());
+
             if (cpfNorm != null && cpfJaExisteParaOutro(conn, p.getId(), cpfNorm)) {
                 throw new RuntimeException("CPF já cadastrado para outro paciente.");
             }
+            if (rgNorm != null && rgJaExisteParaOutro(conn, p.getId(), rgNorm)) {
+                throw new RuntimeException("RG já cadastrado para outro paciente.");
+            }
+
             p.setCpf(cpfNorm);
+            p.setRg(rgNorm);
 
             preencherStatementBasico(stmt, p);
 
-            stmt.setString(8, nvlTrim(p.getRua()));
-            stmt.setString(9, nvlTrim(p.getNumero()));
-            stmt.setString(10, nvlTrim(p.getBairro()));
-            stmt.setString(11, nvlTrim(p.getCidade()));
-            stmt.setString(12, normalizarDocumento(p.getCep()));
-            stmt.setString(13, nvlTrim(p.getUf()));
-            stmt.setLong(14, p.getId());
+            stmt.setString(9, nvlTrim(p.getRua()));
+            stmt.setString(10, nvlTrim(p.getNumero()));
+            stmt.setString(11, nvlTrim(p.getComplemento()));
+            stmt.setString(12, nvlTrim(p.getBairro()));
+            stmt.setString(13, nvlTrim(p.getCidade()));
+            stmt.setString(14, normalizarDocumento(p.getCep()));
+            stmt.setString(15, nvlTrim(p.getUf()));
+            stmt.setLong(16, p.getId());
 
             stmt.executeUpdate();
 
             audit.registrarAuto("EDITAR", "PACIENTE",
                     String.valueOf(p.getId()),
-                    "nome=" + p.getNome() + ", cpf=" + (p.getCpf() == null ? "" : p.getCpf()));
+                    "nome=" + p.getNome()
+                            + ", cpf=" + (p.getCpf() == null ? "" : p.getCpf())
+                            + ", rg=" + (p.getRg() == null ? "" : p.getRg()));
 
         } catch (SQLException e) {
-            if (isUniqueCpfError(e)) {
-                throw new RuntimeException("CPF já cadastrado para outro paciente.");
-            }
-            throw new RuntimeException("Erro ao atualizar paciente", e);
+            tratarErroSql(e);
         }
     }
 
     private void preencherStatementBasico(PreparedStatement stmt, Paciente p) throws SQLException {
         stmt.setString(1, nvlTrim(p.getNome()));
 
-        // CPF: se vazio, salva NULL (não quebra UNIQUE)
         String cpf = normalizarDocumento(p.getCpf());
-        if (cpf == null) {
-            stmt.setNull(2, Types.VARCHAR);
-        } else {
-            stmt.setString(2, cpf);
-        }
+        if (cpf == null) stmt.setNull(2, Types.VARCHAR);
+        else stmt.setString(2, cpf);
+
+        String rg = normalizarDocumento(p.getRg());
+        if (rg == null) stmt.setNull(3, Types.VARCHAR);
+        else stmt.setString(3, rg);
 
         if (p.getDataNascimento() != null) {
-            stmt.setString(3, p.getDataNascimento().format(DATA_FORMATTER));
+            stmt.setString(4, p.getDataNascimento().format(DATA_FORMATTER));
         } else {
-            stmt.setNull(3, Types.VARCHAR);
+            stmt.setNull(4, Types.VARCHAR);
         }
 
-        // Telefone: se vazio, salva NULL
         String tel = normalizarDocumento(p.getTelefone());
-        if (tel == null) stmt.setNull(4, Types.VARCHAR);
-        else stmt.setString(4, tel);
+        if (tel == null) stmt.setNull(5, Types.VARCHAR);
+        else stmt.setString(5, tel);
 
-        stmt.setString(5, nvlTrim(p.getEndereco()));
+        stmt.setString(6, nvlTrim(p.getEndereco()));
 
         String resp = nvlTrim(p.getResponsavelLegal());
-        if (resp == null) stmt.setNull(6, Types.VARCHAR);
-        else stmt.setString(6, resp);
+        if (resp == null) stmt.setNull(7, Types.VARCHAR);
+        else stmt.setString(7, resp);
 
-        stmt.setInt(7, p.isAtivo() ? 1 : 0);
+        stmt.setInt(8, p.isAtivo() ? 1 : 0);
     }
 
     public List<Paciente> listarTodos() {
@@ -186,9 +196,12 @@ public class PacienteDAO {
         p.setId(rs.getLong("id"));
         p.setNome(rs.getString("nome"));
         p.setCpf(rs.getString("cpf"));
+        p.setRg(rs.getString("rg"));
 
         String dataStr = rs.getString("data_nascimento");
-        if (dataStr != null && !dataStr.isBlank()) p.setDataNascimento(LocalDate.parse(dataStr, DATA_FORMATTER));
+        if (dataStr != null && !dataStr.isBlank()) {
+            p.setDataNascimento(LocalDate.parse(dataStr, DATA_FORMATTER));
+        }
 
         p.setTelefone(rs.getString("telefone"));
         p.setEndereco(rs.getString("endereco"));
@@ -198,6 +211,7 @@ public class PacienteDAO {
         try {
             p.setRua(rs.getString("rua"));
             p.setNumero(rs.getString("numero"));
+            p.setComplemento(rs.getString("complemento"));
             p.setBairro(rs.getString("bairro"));
             p.setCidade(rs.getString("cidade"));
             p.setCep(rs.getString("cep"));
@@ -207,8 +221,13 @@ public class PacienteDAO {
         return p;
     }
 
-    public void inativar(Long id) { alterarStatus(id, false); }
-    public void ativar(Long id) { alterarStatus(id, true); }
+    public void inativar(Long id) {
+        alterarStatus(id, false);
+    }
+
+    public void ativar(Long id) {
+        alterarStatus(id, true);
+    }
 
     private void alterarStatus(Long id, boolean ativo) {
         String sql = "UPDATE paciente SET ativo = ? WHERE id = ?";
@@ -230,14 +249,25 @@ public class PacienteDAO {
         }
     }
 
-    // Helpers
-
     private boolean cpfJaExisteParaOutro(Connection conn, Long idAtual, String cpfNorm) throws SQLException {
         if (cpfNorm == null || cpfNorm.isBlank()) return false;
 
         String sql = "SELECT 1 FROM paciente WHERE cpf = ? AND id <> ? LIMIT 1";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, cpfNorm);
+            ps.setLong(2, idAtual != null ? idAtual : -1);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private boolean rgJaExisteParaOutro(Connection conn, Long idAtual, String rgNorm) throws SQLException {
+        if (rgNorm == null || rgNorm.isBlank()) return false;
+
+        String sql = "SELECT 1 FROM paciente WHERE rg = ? AND id <> ? LIMIT 1";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, rgNorm);
             ps.setLong(2, idAtual != null ? idAtual : -1);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -260,6 +290,33 @@ public class PacienteDAO {
     private boolean isUniqueCpfError(SQLException e) {
         String msg = e.getMessage();
         if (msg == null) return false;
-        return msg.toLowerCase().contains("unique") && msg.toLowerCase().contains("paciente.cpf");
+        String m = msg.toLowerCase();
+        return m.contains("unique") && (m.contains("uk_paciente_cpf") || m.contains("paciente.cpf"));
+    }
+
+    private boolean isUniqueRgError(SQLException e) {
+        String msg = e.getMessage();
+        if (msg == null) return false;
+        String m = msg.toLowerCase();
+        return m.contains("unique") && (m.contains("uk_paciente_rg") || m.contains("paciente.rg"));
+    }
+
+    private boolean isCheckCpfOuRgError(SQLException e) {
+        String msg = e.getMessage();
+        if (msg == null) return false;
+        return msg.toLowerCase().contains("ck_paciente_cpf_ou_rg");
+    }
+
+    private void tratarErroSql(SQLException e) {
+        if (isUniqueCpfError(e)) {
+            throw new RuntimeException("CPF já cadastrado para outro paciente.");
+        }
+        if (isUniqueRgError(e)) {
+            throw new RuntimeException("RG já cadastrado para outro paciente.");
+        }
+        if (isCheckCpfOuRgError(e)) {
+            throw new RuntimeException("Informe CPF ou RG do paciente.");
+        }
+        throw new RuntimeException("Erro ao salvar paciente", e);
     }
 }
