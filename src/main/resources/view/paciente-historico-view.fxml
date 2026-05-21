@@ -11,82 +11,127 @@
             stylesheets="@/styles/app.css">
 
     <top>
-        <VBox spacing="10" styleClass="top-clean">
+        <VBox spacing="16" styleClass="top-clean">
             <padding>
-                <Insets top="14" right="16" bottom="10" left="16"/>
+                <Insets top="22" right="26" bottom="18" left="26"/>
             </padding>
 
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Histórico do Paciente" styleClass="header-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <VBox spacing="4">
+                    <Label text="Histórico do Paciente"
+                           styleClass="page-title"/>
+
+                    <Label text="Resumo clínico, anexos, exames, anamneses e evoluções do paciente."
+                           styleClass="page-subtitle"/>
+                </VBox>
+
                 <Pane HBox.hgrow="ALWAYS"/>
-                <Button text="Fechar" onAction="#onFechar" styleClass="btn-ghost"/>
+
+                <Button text="Fechar"
+                        onAction="#onFechar"
+                        styleClass="btn-ghost"/>
             </HBox>
 
-            <GridPane hgap="14" vgap="6" styleClass="info-grid">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="110" halignment="RIGHT"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                    <ColumnConstraints minWidth="110" halignment="RIGHT"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
+            <VBox spacing="14" styleClass="card">
+                <padding>
+                    <Insets top="18" right="20" bottom="20" left="20"/>
+                </padding>
 
-                <Label text="Nome:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <Label fx:id="lblNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <VBox spacing="2">
+                        <Label fx:id="lblNome"
+                               text="-"
+                               styleClass="header-title"/>
 
-                <Label text="CPF:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                <Label fx:id="lblCpf" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                        <HBox spacing="12">
+                            <Label text="CPF:" styleClass="label-muted"/>
+                            <Label fx:id="lblCpf" text="-"/>
 
-                <Label text="RG:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <Label fx:id="lblRg" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <Label text="RG:" styleClass="label-muted"/>
+                            <Label fx:id="lblRg" text="-"/>
 
-                <Label text="Telefone:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                <Label fx:id="lblTelefone" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                            <Label text="Ativo:" styleClass="label-muted"/>
+                            <Label fx:id="lblAtivo" text="-"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
-                <Label text="Data nasc.:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <Label fx:id="lblDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Separator/>
 
-                <Label text="Idade:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                <Label fx:id="lblIdade" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                <GridPane hgap="14" vgap="8" styleClass="info-grid">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="125" halignment="RIGHT"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints minWidth="125" halignment="RIGHT"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
 
-                <Label text="Endereço:" styleClass="label-muted" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <Label fx:id="lblEndereco"
-                       wrapText="true"
-                       maxWidth="1.7976931348623157E308"
-                       GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                    <Label text="Telefone:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblTelefone" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Ativo:" styleClass="label-muted" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <Label fx:id="lblAtivo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-            </GridPane>
+                    <Label text="Data nasc.:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <Label fx:id="lblDataNascimento" text="-" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-            <Separator/>
+                    <Label text="Idade:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblIdade" text="-" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Endereço:" styleClass="label-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblEndereco"
+                           text="-"
+                           wrapText="true"
+                           maxWidth="1.7976931348623157E308"
+                           GridPane.rowIndex="2"
+                           GridPane.columnIndex="1"
+                           GridPane.columnSpan="3"/>
+                </GridPane>
+            </VBox>
         </VBox>
     </top>
 
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tabs-clean">
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 styleClass="tabs-clean">
 
             <Tab text="Anexos / Exames">
-                <VBox spacing="10" styleClass="tab-body">
+                <VBox spacing="14" styleClass="tab-body">
                     <padding>
-                        <Insets top="10" right="16" bottom="16" left="16"/>
+                        <Insets top="18" right="26" bottom="24" left="26"/>
                     </padding>
 
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Anexos do paciente" styleClass="section-title"/>
+                        <VBox spacing="2">
+                            <Label text="Anexos do paciente"
+                                   styleClass="section-title"/>
+
+                            <Label text="Documentos, exames e arquivos vinculados ao paciente."
+                                   styleClass="hint-text"/>
+                        </VBox>
+
                         <Pane HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="btnAtualizarAnexos" text="Atualizar" onAction="#onAtualizarAnexos" styleClass="btn-ghost"/>
-                        <Button fx:id="btnAbrirAnexo" text="Abrir" onAction="#onAbrirAnexo" disable="true" styleClass="btn-primary"/>
+
+                        <Button fx:id="btnAtualizarAnexos"
+                                text="Atualizar"
+                                onAction="#onAtualizarAnexos"
+                                styleClass="btn-ghost"/>
+
+                        <Button fx:id="btnAbrirAnexo"
+                                text="Abrir"
+                                onAction="#onAbrirAnexo"
+                                disable="true"
+                                styleClass="btn-primary"/>
                     </HBox>
 
-                    <TableView fx:id="tableAnexos" VBox.vgrow="ALWAYS" styleClass="table-soft">
+                    <TableView fx:id="tableAnexos"
+                               VBox.vgrow="ALWAYS"
+                               styleClass="table-soft">
                         <columns>
-                            <TableColumn fx:id="colAnexoNome" text="Arquivo" prefWidth="320"/>
-                            <TableColumn fx:id="colAnexoDescricao" text="Descrição" prefWidth="240"/>
-                            <TableColumn fx:id="colAnexoDataHora" text="Data/Hora" prefWidth="160"/>
+                            <TableColumn fx:id="colAnexoNome" text="Arquivo" prefWidth="360"/>
+                            <TableColumn fx:id="colAnexoDescricao" text="Descrição" prefWidth="320"/>
+                            <TableColumn fx:id="colAnexoDataHora" text="Data/Hora" prefWidth="180"/>
                         </columns>
                     </TableView>
 
-                    <Label text="Dica: selecione um anexo e clique em “Abrir” para visualizar o PDF no leitor padrão."
+                    <Label text="Dica: selecione um anexo e clique em “Abrir” para visualizar o arquivo."
                            styleClass="hint-text"/>
                 </VBox>
             </Tab>
@@ -94,44 +139,86 @@
             <Tab text="Anamnese &amp; Evoluções">
                 <BorderPane styleClass="tab-body">
                     <padding>
-                        <Insets top="10" right="16" bottom="16" left="16"/>
+                        <Insets top="18" right="26" bottom="24" left="26"/>
                     </padding>
 
                     <top>
                         <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Label text="Histórico de Anamnese e Evoluções" styleClass="section-title"/>
+                            <VBox spacing="2">
+                                <Label text="Histórico de Anamnese e Evoluções"
+                                       styleClass="section-title"/>
+
+                                <Label text="Selecione um registro para visualizar o resumo clínico detalhado."
+                                       styleClass="hint-text"/>
+                            </VBox>
+
                             <Pane HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="btnAtualizarAnamnese" text="Atualizar" onAction="#onAtualizarAnamnese" styleClass="btn-ghost"/>
+
+                            <Button fx:id="btnAtualizarAnamnese"
+                                    text="Atualizar"
+                                    onAction="#onAtualizarAnamnese"
+                                    styleClass="btn-ghost"/>
                         </HBox>
                     </top>
 
                     <left>
-                        <VBox spacing="8" prefWidth="360">
-                            <TableView fx:id="tableAnamnese" VBox.vgrow="ALWAYS" styleClass="table-soft">
+                        <VBox spacing="10" prefWidth="380">
+                            <padding>
+                                <Insets top="14" right="18" bottom="0" left="0"/>
+                            </padding>
+
+                            <TableView fx:id="tableAnamnese"
+                                       VBox.vgrow="ALWAYS"
+                                       styleClass="table-soft">
                                 <columns>
-                                    <TableColumn fx:id="colAnaDataHora" text="Data/Hora" prefWidth="170"/>
-                                    <TableColumn fx:id="colAnaTipo" text="Tipo" prefWidth="160"/>
+                                    <TableColumn fx:id="colAnaDataHora" text="Data/Hora" prefWidth="190"/>
+                                    <TableColumn fx:id="colAnaTipo" text="Tipo" prefWidth="170"/>
                                 </columns>
                             </TableView>
 
-                            <Label text="Selecione um item para ver os detalhes à direita."
+                            <Label text="Os detalhes aparecem ao lado após selecionar um item."
                                    styleClass="hint-text"/>
                         </VBox>
                     </left>
 
                     <center>
-                        <VBox spacing="10">
-                            <Label text="Observações" styleClass="field-title"/>
-                            <TextArea fx:id="txtObservacoes" prefRowCount="4" wrapText="true" editable="false" styleClass="area-clean"/>
+                        <VBox spacing="14">
+                            <padding>
+                                <Insets top="14" right="0" bottom="0" left="0"/>
+                            </padding>
 
-                            <Label text="Resumo do registro" styleClass="field-title"/>
-                            <TextArea fx:id="txtResumo" prefRowCount="14" wrapText="true" editable="false" styleClass="area-clean"/>
+                            <VBox spacing="8" styleClass="card">
+                                <padding>
+                                    <Insets top="16" right="18" bottom="18" left="18"/>
+                                </padding>
 
-                            <TitledPane fx:id="tpJson" text="Dados técnicos (JSON)" expanded="false" styleClass="tp-clean">
-                                <content>
-                                    <TextArea fx:id="txtJson" prefRowCount="10" wrapText="false" editable="false" styleClass="area-clean mono"/>
-                                </content>
-                            </TitledPane>
+                                <Label text="Observações do registro"
+                                       styleClass="field-title"/>
+
+                                <TextArea fx:id="txtObservacoes"
+                                          prefRowCount="4"
+                                          wrapText="true"
+                                          editable="false"
+                                          promptText="Nenhuma observação registrada."
+                                          styleClass="area-clean"/>
+                            </VBox>
+
+                            <VBox spacing="8" styleClass="card" VBox.vgrow="ALWAYS">
+                                <padding>
+                                    <Insets top="16" right="18" bottom="18" left="18"/>
+                                </padding>
+
+                                <Label text="Resumo clínico"
+                                       styleClass="field-title"/>
+
+                                <TextArea fx:id="txtResumo"
+                                          prefRowCount="18"
+                                          wrapText="true"
+                                          editable="false"
+                                          VBox.vgrow="ALWAYS"
+                                          promptText="Selecione um registro para visualizar o resumo clínico."
+                                          styleClass="area-clean"/>
+                            </VBox>
                         </VBox>
                     </center>
                 </BorderPane>

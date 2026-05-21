@@ -4,162 +4,347 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.PacienteController">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.PacienteController"
+            styleClass="page-root"
+            stylesheets="@/styles/app.css">
 
     <center>
         <StackPane>
 
+            <!-- TELA INICIAL -->
             <VBox fx:id="boxEscolha"
                   alignment="CENTER"
-                  spacing="18"
+                  spacing="26"
                   styleClass="paciente-escolha-root">
 
-                <Label text="Pacientes" styleClass="page-title"/>
-                <Label text="Escolha uma opção para continuar" styleClass="page-subtitle"/>
-
-                <VBox alignment="CENTER" spacing="10">
-                    <Label text="O que você deseja fazer?" styleClass="section-title"/>
-
-                    <HBox alignment="CENTER" spacing="16" styleClass="choice-row">
-                        <Button text="Cadastrar paciente"
-                                onAction="#irParaCadastro"
-                                prefWidth="230" prefHeight="110"
-                                styleClass="choice-card"/>
-
-                        <Button text="Buscar paciente"
-                                onAction="#irParaBusca"
-                                prefWidth="230" prefHeight="110"
-                                styleClass="choice-card"/>
-                    </HBox>
-
-                    <Label text="Você pode alternar entre as telas quando quiser." styleClass="hint-text"/>
+                <VBox alignment="CENTER" spacing="8">
+                    <Label text="Pacientes" styleClass="page-title"/>
+                    <Label text="Gerencie cadastros, buscas e históricos clínicos dos pacientes."
+                           styleClass="page-subtitle"/>
                 </VBox>
+
+                <HBox alignment="CENTER" spacing="22">
+
+                    <VBox spacing="12" alignment="CENTER" styleClass="choice-card" prefWidth="280" prefHeight="150">
+                        <Label text="Novo paciente" styleClass="card-title"/>
+                        <Label text="Cadastre dados pessoais, contato e endereço."
+                               wrapText="true"
+                               styleClass="card-desc"/>
+                        <Button text="Cadastrar"
+                                onAction="#irParaCadastro"
+                                styleClass="btn-primary"/>
+                    </VBox>
+
+                    <VBox spacing="12" alignment="CENTER" styleClass="choice-card" prefWidth="280" prefHeight="150">
+                        <Label text="Buscar paciente" styleClass="card-title"/>
+                        <Label text="Localize pacientes e acesse histórico clínico."
+                               wrapText="true"
+                               styleClass="card-desc"/>
+                        <Button text="Buscar"
+                                onAction="#irParaBusca"
+                                styleClass="btn-primary"/>
+                    </VBox>
+
+                </HBox>
             </VBox>
 
+            <!-- CADASTRO -->
             <ScrollPane fx:id="scrollCadastro"
                         fitToWidth="true"
                         visible="false"
                         managed="false"
                         styleClass="page-scroll">
+
                 <content>
                     <StackPane styleClass="page-center">
-                        <VBox spacing="12" styleClass="page-content">
+
+                        <VBox spacing="20" styleClass="page-content">
+
                             <padding>
-                                <Insets top="14" right="16" bottom="16" left="16"/>
+                                <Insets top="26" right="30" bottom="30" left="30"/>
                             </padding>
 
-                            <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
-                                <Label text="Cadastro de Pacientes" styleClass="section-title"/>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+
+                                <Button text="← Voltar"
+                                        onAction="#voltarEscolha"
+                                        styleClass="btn-ghost"/>
+
+                                <VBox spacing="4">
+                                    <Label text="Cadastro de Paciente" styleClass="page-title"/>
+                                    <Label text="Preencha os dados principais do paciente com atenção."
+                                           styleClass="page-subtitle"/>
+                                </VBox>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Button text="Novo"
+                                        onAction="#onNovo"
+                                        styleClass="btn-ghost"/>
+
+                                <Button text="Salvar"
+                                        onAction="#onSalvar"
+                                        styleClass="btn-primary"/>
                             </HBox>
 
-                            <GridPane hgap="10" vgap="10">
-                                <columnConstraints>
-                                    <ColumnConstraints minWidth="120"/>
-                                    <ColumnConstraints hgrow="ALWAYS"/>
-                                    <ColumnConstraints minWidth="140"/>
-                                    <ColumnConstraints hgrow="ALWAYS"/>
-                                </columnConstraints>
+                            <!-- DADOS PESSOAIS -->
+                            <VBox spacing="14" styleClass="dashboard-panel">
+                                <padding>
+                                    <Insets top="22" right="24" bottom="24" left="24"/>
+                                </padding>
 
-                                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                <Label text="Dados pessoais" styleClass="section-title"/>
 
-                                <Label text="CPF:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtCpf" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <GridPane hgap="16" vgap="14">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="135"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                        <ColumnConstraints minWidth="135"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
 
-                                <Label text="RG:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtRg" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                                    <Label text="Nome:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtNome"
+                                               promptText="Nome completo"
+                                               maxWidth="1.7976931348623157E308"
+                                               GridPane.rowIndex="0"
+                                               GridPane.columnIndex="1"
+                                               GridPane.columnSpan="3"/>
 
-                                <Label text="Data Nasc.:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                                <DatePicker fx:id="dpDataNascimento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                    <Label text="CPF:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCpf"
+                                               promptText="000.000.000-00"
+                                               GridPane.rowIndex="1"
+                                               GridPane.columnIndex="1"/>
 
-                                <Label text="Idade:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtIdade" editable="false" focusTraversable="false"
-                                           GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                                    <Label text="RG:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="txtRg"
+                                               promptText="0.000.000"
+                                               GridPane.rowIndex="1"
+                                               GridPane.columnIndex="3"/>
 
-                                <Label text="Telefone:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtTelefone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                    <Label text="Data nascimento:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <DatePicker fx:id="dpDataNascimento"
+                                                GridPane.rowIndex="2"
+                                                GridPane.columnIndex="1"/>
 
-                                <Label text="Rua:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtRua" GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                    <Label text="Idade:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="txtIdade"
+                                               editable="false"
+                                               focusTraversable="false"
+                                               promptText="Calculada automaticamente"
+                                               GridPane.rowIndex="2"
+                                               GridPane.columnIndex="3"/>
 
-                                <Label text="Número:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtNumero" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                    <Label text="Telefone:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtTelefone"
+                                               promptText="(00) 00000-0000"
+                                               GridPane.rowIndex="3"
+                                               GridPane.columnIndex="1"/>
 
-                                <CheckBox fx:id="chkSemNumero" text="Sem número"
-                                          GridPane.rowIndex="5" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
+                                    <Label text="Responsável legal:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="txtResponsavelLegal"
+                                               promptText="Quando aplicável"
+                                               GridPane.rowIndex="3"
+                                               GridPane.columnIndex="3"/>
+                                </GridPane>
+                            </VBox>
 
-                                <Label text="Complemento:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtComplemento" GridPane.rowIndex="6" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                            <!-- ENDEREÇO -->
+                            <VBox spacing="14" styleClass="dashboard-panel">
+                                <padding>
+                                    <Insets top="22" right="24" bottom="24" left="24"/>
+                                </padding>
 
-                                <Label text="Bairro:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtBairro" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                                <Label text="Endereço" styleClass="section-title"/>
 
-                                <Label text="Cidade:" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtCidade" GridPane.rowIndex="7" GridPane.columnIndex="3"/>
+                                <GridPane hgap="16" vgap="14">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="135"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                        <ColumnConstraints minWidth="135"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
 
-                                <Label text="CEP:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtCep" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+                                    <Label text="CEP:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCep"
+                                               promptText="00000-000"
+                                               GridPane.rowIndex="0"
+                                               GridPane.columnIndex="1"/>
 
-                                <Label text="UF:" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
-                                <TextField fx:id="txtUf" GridPane.rowIndex="8" GridPane.columnIndex="3"/>
+                                    <Label text="UF:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="txtUf"
+                                               promptText="UF"
+                                               GridPane.rowIndex="0"
+                                               GridPane.columnIndex="3"/>
 
-                                <Label text="Responsável legal:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtResponsavelLegal"
-                                           GridPane.rowIndex="9" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
-                            </GridPane>
+                                    <Label text="Rua:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtRua"
+                                               promptText="Rua, avenida ou logradouro"
+                                               maxWidth="1.7976931348623157E308"
+                                               GridPane.rowIndex="1"
+                                               GridPane.columnIndex="1"
+                                               GridPane.columnSpan="3"/>
 
-                            <HBox spacing="10">
-                                <Button text="Novo" onAction="#onNovo"/>
-                                <Button text="Salvar" onAction="#onSalvar"/>
-                                <Button fx:id="btnInativar" text="Inativar" onAction="#onInativar"/>
-                                <Button fx:id="btnAtivar" text="Ativar" onAction="#onAtivar"/>
+                                    <Label text="Número:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtNumero"
+                                               promptText="Número"
+                                               GridPane.rowIndex="2"
+                                               GridPane.columnIndex="1"/>
+
+                                    <CheckBox fx:id="chkSemNumero"
+                                              text="Sem número"
+                                              GridPane.rowIndex="2"
+                                              GridPane.columnIndex="2"
+                                              GridPane.columnSpan="2"/>
+
+                                    <Label text="Complemento:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtComplemento"
+                                               promptText="Apartamento, bloco, referência..."
+                                               maxWidth="1.7976931348623157E308"
+                                               GridPane.rowIndex="3"
+                                               GridPane.columnIndex="1"
+                                               GridPane.columnSpan="3"/>
+
+                                    <Label text="Bairro:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtBairro"
+                                               promptText="Bairro"
+                                               GridPane.rowIndex="4"
+                                               GridPane.columnIndex="1"/>
+
+                                    <Label text="Cidade:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="txtCidade"
+                                               promptText="Cidade"
+                                               GridPane.rowIndex="4"
+                                               GridPane.columnIndex="3"/>
+                                </GridPane>
+                            </VBox>
+
+                            <!-- STATUS / AÇÕES -->
+                            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="dashboard-panel">
+                                <padding>
+                                    <Insets top="18" right="20" bottom="18" left="20"/>
+                                </padding>
+
+                                <Button fx:id="btnInativar"
+                                        text="Inativar paciente"
+                                        onAction="#onInativar"
+                                        styleClass="btn-ghost"/>
+
+                                <Button fx:id="btnAtivar"
+                                        text="Ativar paciente"
+                                        onAction="#onAtivar"
+                                        styleClass="btn-primary"/>
+
+                                <CheckBox fx:id="chkMostrarInativos"
+                                          text="Mostrar inativos"
+                                          onAction="#onAtualizarLista"/>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Label fx:id="lblMensagem"
+                                       wrapText="true"
+                                       styleClass="hint-text"/>
                             </HBox>
 
-                            <HBox spacing="18">
-                                <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
-                            </HBox>
-
-                            <Label fx:id="lblMensagem" styleClass="hint-text"/>
                         </VBox>
                     </StackPane>
                 </content>
             </ScrollPane>
 
-            <VBox fx:id="boxBusca" spacing="12" visible="false" managed="false" styleClass="page-content">
+            <!-- BUSCA -->
+            <VBox fx:id="boxBusca"
+                  spacing="18"
+                  visible="false"
+                  managed="false"
+                  styleClass="page-content">
+
                 <padding>
-                    <Insets top="14" right="16" bottom="16" left="16"/>
+                    <Insets top="26" right="30" bottom="30" left="30"/>
                 </padding>
 
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Button text="← Voltar" onAction="#voltarEscolha" styleClass="nav-btn"/>
-                    <Label text="Buscar Paciente" styleClass="section-title"/>
-                    <Pane HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnEditarSelecionado" text="Editar" onAction="#onEditarSelecionado" disable="true"/>
-                    <Button fx:id="btnHistoricoSelecionado" text="Ver histórico" onAction="#onVerHistoricoSelecionado" disable="true"/>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+
+                    <Button text="← Voltar"
+                            onAction="#voltarEscolha"
+                            styleClass="btn-ghost"/>
+
+                    <VBox spacing="4">
+                        <Label text="Busca de Pacientes" styleClass="page-title"/>
+                        <Label text="Localize pacientes por nome, CPF, telefone ou RG."
+                               styleClass="page-subtitle"/>
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button fx:id="btnEditarSelecionado"
+                            text="Editar"
+                            onAction="#onEditarSelecionado"
+                            disable="true"
+                            styleClass="btn-ghost"/>
+
+                    <Button fx:id="btnHistoricoSelecionado"
+                            text="Ver histórico"
+                            onAction="#onVerHistoricoSelecionado"
+                            disable="true"
+                            styleClass="btn-primary"/>
                 </HBox>
 
-                <HBox spacing="10">
-                    <TextField fx:id="txtBusca" promptText="Nome, CPF, RG ou telefone..." HBox.hgrow="ALWAYS"/>
-                    <Button text="Buscar" onAction="#onBuscarPaciente"/>
-                    <Button text="Limpar" onAction="#onLimparBusca"/>
-                </HBox>
+                <VBox spacing="14" styleClass="dashboard-panel">
+                    <padding>
+                        <Insets top="18" right="20" bottom="20" left="20"/>
+                    </padding>
 
-                <HBox spacing="18">
-                    <CheckBox fx:id="chkMostrarInativosBusca" text="Mostrar inativos" onAction="#onBuscarPaciente"/>
-                </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
 
-                <TableView fx:id="tableBusca" VBox.vgrow="ALWAYS">
+                        <TextField fx:id="txtBusca"
+                                   promptText="Digite nome, CPF, RG ou telefone..."
+                                   HBox.hgrow="ALWAYS"
+                                   maxWidth="1.7976931348623157E308"/>
+
+                        <Button text="Buscar"
+                                onAction="#onBuscarPaciente"
+                                styleClass="btn-primary"/>
+
+                        <Button text="Limpar"
+                                onAction="#onLimparBusca"
+                                styleClass="btn-ghost"/>
+                    </HBox>
+
+                    <CheckBox fx:id="chkMostrarInativosBusca"
+                              text="Mostrar pacientes inativos"
+                              onAction="#onBuscarPaciente"/>
+                </VBox>
+
+                <TableView fx:id="tableBusca"
+                           VBox.vgrow="ALWAYS"
+                           styleClass="table-soft">
+
                     <columns>
-                        <TableColumn fx:id="colBuscaNome" text="Nome" prefWidth="280"/>
-                        <TableColumn fx:id="colBuscaCpf" text="CPF / RG" prefWidth="150"/>
-                        <TableColumn fx:id="colBuscaTelefone" text="Telefone" prefWidth="140"/>
-                        <TableColumn fx:id="colBuscaDataNascimento" text="Data Nasc." prefWidth="110"/>
-                        <TableColumn fx:id="colBuscaAtivo" text="Ativo" prefWidth="70"/>
+                        <TableColumn fx:id="colBuscaNome"
+                                     text="Nome"
+                                     prefWidth="320"/>
+
+                        <TableColumn fx:id="colBuscaCpf"
+                                     text="CPF / RG"
+                                     prefWidth="180"/>
+
+                        <TableColumn fx:id="colBuscaTelefone"
+                                     text="Telefone"
+                                     prefWidth="160"/>
+
+                        <TableColumn fx:id="colBuscaDataNascimento"
+                                     text="Data nasc."
+                                     prefWidth="140"/>
+
+                        <TableColumn fx:id="colBuscaAtivo"
+                                     text="Status"
+                                     prefWidth="110"/>
                     </columns>
                 </TableView>
+
             </VBox>
 
         </StackPane>

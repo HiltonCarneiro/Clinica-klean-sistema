@@ -26,7 +26,6 @@ import java.util.List;
 
 public class PacienteHistoricoController {
 
-    // ======= CABEÇALHO =======
     @FXML private Label lblNome;
     @FXML private Label lblCpf;
     @FXML private Label lblRg;
@@ -36,7 +35,6 @@ public class PacienteHistoricoController {
     @FXML private Label lblEndereco;
     @FXML private Label lblAtivo;
 
-    // ======= ABA ANEXOS =======
     @FXML private TableView<AnexoPacienteItem> tableAnexos;
     @FXML private TableColumn<AnexoPacienteItem, String> colAnexoNome;
     @FXML private TableColumn<AnexoPacienteItem, String> colAnexoDescricao;
@@ -44,7 +42,6 @@ public class PacienteHistoricoController {
     @FXML private Button btnAbrirAnexo;
     @FXML private Button btnAtualizarAnexos;
 
-    // ======= ABA ANAMNESE / EVOLUÇÃO =======
     @FXML private TableView<Anamnese> tableAnamnese;
     @FXML private TableColumn<Anamnese, String> colAnaDataHora;
     @FXML private TableColumn<Anamnese, String> colAnaTipo;
@@ -56,7 +53,6 @@ public class PacienteHistoricoController {
 
     @FXML private Button btnAtualizarAnamnese;
 
-    // ======= DADOS =======
     private final AnexoPacienteDAO anexoDAO = new AnexoPacienteDAO();
     private final AnamneseDAO anamneseDAO = new AnamneseDAO();
 
@@ -69,47 +65,79 @@ public class PacienteHistoricoController {
 
     @FXML
     private void initialize() {
-        // ---- Anexos
-        if (colAnexoNome != null) colAnexoNome.setCellValueFactory(c ->
-                new SimpleStringProperty(safe(c.getValue().getNomeArquivo()))
-        );
-        if (colAnexoDescricao != null) colAnexoDescricao.setCellValueFactory(c ->
-                new SimpleStringProperty(safe(c.getValue().getDescricao()))
-        );
-        if (colAnexoDataHora != null) colAnexoDataHora.setCellValueFactory(c ->
-                new SimpleStringProperty(safe(c.getValue().getDataHora()))
-        );
+        if (colAnexoNome != null) {
+            colAnexoNome.setCellValueFactory(c ->
+                    new SimpleStringProperty(safe(c.getValue().getNomeArquivo()))
+            );
+        }
 
-        if (tableAnexos != null) tableAnexos.setItems(anexos);
+        if (colAnexoDescricao != null) {
+            colAnexoDescricao.setCellValueFactory(c ->
+                    new SimpleStringProperty(safe(c.getValue().getDescricao()))
+            );
+        }
 
-        if (btnAbrirAnexo != null) btnAbrirAnexo.setDisable(true);
+        if (colAnexoDataHora != null) {
+            colAnexoDataHora.setCellValueFactory(c ->
+                    new SimpleStringProperty(safe(c.getValue().getDataHora()))
+            );
+        }
+
+        if (tableAnexos != null) {
+            tableAnexos.setItems(anexos);
+        }
+
+        if (btnAbrirAnexo != null) {
+            btnAbrirAnexo.setDisable(true);
+        }
 
         if (tableAnexos != null) {
             tableAnexos.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-                if (btnAbrirAnexo != null) btnAbrirAnexo.setDisable(newSel == null);
+                if (btnAbrirAnexo != null) {
+                    btnAbrirAnexo.setDisable(newSel == null);
+                }
             });
         }
 
-        // ---- Anamnese/Evolução
-        if (colAnaDataHora != null) colAnaDataHora.setCellValueFactory(c ->
-                new SimpleStringProperty(safe(c.getValue().getDataHora()))
-        );
-        if (colAnaTipo != null) colAnaTipo.setCellValueFactory(c ->
-                new SimpleStringProperty(formatTipo(safe(c.getValue().getTipo())))
-        );
+        if (colAnaDataHora != null) {
+            colAnaDataHora.setCellValueFactory(c ->
+                    new SimpleStringProperty(safe(c.getValue().getDataHora()))
+            );
+        }
 
-        if (tableAnamnese != null) tableAnamnese.setItems(anamneses);
+        if (colAnaTipo != null) {
+            colAnaTipo.setCellValueFactory(c ->
+                    new SimpleStringProperty(formatTipo(safe(c.getValue().getTipo())))
+            );
+        }
 
         if (tableAnamnese != null) {
-            tableAnamnese.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-                preencherDetalheAnamnese(newSel);
-            });
+            tableAnamnese.setItems(anamneses);
         }
 
-        if (txtObservacoes != null) txtObservacoes.setEditable(false);
-        if (txtResumo != null) txtResumo.setEditable(false);
-        if (txtJson != null) txtJson.setEditable(false);
-        if (tpJson != null) tpJson.setExpanded(false);
+        if (tableAnamnese != null) {
+            tableAnamnese.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) ->
+                    preencherDetalheAnamnese(newSel)
+            );
+        }
+
+        if (txtObservacoes != null) {
+            txtObservacoes.setEditable(false);
+        }
+
+        if (txtResumo != null) {
+            txtResumo.setEditable(false);
+        }
+
+        if (txtJson != null) {
+            txtJson.setEditable(false);
+        }
+
+        if (tpJson != null) {
+            tpJson.setExpanded(false);
+            tpJson.setVisible(false);
+            tpJson.setManaged(false);
+        }
     }
 
     public void setPaciente(Paciente paciente) {
@@ -119,35 +147,64 @@ public class PacienteHistoricoController {
         carregarAnamneses();
     }
 
-    // ===============================
-    // CABEÇALHO
-    // ===============================
     private void preencherCabecalho() {
-        if (paciente == null) return;
+        if (paciente == null) {
+            return;
+        }
 
-        if (lblNome != null) lblNome.setText(safe(paciente.getNome()));
-        if (lblCpf != null) lblCpf.setText(ValidationUtils.formatCpf(safe(paciente.getCpf())));
-        if (lblRg != null) lblRg.setText(formatRg(safe(paciente.getRg())));
-        if (lblTelefone != null) lblTelefone.setText(ValidationUtils.formatPhoneBr(safe(paciente.getTelefone())));
+        if (lblNome != null) {
+            lblNome.setText(safe(paciente.getNome()));
+        }
+
+        if (lblCpf != null) {
+            lblCpf.setText(ValidationUtils.formatCpf(safe(paciente.getCpf())));
+        }
+
+        if (lblRg != null) {
+            lblRg.setText(formatRg(safe(paciente.getRg())));
+        }
+
+        if (lblTelefone != null) {
+            lblTelefone.setText(ValidationUtils.formatPhoneBr(safe(paciente.getTelefone())));
+        }
 
         LocalDate dn = paciente.getDataNascimento();
-        if (lblDataNascimento != null) lblDataNascimento.setText(dn == null ? "" : dn.format(fmtBr));
-        if (lblIdade != null) lblIdade.setText(calcularIdadeTexto(dn));
 
-        if (lblEndereco != null) lblEndereco.setText(montarEnderecoCompleto(paciente));
+        if (lblDataNascimento != null) {
+            lblDataNascimento.setText(dn == null ? "" : dn.format(fmtBr));
+        }
 
-        if (lblAtivo != null) lblAtivo.setText(paciente.isAtivo() ? "Sim" : "Não");
+        if (lblIdade != null) {
+            lblIdade.setText(calcularIdadeTexto(dn));
+        }
+
+        if (lblEndereco != null) {
+            lblEndereco.setText(montarEnderecoCompleto(paciente));
+        }
+
+        if (lblAtivo != null) {
+            lblAtivo.setText(paciente.isAtivo() ? "Sim" : "Não");
+        }
     }
 
     private String calcularIdadeTexto(LocalDate dn) {
-        if (dn == null) return "";
+        if (dn == null) {
+            return "";
+        }
+
         int idade = Period.between(dn, LocalDate.now()).getYears();
-        if (idade < 0) idade = 0;
+
+        if (idade < 0) {
+            idade = 0;
+        }
+
         return idade + " anos";
     }
 
     private String montarEnderecoCompleto(Paciente p) {
-        if (p == null) return "";
+        if (p == null) {
+            return "";
+        }
 
         String rua = safe(p.getRua()).trim();
         String numero = safe(p.getNumero()).trim();
@@ -164,35 +221,54 @@ public class PacienteHistoricoController {
         }
 
         if (!numero.isBlank()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+
             sb.append(numero);
         }
 
         if (!complemento.isBlank()) {
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0) {
+                sb.append(" - ");
+            }
+
             sb.append(complemento);
         }
 
         if (!bairro.isBlank()) {
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0) {
+                sb.append(" - ");
+            }
+
             sb.append(bairro);
         }
 
         if (!cidade.isBlank()) {
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0) {
+                sb.append(" - ");
+            }
+
             sb.append(cidade);
         }
 
         if (!uf.isBlank()) {
-            if (sb.length() > 0) sb.append("/").append(uf);
-            else sb.append(uf);
+            if (sb.length() > 0) {
+                sb.append("/").append(uf);
+            } else {
+                sb.append(uf);
+            }
         }
 
         if (!cep.isBlank()) {
             String cepFmt = ValidationUtils.formatCep(cep);
+
             if (!cepFmt.isBlank()) {
-                if (sb.length() > 0) sb.append(" - CEP: ").append(cepFmt);
-                else sb.append("CEP: ").append(cepFmt);
+                if (sb.length() > 0) {
+                    sb.append(" - CEP: ").append(cepFmt);
+                } else {
+                    sb.append("CEP: ").append(cepFmt);
+                }
             }
         }
 
@@ -205,21 +281,28 @@ public class PacienteHistoricoController {
 
     private String formatRg(String rg) {
         String digits = safe(rg).replaceAll("\\D", "");
-        if (digits.isBlank()) return "";
 
-        if (digits.length() > 7) digits = digits.substring(0, 7);
+        if (digits.isBlank()) {
+            return "";
+        }
+
+        if (digits.length() > 7) {
+            digits = digits.substring(0, 7);
+        }
 
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < digits.length(); i++) {
-            if (i == 1 || i == 4) sb.append('.');
+            if (i == 1 || i == 4) {
+                sb.append('.');
+            }
+
             sb.append(digits.charAt(i));
         }
+
         return sb.toString();
     }
 
-    // ===============================
-    // ANEXOS
-    // ===============================
     @FXML
     private void onAtualizarAnexos() {
         carregarAnexos();
@@ -227,36 +310,48 @@ public class PacienteHistoricoController {
 
     private void carregarAnexos() {
         anexos.clear();
-        if (paciente == null || paciente.getId() == null) return;
+
+        if (paciente == null || paciente.getId() == null) {
+            return;
+        }
 
         List<AnexoPacienteItem> list = anexoDAO.listarPorPaciente(paciente.getId());
         anexos.addAll(list);
 
-        if (btnAbrirAnexo != null) btnAbrirAnexo.setDisable(true);
-        if (tableAnexos != null) tableAnexos.getSelectionModel().clearSelection();
+        if (btnAbrirAnexo != null) {
+            btnAbrirAnexo.setDisable(true);
+        }
+
+        if (tableAnexos != null) {
+            tableAnexos.getSelectionModel().clearSelection();
+        }
     }
 
     @FXML
     private void onAbrirAnexo() {
-        AnexoPacienteItem item = (tableAnexos == null) ? null : tableAnexos.getSelectionModel().getSelectedItem();
+        AnexoPacienteItem item =
+                tableAnexos == null
+                        ? null
+                        : tableAnexos.getSelectionModel().getSelectedItem();
+
         if (item == null) {
             new Alert(Alert.AlertType.WARNING, "Selecione um anexo para abrir.").showAndWait();
             return;
         }
 
         try {
-            // Novo: abre do Supabase Storage no navegador
             if (item.isNuvem()) {
                 anexoDAO.abrirNoNavegadorSignedUrl(item.getStoragePath());
                 return;
             }
 
-            // Legado: abre arquivo local (se existir)
             File f = item.getFileLegado();
+
             if (f == null || !f.exists()) {
                 new Alert(Alert.AlertType.ERROR, "Arquivo não encontrado. (anexo antigo/local)").showAndWait();
                 return;
             }
+
             anexoDAO.abrirNoSistema(f);
 
         } catch (Exception e) {
@@ -265,9 +360,6 @@ public class PacienteHistoricoController {
         }
     }
 
-    // ===============================
-    // ANAMNESE & EVOLUÇÕES
-    // ===============================
     @FXML
     private void onAtualizarAnamnese() {
         carregarAnamneses();
@@ -277,12 +369,16 @@ public class PacienteHistoricoController {
         anamneses.clear();
         limparDetalheAnamnese();
 
-        if (paciente == null || paciente.getId() == null) return;
+        if (paciente == null || paciente.getId() == null) {
+            return;
+        }
 
         List<Anamnese> list = anamneseDAO.listarPorPaciente(paciente.getId());
         anamneses.addAll(list);
 
-        if (tableAnamnese != null) tableAnamnese.getSelectionModel().clearSelection();
+        if (tableAnamnese != null) {
+            tableAnamnese.getSelectionModel().clearSelection();
+        }
     }
 
     private void preencherDetalheAnamnese(Anamnese a) {
@@ -303,18 +399,34 @@ public class PacienteHistoricoController {
         }
 
         if (txtJson != null) {
-            txtJson.setText(prettyJson(rawJson));
+            txtJson.setText("");
         }
 
-        // JSON recolhido por padrão
-        if (tpJson != null) tpJson.setExpanded(false);
+        if (tpJson != null) {
+            tpJson.setExpanded(false);
+            tpJson.setVisible(false);
+            tpJson.setManaged(false);
+        }
     }
 
     private void limparDetalheAnamnese() {
-        if (txtObservacoes != null) txtObservacoes.clear();
-        if (txtResumo != null) txtResumo.clear();
-        if (txtJson != null) txtJson.clear();
-        if (tpJson != null) tpJson.setExpanded(false);
+        if (txtObservacoes != null) {
+            txtObservacoes.clear();
+        }
+
+        if (txtResumo != null) {
+            txtResumo.clear();
+        }
+
+        if (txtJson != null) {
+            txtJson.clear();
+        }
+
+        if (tpJson != null) {
+            tpJson.setExpanded(false);
+            tpJson.setVisible(false);
+            tpJson.setManaged(false);
+        }
     }
 
     private String montarResumoBonito(Anamnese a, String rawJson, String obs) {
@@ -348,92 +460,149 @@ public class PacienteHistoricoController {
 
         StringBuilder sb = new StringBuilder();
 
+        sb.append("Registro clínico\n");
         sb.append(tipo);
-        if (!dataHora.isBlank()) sb.append(" — ").append(dataHora);
+
+        if (!dataHora.isBlank()) {
+            sb.append(" — ").append(dataHora);
+        }
+
         sb.append("\n\n");
 
-        if (!queixa.isBlank()) {
-            sb.append("Queixa principal\n");
-            sb.append(queixa).append("\n\n");
-        }
-        if (!evolucao.isBlank()) {
-            sb.append("Evolução\n");
-            sb.append(evolucao).append("\n\n");
-        }
+        appendSecaoTexto(sb, "Queixa principal", queixa);
+        appendSecaoTexto(sb, "Evolução", evolucao);
 
         String sinais = montarLinhaSinaisVitais(pa, fc, fr, temp, peso, altura, spo2);
-        if (!sinais.isBlank()) {
-            sb.append("Sinais vitais\n");
-            sb.append(sinais).append("\n\n");
-        }
+        appendSecaoTexto(sb, "Sinais vitais", sinais);
 
-        boolean temHist = !antecedentes.isBlank() || !medicacoes.isBlank() || !alergias.isBlank() || !cirurgias.isBlank();
-        if (temHist) {
+        boolean temHistorico =
+                !antecedentes.isBlank()
+                        || !medicacoes.isBlank()
+                        || !alergias.isBlank()
+                        || !cirurgias.isBlank();
+
+        if (temHistorico) {
             sb.append("Histórico clínico\n");
-            if (!antecedentes.isBlank()) sb.append("• Antecedentes: ").append(antecedentes).append("\n");
-            if (!medicacoes.isBlank()) sb.append("• Medicações: ").append(medicacoes).append("\n");
-            if (!alergias.isBlank()) sb.append("• Alergias: ").append(alergias).append("\n");
-            if (!cirurgias.isBlank()) sb.append("• Cirurgias: ").append(cirurgias).append("\n");
+
+            appendItem(sb, "Antecedentes", antecedentes);
+            appendItem(sb, "Medicações", medicacoes);
+            appendItem(sb, "Alergias", alergias);
+            appendItem(sb, "Cirurgias", cirurgias);
+
             sb.append("\n");
         }
 
-        boolean temHab = !tabagismo.isBlank() || !alcool.isBlank() || !sono.isBlank() || !atividade.isBlank() || !alimentacao.isBlank();
-        if (temHab) {
+        boolean temHabitos =
+                !tabagismo.isBlank()
+                        || !alcool.isBlank()
+                        || !sono.isBlank()
+                        || !atividade.isBlank()
+                        || !alimentacao.isBlank();
+
+        if (temHabitos) {
             sb.append("Hábitos\n");
-            if (!tabagismo.isBlank()) sb.append("• Tabagismo: ").append(tabagismo).append("\n");
-            if (!alcool.isBlank()) sb.append("• Álcool: ").append(alcool).append("\n");
-            if (!sono.isBlank()) sb.append("• Sono: ").append(sono).append("\n");
-            if (!atividade.isBlank()) sb.append("• Atividade física: ").append(atividade).append("\n");
-            if (!alimentacao.isBlank()) sb.append("• Alimentação: ").append(alimentacao).append("\n");
+
+            appendItem(sb, "Tabagismo", tabagismo);
+            appendItem(sb, "Álcool", alcool);
+            appendItem(sb, "Sono", sono);
+            appendItem(sb, "Atividade física", atividade);
+            appendItem(sb, "Alimentação", alimentacao);
+
             sb.append("\n");
         }
 
-        boolean temEx = !exameGeral.isBlank() || !exameSeg.isBlank();
-        if (temEx) {
+        boolean temExame =
+                !exameGeral.isBlank()
+                        || !exameSeg.isBlank();
+
+        if (temExame) {
             sb.append("Exame físico\n");
-            if (!exameGeral.isBlank()) sb.append("• Geral: ").append(exameGeral).append("\n");
-            if (!exameSeg.isBlank()) sb.append("• Segmentar: ").append(exameSeg).append("\n");
+
+            appendItem(sb, "Geral", exameGeral);
+            appendItem(sb, "Segmentar", exameSeg);
+
             sb.append("\n");
         }
 
-        if (!obs.isBlank()) {
-            sb.append("Observações\n");
-            sb.append(obs).append("\n");
-        }
+        appendSecaoTexto(sb, "Observações", obs);
 
         String out = sb.toString().trim();
-        if (out.isBlank()) return "Sem detalhes para exibir neste registro.";
+
+        if (out.isBlank()) {
+            return "Sem detalhes para exibir neste registro.";
+        }
+
         return out;
     }
 
-    private String montarLinhaSinaisVitais(String pa, String fc, String fr, String temp, String peso, String altura, String spo2) {
+    private void appendSecaoTexto(StringBuilder sb, String titulo, String texto) {
+        String valor = safe(texto).trim();
+
+        if (valor.isBlank()) {
+            return;
+        }
+
+        sb.append(titulo).append("\n");
+        sb.append(valor).append("\n\n");
+    }
+
+    private void appendItem(StringBuilder sb, String label, String valor) {
+        String v = safe(valor).trim();
+
+        if (v.isBlank()) {
+            return;
+        }
+
+        sb.append("• ").append(label).append(": ").append(v).append("\n");
+    }
+
+    private String montarLinhaSinaisVitais(
+            String pa,
+            String fc,
+            String fr,
+            String temp,
+            String peso,
+            String altura,
+            String spo2
+    ) {
         StringBuilder s = new StringBuilder();
-        appendCampo(s, "PA", pa);
-        appendCampo(s, "FC", fc);
-        appendCampo(s, "FR", fr);
+
+        appendCampo(s, "PA", pa, "mmHg");
+        appendCampo(s, "FC", fc, "bpm");
+        appendCampo(s, "FR", fr, "irpm");
         appendCampo(s, "Temp", temp, "°C");
         appendCampo(s, "Peso", peso, "kg");
         appendCampo(s, "Altura", altura, "m");
         appendCampo(s, "SpO₂", spo2, "%");
-        return s.toString().trim();
-    }
 
-    private void appendCampo(StringBuilder sb, String label, String valor) {
-        appendCampo(sb, label, valor, "");
+        return s.toString().trim();
     }
 
     private void appendCampo(StringBuilder sb, String label, String valor, String sufixo) {
         String v = safe(valor).trim();
-        if (v.isBlank()) return;
 
-        if (sb.length() > 0) sb.append("   ");
+        if (v.isBlank()) {
+            return;
+        }
+
+        if (sb.length() > 0) {
+            sb.append("   ");
+        }
+
         sb.append(label).append(": ").append(v);
-        if (sufixo != null && !sufixo.isBlank()) sb.append(" ").append(sufixo);
+
+        if (sufixo != null && !sufixo.isBlank()) {
+            sb.append(" ").append(sufixo);
+        }
     }
 
     private String formatTipo(String tipo) {
-        if (tipo == null) return "";
+        if (tipo == null) {
+            return "";
+        }
+
         String t = tipo.trim().toUpperCase();
+
         return switch (t) {
             case "ANAMNESE_INICIAL" -> "Anamnese inicial";
             case "EVOLUCAO" -> "Evolução";
@@ -441,9 +610,6 @@ public class PacienteHistoricoController {
         };
     }
 
-    // ===============================
-    // FECHAR
-    // ===============================
     @FXML
     private void onFechar() {
         if (lblNome != null && lblNome.getScene() != null) {
@@ -451,24 +617,23 @@ public class PacienteHistoricoController {
         }
     }
 
-    // ===============================
-    // UTIL
-    // ===============================
     private String safe(String s) {
         return s == null ? "" : s;
     }
 
-    /**
-     * Extrai um campo de um JSON do tipo {"campo":"valor"} sem depender de libs.
-     * Se não encontrar, retorna "".
-     */
     private String getJsonField(String json, String field) {
-        if (json == null || json.isBlank() || field == null || field.isBlank()) return "";
+        if (json == null || json.isBlank() || field == null || field.isBlank()) {
+            return "";
+        }
+
         String t = json.trim();
 
         String key = "\"" + field + "\":\"";
         int i = t.indexOf(key);
-        if (i < 0) return "";
+
+        if (i < 0) {
+            return "";
+        }
 
         int start = i + key.length();
         int end = start;
@@ -476,79 +641,37 @@ public class PacienteHistoricoController {
 
         while (end < t.length()) {
             char c = t.charAt(end);
+
             if (escape) {
                 escape = false;
                 end++;
                 continue;
             }
+
             if (c == '\\') {
                 escape = true;
                 end++;
                 continue;
             }
-            if (c == '"') break;
+
+            if (c == '"') {
+                break;
+            }
+
             end++;
         }
 
-        if (end <= start || end >= t.length()) return "";
+        if (end <= start || end >= t.length()) {
+            return "";
+        }
 
         String raw = t.substring(start, end);
+
         return raw.replace("\\n", "\n")
                 .replace("\\t", "\t")
                 .replace("\\r", "\r")
                 .replace("\\\"", "\"")
                 .replace("\\\\", "\\")
                 .trim();
-    }
-
-    /**
-     * "Pretty print" simples de JSON sem depender de libs.
-     * Se não parecer JSON, retorna o texto original.
-     */
-    private String prettyJson(String s) {
-        if (s == null) return "";
-        String t = s.trim();
-        if (!(t.startsWith("{") || t.startsWith("["))) return s;
-
-        StringBuilder out = new StringBuilder();
-        int indent = 0;
-        boolean inString = false;
-
-        for (int i = 0; i < t.length(); i++) {
-            char c = t.charAt(i);
-
-            if (c == '"' && (i == 0 || t.charAt(i - 1) != '\\')) {
-                inString = !inString;
-                out.append(c);
-                continue;
-            }
-
-            if (inString) {
-                out.append(c);
-                continue;
-            }
-
-            switch (c) {
-                case '{', '[' -> {
-                    out.append(c).append('\n');
-                    indent++;
-                    out.append("  ".repeat(indent));
-                }
-                case '}', ']' -> {
-                    out.append('\n');
-                    indent = Math.max(0, indent - 1);
-                    out.append("  ".repeat(indent)).append(c);
-                }
-                case ',' -> {
-                    out.append(c).append('\n');
-                    out.append("  ".repeat(indent));
-                }
-                case ':' -> out.append(": ");
-                default -> {
-                    if (!Character.isWhitespace(c)) out.append(c);
-                }
-            }
-        }
-        return out.toString();
     }
 }

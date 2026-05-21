@@ -4,111 +4,255 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.EstoqueController">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.EstoqueController"
+            styleClass="page-root"
+            stylesheets="@/styles/app.css">
 
     <top>
-        <VBox spacing="5">
+        <VBox spacing="16" styleClass="top-clean">
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets top="22" right="28" bottom="18" left="28"/>
             </padding>
 
-            <Label text="Controle de Estoque - Produtos / Insumos"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="5">
+                    <Label text="Estoque" styleClass="page-title"/>
+                    <Label text="Controle produtos, validade, preços, estoque mínimo e alertas operacionais."
+                           styleClass="page-subtitle"/>
+                </VBox>
 
-            <Separator/>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <VBox alignment="CENTER_RIGHT" spacing="4">
+                    <Label text="Controle operacional" styleClass="dashboard-badge"/>
+                    <Label text="Produtos e suprimentos" styleClass="label-muted"/>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="18">
+                <VBox spacing="8" styleClass="metric-card">
+                    <Label text="Produtos" styleClass="metric-title"/>
+                    <Label text="Cadastro" styleClass="metric-value"/>
+                    <Label text="Gerencie itens ativos e inativos." wrapText="true" styleClass="metric-desc"/>
+                </VBox>
+
+                <VBox spacing="8" styleClass="metric-card">
+                    <Label text="Estoque baixo" styleClass="metric-title"/>
+                    <Label text="Alerta" styleClass="metric-value"/>
+                    <Label text="Use o filtro para visualizar itens críticos." wrapText="true" styleClass="metric-desc"/>
+                </VBox>
+
+                <VBox spacing="8" styleClass="metric-card metric-card-admin">
+                    <Label text="Validade" styleClass="metric-title"/>
+                    <Label text="Vencimentos" styleClass="metric-value"/>
+                    <Label text="Acompanhe produtos próximos do vencimento." wrapText="true" styleClass="metric-desc"/>
+                </VBox>
+            </HBox>
         </VBox>
     </top>
 
     <center>
-        <VBox spacing="10">
+        <HBox spacing="22">
             <padding>
-                <Insets top="0" right="10" bottom="10" left="10"/>
+                <Insets top="0" right="28" bottom="28" left="28"/>
             </padding>
 
             <!-- FORMULÁRIO -->
-            <GridPane hgap="10" vgap="8">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="120"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
+            <ScrollPane fitToWidth="true"
+                        prefWidth="450"
+                        styleClass="page-scroll">
+                <content>
+                    <VBox spacing="18" styleClass="dashboard-panel">
+                        <padding>
+                            <Insets top="22" right="22" bottom="22" left="22"/>
+                        </padding>
 
-                <!-- Nome -->
-                <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <HBox alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="Cadastro do produto" styleClass="section-title"/>
+                                <Label text="Informe os dados comerciais e operacionais do item."
+                                       wrapText="true"
+                                       styleClass="hint-text"/>
+                            </VBox>
 
-                <!-- Tipo -->
-                <Label text="Tipo:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cbTipo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- Estoque atual -->
-                <Label text="Estoque atual:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtEstoqueAtual" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <Button text="Novo"
+                                    onAction="#onNovo"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
 
-                <!-- Estoque mínimo -->
-                <Label text="Estoque mínimo:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtEstoqueMinimo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <Separator/>
 
-                <!-- Lote -->
-                <Label text="Lote:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtLote" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                        <VBox spacing="8">
+                            <Label text="Nome do produto" styleClass="form-label"/>
+                            <TextField fx:id="txtNome"
+                                       promptText="Ex: Luva, máscara, álcool, medicamento..."
+                                       maxWidth="1.7976931348623157E308"/>
+                        </VBox>
 
-                <!-- Validade -->
-                <Label text="Validade:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="dpValidade" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                        <VBox spacing="8">
+                            <Label text="Tipo" styleClass="form-label"/>
+                            <ComboBox fx:id="cbTipo"
+                                      maxWidth="1.7976931348623157E308"/>
+                        </VBox>
 
-                <!-- Preço custo -->
-                <Label text="Preço de custo:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtPrecoCusto" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                        <HBox spacing="12">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Estoque atual" styleClass="form-label"/>
+                                <TextField fx:id="txtEstoqueAtual"
+                                           promptText="0"/>
+                            </VBox>
 
-                <!-- Preço venda -->
-                <Label text="Preço de venda:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtPrecoVenda" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Estoque mínimo" styleClass="form-label"/>
+                                <TextField fx:id="txtEstoqueMinimo"
+                                           promptText="0"/>
+                            </VBox>
+                        </HBox>
 
-                <!-- Ativo -->
-                <Label text="Ativo:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-                <CheckBox fx:id="chkAtivo" GridPane.rowIndex="8" GridPane.columnIndex="1" selected="true"/>
-            </GridPane>
+                        <HBox spacing="12">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Lote" styleClass="form-label"/>
+                                <TextField fx:id="txtLote"
+                                           promptText="Lote do produto"/>
+                            </VBox>
 
-            <!-- BOTÕES + FILTROS -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Button text="Novo" onAction="#onNovo"/>
-                <Button text="Salvar" onAction="#onSalvar"/>
-                <Button text="Ativar / Inativar" onAction="#onAtivarDesativar"/>
-                <Button text="Atualizar lista" onAction="#onAtualizarLista"/>
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Validade" styleClass="form-label"/>
+                                <DatePicker fx:id="dpValidade"
+                                            maxWidth="1.7976931348623157E308"/>
+                            </VBox>
+                        </HBox>
 
-                <Region HBox.hgrow="ALWAYS"/>
+                        <HBox spacing="12">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Preço de custo" styleClass="form-label"/>
+                                <TextField fx:id="txtPrecoCusto"
+                                           promptText="R$ 0,00"/>
+                            </VBox>
 
-                <CheckBox fx:id="chkMostrarInativos" text="Mostrar inativos" onAction="#onAtualizarLista"/>
-                <CheckBox fx:id="chkBaixoEstoque" text="Baixo estoque" onAction="#onAtualizarLista"/>
-                <CheckBox fx:id="chkVencendo" text="Vencendo em 30 dias" onAction="#onAtualizarLista"/>
-            </HBox>
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="Preço de venda" styleClass="form-label"/>
+                                <TextField fx:id="txtPrecoVenda"
+                                           promptText="R$ 0,00"/>
+                            </VBox>
+                        </HBox>
 
-            <!-- BUSCA -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Buscar:"/>
-                <TextField fx:id="txtBuscar" promptText="Digite nome, tipo ou lote..."
-                           HBox.hgrow="ALWAYS"/>
-                <Button text="Limpar" onAction="#onLimparBusca"/>
-            </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <CheckBox fx:id="chkAtivo"
+                                      text="Produto ativo"/>
+                        </HBox>
 
-            <Label fx:id="lblMensagem" textFill="red"/>
+                        <HBox spacing="12">
+                            <Button text="Salvar"
+                                    onAction="#onSalvar"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-primary"/>
 
-            <Separator/>
+                            <Button text="Ativar / Desativar"
+                                    onAction="#onAtivarDesativar"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
 
-            <!-- TABELA -->
-            <TableView fx:id="tblProdutos" prefHeight="200.0" prefWidth="600.0">
-                <columns>
-                    <TableColumn fx:id="colNome"     text="Nome"     prefWidth="260.0"/>
-                    <TableColumn fx:id="colTipo"     text="Tipo"     prefWidth="140.0"/>
-                    <TableColumn fx:id="colEstoque"  text="Estoque"  prefWidth="120.0"/>
-                    <TableColumn fx:id="colValidade" text="Validade" prefWidth="120.0"/>
-                    <TableColumn fx:id="colAtivo"    text="Ativo"    prefWidth="80.0"/>
-                </columns>
-            </TableView>
+                        <Label fx:id="lblMensagem"
+                               wrapText="true"
+                               styleClass="hint-text"/>
+                    </VBox>
+                </content>
+            </ScrollPane>
 
-        </VBox>
+            <!-- LISTAGEM -->
+            <VBox spacing="18"
+                  HBox.hgrow="ALWAYS"
+                  styleClass="dashboard-panel">
+                <padding>
+                    <Insets top="22" right="22" bottom="22" left="22"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Produtos cadastrados" styleClass="section-title"/>
+                        <Label text="Pesquise, filtre e selecione produtos para edição."
+                               styleClass="page-subtitle"/>
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Atualizar"
+                            onAction="#onAtualizarLista"
+                            styleClass="btn-ghost"/>
+                </HBox>
+
+                <VBox spacing="12" styleClass="box-soft">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextField fx:id="txtBuscar"
+                                   promptText="Buscar produto por nome, tipo ou lote..."
+                                   HBox.hgrow="ALWAYS"
+                                   maxWidth="1.7976931348623157E308"/>
+
+                        <Button text="Limpar"
+                                onAction="#onLimparBusca"
+                                styleClass="btn-ghost"/>
+                    </HBox>
+
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="chkMostrarInativos"
+                                  text="Mostrar inativos"
+                                  onAction="#onAtualizarLista"/>
+
+                        <CheckBox fx:id="chkBaixoEstoque"
+                                  text="Baixo estoque"
+                                  onAction="#onAtualizarLista"/>
+
+                        <CheckBox fx:id="chkVencendo"
+                                  text="Vencendo"
+                                  onAction="#onAtualizarLista"/>
+                    </HBox>
+                </VBox>
+
+                <TableView fx:id="tblProdutos"
+                           VBox.vgrow="ALWAYS"
+                           styleClass="table-soft">
+                    <columns>
+                        <TableColumn fx:id="colNome"
+                                     text="Produto"
+                                     prefWidth="320"/>
+
+                        <TableColumn fx:id="colTipo"
+                                     text="Tipo"
+                                     prefWidth="160"/>
+
+                        <TableColumn fx:id="colEstoque"
+                                     text="Estoque"
+                                     prefWidth="110"/>
+
+                        <TableColumn fx:id="colValidade"
+                                     text="Validade"
+                                     prefWidth="130"/>
+
+                        <TableColumn fx:id="colAtivo"
+                                     text="Ativo"
+                                     prefWidth="90"/>
+                    </columns>
+                </TableView>
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label text="Selecione um produto na tabela para carregar os dados no formulário."
+                           styleClass="hint-text"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Controle de estoque"
+                           styleClass="dashboard-badge"/>
+                </HBox>
+            </VBox>
+        </HBox>
     </center>
 
 </BorderPane>

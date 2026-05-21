@@ -2,82 +2,102 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="br.com.clinica.controller.LoginController"
            styleClass="login-root">
 
-    <VBox spacing="16" alignment="CENTER" styleClass="login-card">
+    <HBox maxWidth="1180"
+          maxHeight="680"
+          styleClass="login-shell">
 
-        <!-- LOGO -->
-        <ImageView fx:id="imgLogoLogin"
-                   fitHeight="84"
-                   preserveRatio="true"
-                   smooth="true"
-                   opacity="0.95"/>
+        <VBox spacing="18"
+              alignment="CENTER_LEFT"
+              prefWidth="520"
+              styleClass="login-left">
 
-        <!-- TÍTULO -->
-        <Label text="Clínica Klean - Saúde Integrativa"
-               styleClass="login-title"/>
+            <ImageView fx:id="imgLogoLogin"
+                       fitHeight="120"
+                       preserveRatio="true"
+                       smooth="true"/>
 
-        <!-- FORM -->
-        <GridPane hgap="12" vgap="12" alignment="CENTER">
-            <columnConstraints>
-                <ColumnConstraints minWidth="76" halignment="RIGHT"/>
-                <ColumnConstraints minWidth="300" hgrow="NEVER"/>
-                <ColumnConstraints minWidth="44" halignment="CENTER"/>
-            </columnConstraints>
+            <Label text="Clínica Klean"
+                   styleClass="login-brand"/>
 
-            <!-- USUÁRIO -->
-            <Label text="Usuário:" styleClass="login-label"
-                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <Label text="Sistema profissional para gestão clínica moderna, segura e intuitiva."
+                   wrapText="true"
+                   styleClass="login-brand-sub"/>
 
-            <TextField fx:id="txtUsuario"
-                       prefWidth="300"
-                       styleClass="login-field"
-                       GridPane.rowIndex="0" GridPane.columnIndex="1"
-                       GridPane.columnSpan="2"/>
+        </VBox>
 
-            <!-- SENHA -->
-            <Label text="Senha:" styleClass="login-label"
-                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <VBox spacing="22"
+              alignment="CENTER"
+              HBox.hgrow="ALWAYS"
+              styleClass="login-right">
 
-            <PasswordField fx:id="txtSenha"
-                           prefWidth="300"
-                           styleClass="login-field"
-                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <VBox spacing="6" alignment="CENTER">
+                <Label text="Bem-vindo"
+                       styleClass="login-title"/>
 
-            <TextField fx:id="txtSenhaVisivel"
-                       prefWidth="300"
-                       styleClass="login-field"
-                       visible="false"
-                       managed="false"
-                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Entre com suas credenciais para acessar o sistema"
+                       styleClass="page-subtitle"/>
+            </VBox>
 
-            <Button fx:id="btnToggleSenha"
-                    text="👁"
-                    onAction="#onToggleSenha"
-                    styleClass="login-eye"
-                    prefWidth="44"
-                    GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <VBox spacing="14" maxWidth="360">
 
-            <!-- LEMBRAR USUÁRIO -->
-            <CheckBox fx:id="chkLembrarUsuario"
-                      text="Lembrar usuário"
-                      GridPane.rowIndex="2" GridPane.columnIndex="1"
-                      GridPane.columnSpan="2"/>
-        </GridPane>
+                <VBox spacing="6">
+                    <Label text="Usuário"
+                           styleClass="login-label"/>
 
-        <Label fx:id="lblErro" styleClass="login-error"/>
+                    <TextField fx:id="txtUsuario"
+                               styleClass="login-field"/>
+                </VBox>
 
-        <Button text="Entrar"
-                onAction="#onEntrar"
-                prefWidth="220"
-                styleClass="login-button"
-                defaultButton="true"/>
+                <VBox spacing="6">
+                    <Label text="Senha"
+                           styleClass="login-label"/>
 
-    </VBox>
+                    <HBox spacing="10">
+
+                        <PasswordField fx:id="txtSenha"
+                                       HBox.hgrow="ALWAYS"
+                                       styleClass="login-field"/>
+
+                        <TextField fx:id="txtSenhaVisivel"
+                                   visible="false"
+                                   managed="false"
+                                   HBox.hgrow="ALWAYS"
+                                   styleClass="login-field"/>
+
+                        <Button fx:id="btnToggleSenha"
+                                text="👁"
+                                onAction="#onToggleSenha"
+                                styleClass="login-eye"/>
+                    </HBox>
+                </VBox>
+
+                <CheckBox fx:id="chkLembrarUsuario"
+                          text="Lembrar usuário"/>
+
+                <Label fx:id="lblErro"
+                       styleClass="login-error"/>
+
+                <Button text="Entrar"
+                        onAction="#onEntrar"
+                        defaultButton="true"
+                        maxWidth="999"
+                        styleClass="login-button"/>
+            </VBox>
+
+        </VBox>
+
+    </HBox>
+
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24"/>
+    </padding>
+
 </StackPane>

@@ -1,123 +1,363 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.clinica.controller.AgendaController"
-            styleClass="page-form-root">
+            styleClass="page-root"
+            stylesheets="@/styles/app.css">
+
+    <top>
+
+        <VBox spacing="18"
+              styleClass="top-clean">
+
+            <padding>
+                <Insets top="22"
+                        right="28"
+                        bottom="20"
+                        left="28"/>
+            </padding>
+
+            <!-- HEADER -->
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="16">
+
+                <VBox spacing="5">
+
+                    <Label text="Agenda Clínica"
+                           styleClass="page-title"/>
+
+                    <Label text="Gerencie consultas, atendimentos e organização clínica diária."
+                           styleClass="page-subtitle"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <VBox alignment="CENTER_RIGHT"
+                      spacing="4">
+
+                    <Label text="Fluxo clínico"
+                           styleClass="dashboard-badge"/>
+
+                    <Label text="Agenda operacional"
+                           styleClass="label-muted"/>
+                </VBox>
+            </HBox>
+
+            <!-- CARDS -->
+
+            <HBox spacing="18">
+
+                <VBox spacing="8"
+                      styleClass="metric-card">
+
+                    <Label text="Consultas"
+                           styleClass="metric-title"/>
+
+                    <Label text="Agenda do dia"
+                           styleClass="metric-value"/>
+
+                    <Label text="Visualize atendimentos programados."
+                           wrapText="true"
+                           styleClass="metric-desc"/>
+                </VBox>
+
+                <VBox spacing="8"
+                      styleClass="metric-card">
+
+                    <Label text="Profissionais"
+                           styleClass="metric-title"/>
+
+                    <Label text="Organização"
+                           styleClass="metric-value"/>
+
+                    <Label text="Controle salas e horários disponíveis."
+                           wrapText="true"
+                           styleClass="metric-desc"/>
+                </VBox>
+
+                <VBox spacing="8"
+                      styleClass="metric-card metric-card-admin">
+
+                    <Label text="Atendimento"
+                           styleClass="metric-title"/>
+
+                    <Label text="Fluxo clínico"
+                           styleClass="metric-value"/>
+
+                    <Label text="Inicie e finalize consultas rapidamente."
+                           wrapText="true"
+                           styleClass="metric-desc"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
+
+    </top>
 
     <center>
-        <ScrollPane fitToWidth="true" styleClass="page-scroll">
-            <content>
-                <StackPane styleClass="page-center">
-                    <VBox spacing="16" styleClass="form-card agenda-card">
 
-                        <!-- TÍTULO -->
-                        <VBox spacing="2">
-                            <Label text="Agenda | Clínica Klean - Saúde Integrativa" styleClass="page-title"/>
-                            <Label text="Selecione a data e gerencie os atendimentos." styleClass="page-subtitle"/>
-                        </VBox>
+        <HBox spacing="22">
 
-                        <!-- BLOCO PRINCIPAL (ficha) -->
-                        <GridPane hgap="18" vgap="14" styleClass="agenda-grid">
+            <padding>
+                <Insets top="0"
+                        right="28"
+                        bottom="28"
+                        left="28"/>
+            </padding>
 
-                            <!-- Colunas mais bonitas: Label / Campo / Label / Campo -->
-                            <columnConstraints>
-                                <ColumnConstraints minWidth="130"/>
-                                <ColumnConstraints hgrow="ALWAYS"/>
-                                <ColumnConstraints minWidth="130"/>
-                                <ColumnConstraints hgrow="ALWAYS"/>
-                            </columnConstraints>
+            <!-- FORMULÁRIO -->
 
-                            <!-- Linha 1 -->
-                            <Label text="Data:" styleClass="form-label"
-                                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                            <DatePicker fx:id="dpData" onAction="#onDataAlterada"
-                                        styleClass="field-date"
-                                        GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <ScrollPane fitToWidth="true"
+                        prefWidth="430"
+                        styleClass="page-scroll">
 
-                            <Label text="Profissional:" styleClass="form-label"
-                                   GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                            <ComboBox fx:id="cbProfissional"
-                                      styleClass="field"
-                                      GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                <content>
 
-                            <!-- Linha 2 -->
-                            <Label text="Paciente:" styleClass="form-label"
-                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                            <ComboBox fx:id="cbPaciente"
-                                      styleClass="field"
-                                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <VBox spacing="18"
+                          styleClass="dashboard-panel">
 
-                            <Label text="Sala:" styleClass="form-label"
-                                   GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                            <ComboBox fx:id="cbSala"
-                                      styleClass="field"
-                                      GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                        <padding>
+                            <Insets top="22"
+                                    right="22"
+                                    bottom="22"
+                                    left="22"/>
+                        </padding>
 
-                            <!-- Linha 3 -->
-                            <Label text="Hora início:" styleClass="form-label"
-                                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                            <TextField fx:id="txtHoraInicio" promptText="08:00"
-                                       styleClass="field-time"
-                                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <HBox alignment="CENTER_LEFT">
 
-                            <Label text="Hora fim:" styleClass="form-label"
-                                   GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                            <TextField fx:id="txtHoraFim" promptText="09:00"
-                                       styleClass="field-time"
-                                       GridPane.rowIndex="2" GridPane.columnIndex="3"/>
-
-                            <!-- Linha 4 -->
-                            <Label text="Procedimento:" styleClass="form-label"
-                                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                            <TextField fx:id="txtProcedimento"
-                                       styleClass="field"
-                                       GridPane.rowIndex="3" GridPane.columnIndex="1"
-                                       GridPane.columnSpan="1"/>
-
-                            <Label text="Observações:" styleClass="form-label"
-                                   GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-                            <TextArea fx:id="txtObservacoes" prefRowCount="2"
-                                      styleClass="field"
-                                      GridPane.rowIndex="3" GridPane.columnIndex="3"/>
-                        </GridPane>
-
-                        <!-- AÇÕES -->
-                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="form-actions">
-                            <Button text="Novo" onAction="#onNovo" styleClass="btn-ghost"/>
-                            <Button text="Salvar" onAction="#onSalvar" styleClass="btn-primary"/>
-                            <Button text="Iniciar atendimento" onAction="#onIniciarAtendimento" styleClass="btn-ghost"/>
-
-                            <Button fx:id="btnFinalizarConsulta"
-                                    text="Finalizar consulta"
-                                    onAction="#onFinalizarConsulta"
-                                    styleClass="btn-ghost"/>
-
-                            <Button text="Atualizar lista" onAction="#onAtualizarLista" styleClass="btn-ghost"/>
+                            <Label text="Novo Agendamento"
+                                   styleClass="section-title"/>
 
                             <Region HBox.hgrow="ALWAYS"/>
 
-                            <Label fx:id="lblMensagem" styleClass="hint-text"/>
+                            <Button text="Novo"
+                                    onAction="#onNovo"
+                                    styleClass="btn-ghost"/>
                         </HBox>
 
-                        <!-- TABELA -->
-                        <TableView fx:id="tbAgenda" prefHeight="460" styleClass="table-soft">
-                            <columns>
-                                <TableColumn fx:id="colHora" text="Horário" prefWidth="120"/>
-                                <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="210"/>
-                                <TableColumn fx:id="colSala" text="Sala" prefWidth="150"/>
-                                <TableColumn fx:id="colPaciente" text="Paciente" prefWidth="320"/>
-                                <TableColumn fx:id="colStatus" text="Status" prefWidth="140"/>
-                            </columns>
-                        </TableView>
+                        <Separator/>
+
+                        <!-- DATA -->
+
+                        <VBox spacing="8">
+
+                            <Label text="Data"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dpData"
+                                        onAction="#onDataAlterada"
+                                        maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+
+                        <!-- HORÁRIOS -->
+
+                        <HBox spacing="12">
+
+                            <VBox spacing="8"
+                                  HBox.hgrow="ALWAYS">
+
+                                <Label text="Hora início"
+                                       styleClass="form-label"/>
+
+                                <TextField fx:id="txtHoraInicio"
+                                           promptText="08:00"/>
+                            </VBox>
+
+                            <VBox spacing="8"
+                                  HBox.hgrow="ALWAYS">
+
+                                <Label text="Hora fim"
+                                       styleClass="form-label"/>
+
+                                <TextField fx:id="txtHoraFim"
+                                           promptText="09:00"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- PROFISSIONAL -->
+
+                        <VBox spacing="8">
+
+                            <Label text="Profissional"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbProfissional"
+                                      maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+
+                        <!-- PACIENTE -->
+
+                        <VBox spacing="8">
+
+                            <Label text="Paciente"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbPaciente"
+                                      editable="true"
+                                      maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+
+                        <!-- SALA -->
+
+                        <VBox spacing="8">
+
+                            <Label text="Sala"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbSala"
+                                      maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+
+                        <!-- PROCEDIMENTO -->
+
+                        <VBox spacing="8">
+
+                            <Label text="Procedimento"
+                                   styleClass="form-label"/>
+
+                            <TextField fx:id="txtProcedimento"
+                                       promptText="Ex: Consulta, retorno, avaliação..."/>
+                        </VBox>
+
+                        <!-- OBSERVAÇÕES -->
+
+                        <VBox spacing="8"
+                              VBox.vgrow="ALWAYS">
+
+                            <Label text="Observações"
+                                   styleClass="form-label"/>
+
+                            <TextArea fx:id="txtObservacoes"
+                                      prefRowCount="5"
+                                      wrapText="true"
+                                      VBox.vgrow="ALWAYS"
+                                      promptText="Observações clínicas ou administrativas..."/>
+                        </VBox>
+
+                        <!-- BOTÕES -->
+
+                        <HBox spacing="12">
+
+                            <Button text="Salvar"
+                                    onAction="#onSalvar"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-primary"/>
+
+                            <Button text="Atualizar"
+                                    onAction="#onAtualizarLista"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
+
+                        <HBox spacing="12">
+
+                            <Button text="Iniciar"
+                                    onAction="#onIniciarAtendimento"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-primary"/>
+
+                            <Button fx:id="btnFinalizarConsulta"
+                                    text="Finalizar"
+                                    onAction="#onFinalizarConsulta"
+                                    maxWidth="1.7976931348623157E308"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
+
+                        <Label fx:id="lblMensagem"
+                               wrapText="true"
+                               styleClass="hint-text"/>
 
                     </VBox>
-                </StackPane>
-            </content>
-        </ScrollPane>
+
+                </content>
+
+            </ScrollPane>
+
+            <!-- TABELA -->
+
+            <VBox spacing="16"
+                  HBox.hgrow="ALWAYS"
+                  styleClass="dashboard-panel">
+
+                <padding>
+                    <Insets top="22"
+                            right="22"
+                            bottom="22"
+                            left="22"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT">
+
+                    <VBox spacing="4">
+
+                        <Label text="Agenda do Dia"
+                               styleClass="section-title"/>
+
+                        <Label text="Visualize os atendimentos organizados por horário."
+                               styleClass="page-subtitle"/>
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Atualizar"
+                            onAction="#onAtualizarLista"
+                            styleClass="btn-ghost"/>
+                </HBox>
+
+                <TableView fx:id="tbAgenda"
+                           VBox.vgrow="ALWAYS"
+                           styleClass="table-soft">
+
+                    <columns>
+
+                        <TableColumn fx:id="colHora"
+                                     text="Horário"
+                                     prefWidth="120"/>
+
+                        <TableColumn fx:id="colProfissional"
+                                     text="Profissional"
+                                     prefWidth="220"/>
+
+                        <TableColumn fx:id="colSala"
+                                     text="Sala"
+                                     prefWidth="140"/>
+
+                        <TableColumn fx:id="colPaciente"
+                                     text="Paciente"
+                                     prefWidth="260"/>
+
+                        <TableColumn fx:id="colStatus"
+                                     text="Status"
+                                     prefWidth="150"/>
+                    </columns>
+                </TableView>
+
+                <HBox alignment="CENTER_LEFT"
+                      spacing="16">
+
+                    <Label text="Selecione um atendimento para iniciar ou finalizar."
+                           styleClass="hint-text"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Agenda clínica"
+                           styleClass="dashboard-badge"/>
+                </HBox>
+
+            </VBox>
+
+        </HBox>
+
     </center>
 
 </BorderPane>

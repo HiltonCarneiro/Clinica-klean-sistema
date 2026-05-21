@@ -4,149 +4,388 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/21.0.9" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="br.com.clinica.controller.RelatoriosController">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.RelatoriosController"
+            styleClass="page-root"
+            stylesheets="@/styles/app.css">
 
-    <children>
-        <VBox spacing="12" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-
+    <top>
+        <VBox spacing="16" styleClass="top-clean">
             <padding>
-                <Insets top="14" right="14" bottom="14" left="14"/>
+                <Insets top="22" right="28" bottom="18" left="28"/>
             </padding>
 
-            <Label text="Relatórios" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="5">
+                    <Label text="Relatórios Gerenciais" styleClass="page-title"/>
+                    <Label text="Visualize movimentações financeiras, agenda clínica e notas emitidas."
+                           styleClass="page-subtitle"/>
+                </VBox>
 
-            <TabPane VBox.vgrow="ALWAYS">
+                <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- ABA: CAIXA -->
-                <Tab text="Caixa" closable="false">
-                    <BorderPane>
-                        <top>
-                            <VBox spacing="10">
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Período:"/>
-                                    <DatePicker fx:id="dtCxInicio"/>
-                                    <Label text="até"/>
-                                    <DatePicker fx:id="dtCxFim"/>
-
-                                    <Button text="Buscar" onAction="#onBuscarCaixa"/>
-                                    <Button text="Exportar PDF" onAction="#onExportarCaixaPdf"/>
-                                </HBox>
-
-                                <HBox spacing="16" alignment="CENTER_LEFT">
-                                    <Label text="Entradas:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="lblCxEntradas" text="R$ 0,00"/>
-
-                                    <Label text="Saídas:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="lblCxSaidas" text="R$ 0,00"/>
-
-                                    <Label text="Saldo:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="lblCxSaldo" text="R$ 0,00"/>
-                                </HBox>
-
-                                <Separator/>
-                            </VBox>
-                        </top>
-
-                        <center>
-                            <TableView fx:id="tblCaixa" VBox.vgrow="ALWAYS">
-                                <columns>
-                                    <TableColumn fx:id="colCxData" text="Data" prefWidth="110"/>
-                                    <TableColumn fx:id="colCxTipo" text="Tipo" prefWidth="90"/>
-                                    <TableColumn fx:id="colCxDescricao" text="Descrição" prefWidth="280"/>
-                                    <TableColumn fx:id="colCxForma" text="Forma" prefWidth="130"/>
-                                    <TableColumn fx:id="colCxValor" text="Valor (R$)" prefWidth="110"/>
-                                    <TableColumn fx:id="colCxPaciente" text="Paciente" prefWidth="220"/>
-                                </columns>
-                            </TableView>
-                        </center>
-                    </BorderPane>
-                </Tab>
-
-                <!--ABA: AGENDAMENTOS -->
-                <Tab text="Agendamentos" closable="false">
-                    <BorderPane>
-                        <top>
-                            <VBox spacing="10">
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Período:"/>
-                                    <DatePicker fx:id="dtAgInicio"/>
-                                    <Label text="até"/>
-                                    <DatePicker fx:id="dtAgFim"/>
-
-                                    <Label text="Profissional:"/>
-                                    <ComboBox fx:id="cbAgProfissional" prefWidth="260"/>
-
-                                    <Button text="Buscar" onAction="#onBuscarAgendamentos"/>
-                                    <Button text="Exportar PDF" onAction="#onExportarAgendamentosPdf"/>
-                                </HBox>
-
-                                <Separator/>
-                            </VBox>
-                        </top>
-
-                        <center>
-                            <TableView fx:id="tblAgendamentos" VBox.vgrow="ALWAYS">
-                                <columns>
-                                    <TableColumn fx:id="colAgData" text="Data" prefWidth="110"/>
-                                    <TableColumn fx:id="colAgHora" text="Horário" prefWidth="110"/>
-                                    <TableColumn fx:id="colAgProf" text="Profissional" prefWidth="220"/>
-                                    <TableColumn fx:id="colAgSala" text="Sala" prefWidth="120"/>
-                                    <TableColumn fx:id="colAgPaciente" text="Paciente" prefWidth="220"/>
-                                    <TableColumn fx:id="colAgStatus" text="Status" prefWidth="120"/>
-                                    <TableColumn fx:id="colAgProced" text="Procedimento" prefWidth="250"/>
-                                </columns>
-                            </TableView>
-                        </center>
-                    </BorderPane>
-                </Tab>
-
-                <!-- ABA: NOTAS -->
-                <Tab text="Notas" closable="false">
-                    <BorderPane>
-                        <top>
-                            <VBox spacing="10">
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Período:"/>
-                                    <DatePicker fx:id="dtNotaInicio"/>
-                                    <Label text="até"/>
-                                    <DatePicker fx:id="dtNotaFim"/>
-
-                                    <Label text="Paciente (contém):"/>
-                                    <TextField fx:id="txtPacienteFiltro" promptText="Ex: maria" prefWidth="180"/>
-
-                                    <Label text="Profissional:"/>
-                                    <ComboBox fx:id="cbNotaProfissional" prefWidth="240"/>
-
-                                    <Label text="Forma:"/>
-                                    <ComboBox fx:id="cbNotaForma" prefWidth="160"/>
-
-                                    <Button text="Buscar" onAction="#onBuscarNotas"/>
-                                    <Button text="Exportar PDF (Relatório)" onAction="#onExportarNotasPdf"/>
-                                    <Button text="Reimprimir PDF (Nota)" onAction="#onReimprimirNota"/>
-                                </HBox>
-
-                                <Separator/>
-                            </VBox>
-                        </top>
-
-                        <center>
-                            <TableView fx:id="tblNotas" VBox.vgrow="ALWAYS">
-                                <columns>
-                                    <TableColumn fx:id="colNotaId" text="ID" prefWidth="60"/>
-                                    <TableColumn fx:id="colNotaDataHora" text="Data/Hora" prefWidth="150"/>
-                                    <TableColumn fx:id="colNotaPaciente" text="Paciente" prefWidth="260"/>
-                                    <TableColumn fx:id="colNotaProfissional" text="Profissional" prefWidth="220"/>
-                                    <TableColumn fx:id="colNotaForma" text="Forma" prefWidth="120"/>
-                                    <TableColumn fx:id="colNotaTotal" text="Total (R$)" prefWidth="120"/>
-                                </columns>
-                            </TableView>
-                        </center>
-                    </BorderPane>
-                </Tab>
-
-            </TabPane>
+                <VBox alignment="CENTER_RIGHT" spacing="4">
+                    <Label text="Painel executivo" styleClass="dashboard-badge-admin"/>
+                    <Label text="Exportações e análises" styleClass="label-muted"/>
+                </VBox>
+            </HBox>
         </VBox>
-    </children>
-</AnchorPane>
+    </top>
+
+    <center>
+
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 styleClass="tabs-clean">
+
+            <!-- CAIXA -->
+            <Tab text="Caixa">
+
+                <VBox spacing="18">
+                    <padding>
+                        <Insets top="20" right="28" bottom="28" left="28"/>
+                    </padding>
+
+                    <HBox spacing="18">
+
+                        <VBox spacing="8" styleClass="metric-card">
+                            <Label text="Entradas" styleClass="metric-title"/>
+                            <Label fx:id="lblCxEntradas"
+                                   text="R$ 0,00"
+                                   styleClass="metric-value finance-positive"/>
+                            <Label text="Total de entradas do período."
+                                   styleClass="metric-desc"/>
+                        </VBox>
+
+                        <VBox spacing="8" styleClass="metric-card">
+                            <Label text="Saídas" styleClass="metric-title"/>
+                            <Label fx:id="lblCxSaidas"
+                                   text="R$ 0,00"
+                                   styleClass="metric-value finance-negative"/>
+                            <Label text="Despesas e saídas registradas."
+                                   styleClass="metric-desc"/>
+                        </VBox>
+
+                        <VBox spacing="8" styleClass="metric-card metric-card-admin">
+                            <Label text="Saldo" styleClass="metric-title"/>
+                            <Label fx:id="lblCxSaldo"
+                                   text="R$ 0,00"
+                                   styleClass="metric-value"/>
+                            <Label text="Resultado financeiro do período."
+                                   styleClass="metric-desc"/>
+                        </VBox>
+
+                    </HBox>
+
+                    <VBox spacing="14" styleClass="dashboard-panel">
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+
+                            <Label text="Filtros"
+                                   styleClass="section-title"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label text="Início:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtCxInicio"/>
+
+                            <Label text="Fim:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtCxFim"/>
+
+                            <Button text="Buscar"
+                                    onAction="#onBuscarCaixa"
+                                    styleClass="btn-primary"/>
+
+                            <Button text="Exportar PDF"
+                                    onAction="#onExportarCaixaPdf"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="14"
+                          VBox.vgrow="ALWAYS"
+                          styleClass="dashboard-panel">
+
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <VBox spacing="4">
+                            <Label text="Movimentações financeiras"
+                                   styleClass="section-title"/>
+
+                            <Label text="Entradas, saídas e registros financeiros da clínica."
+                                   styleClass="page-subtitle"/>
+                        </VBox>
+
+                        <TableView fx:id="tblCaixa"
+                                   VBox.vgrow="ALWAYS"
+                                   styleClass="table-soft">
+
+                            <columns>
+
+                                <TableColumn fx:id="colCxData"
+                                             text="Data"
+                                             prefWidth="120"/>
+
+                                <TableColumn fx:id="colCxTipo"
+                                             text="Tipo"
+                                             prefWidth="120"/>
+
+                                <TableColumn fx:id="colCxDescricao"
+                                             text="Descrição"
+                                             prefWidth="320"/>
+
+                                <TableColumn fx:id="colCxForma"
+                                             text="Pagamento"
+                                             prefWidth="160"/>
+
+                                <TableColumn fx:id="colCxValor"
+                                             text="Valor"
+                                             prefWidth="140"/>
+
+                                <TableColumn fx:id="colCxPaciente"
+                                             text="Paciente"
+                                             prefWidth="240"/>
+
+                            </columns>
+
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+            <!-- AGENDAMENTOS -->
+            <Tab text="Agenda">
+
+                <VBox spacing="18">
+                    <padding>
+                        <Insets top="20" right="28" bottom="28" left="28"/>
+                    </padding>
+
+                    <VBox spacing="14" styleClass="dashboard-panel">
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+
+                            <Label text="Filtros"
+                                   styleClass="section-title"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label text="Início:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtAgInicio"/>
+
+                            <Label text="Fim:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtAgFim"/>
+
+                            <Label text="Profissional:"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbAgProfissional"
+                                      prefWidth="260"/>
+
+                            <Button text="Buscar"
+                                    onAction="#onBuscarAgendamentos"
+                                    styleClass="btn-primary"/>
+
+                            <Button text="Exportar PDF"
+                                    onAction="#onExportarAgendamentosPdf"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="14"
+                          VBox.vgrow="ALWAYS"
+                          styleClass="dashboard-panel">
+
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <VBox spacing="4">
+                            <Label text="Agendamentos"
+                                   styleClass="section-title"/>
+
+                            <Label text="Consultas, retornos e procedimentos agendados."
+                                   styleClass="page-subtitle"/>
+                        </VBox>
+
+                        <TableView fx:id="tblAgendamentos"
+                                   VBox.vgrow="ALWAYS"
+                                   styleClass="table-soft">
+
+                            <columns>
+
+                                <TableColumn fx:id="colAgData"
+                                             text="Data"
+                                             prefWidth="120"/>
+
+                                <TableColumn fx:id="colAgHora"
+                                             text="Hora"
+                                             prefWidth="100"/>
+
+                                <TableColumn fx:id="colAgProf"
+                                             text="Profissional"
+                                             prefWidth="220"/>
+
+                                <TableColumn fx:id="colAgSala"
+                                             text="Sala"
+                                             prefWidth="120"/>
+
+                                <TableColumn fx:id="colAgPaciente"
+                                             text="Paciente"
+                                             prefWidth="240"/>
+
+                                <TableColumn fx:id="colAgStatus"
+                                             text="Status"
+                                             prefWidth="150"/>
+
+                                <TableColumn fx:id="colAgProced"
+                                             text="Procedimento"
+                                             prefWidth="240"/>
+
+                            </columns>
+
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+            <!-- NOTAS -->
+            <Tab text="Notas">
+
+                <VBox spacing="18">
+                    <padding>
+                        <Insets top="20" right="28" bottom="28" left="28"/>
+                    </padding>
+
+                    <VBox spacing="14" styleClass="dashboard-panel">
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+
+                            <Label text="Filtros"
+                                   styleClass="section-title"/>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label text="Início:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtNotaInicio"/>
+
+                            <Label text="Fim:"
+                                   styleClass="form-label"/>
+
+                            <DatePicker fx:id="dtNotaFim"/>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+
+                            <Label text="Paciente:"
+                                   styleClass="form-label"/>
+
+                            <TextField fx:id="txtPacienteFiltro"
+                                       promptText="Buscar paciente..."
+                                       prefWidth="260"/>
+
+                            <Label text="Profissional:"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbNotaProfissional"
+                                      prefWidth="240"/>
+
+                            <Label text="Pagamento:"
+                                   styleClass="form-label"/>
+
+                            <ComboBox fx:id="cbNotaForma"
+                                      prefWidth="180"/>
+
+                            <Button text="Buscar"
+                                    onAction="#onBuscarNotas"
+                                    styleClass="btn-primary"/>
+
+                            <Button text="Exportar PDF"
+                                    onAction="#onExportarNotasPdf"
+                                    styleClass="btn-ghost"/>
+
+                            <Button text="Reimprimir"
+                                    onAction="#onReimprimirNota"
+                                    styleClass="btn-ghost"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="14"
+                          VBox.vgrow="ALWAYS"
+                          styleClass="dashboard-panel">
+
+                        <padding>
+                            <Insets top="20" right="22" bottom="22" left="22"/>
+                        </padding>
+
+                        <VBox spacing="4">
+                            <Label text="Notas emitidas"
+                                   styleClass="section-title"/>
+
+                            <Label text="Histórico financeiro e emissão de notas/recibos."
+                                   styleClass="page-subtitle"/>
+                        </VBox>
+
+                        <TableView fx:id="tblNotas"
+                                   VBox.vgrow="ALWAYS"
+                                   styleClass="table-soft">
+
+                            <columns>
+
+                                <TableColumn fx:id="colNotaId"
+                                             text="ID"
+                                             prefWidth="90"/>
+
+                                <TableColumn fx:id="colNotaDataHora"
+                                             text="Data/Hora"
+                                             prefWidth="170"/>
+
+                                <TableColumn fx:id="colNotaPaciente"
+                                             text="Paciente"
+                                             prefWidth="260"/>
+
+                                <TableColumn fx:id="colNotaProfissional"
+                                             text="Profissional"
+                                             prefWidth="240"/>
+
+                                <TableColumn fx:id="colNotaForma"
+                                             text="Pagamento"
+                                             prefWidth="160"/>
+
+                                <TableColumn fx:id="colNotaTotal"
+                                             text="Total"
+                                             prefWidth="140"/>
+
+                            </columns>
+
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+        </TabPane>
+
+    </center>
+
+</BorderPane>

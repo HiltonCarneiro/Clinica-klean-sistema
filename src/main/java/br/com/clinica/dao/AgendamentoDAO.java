@@ -31,7 +31,7 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, ag.getData().toString()); // coluna data é text
+            ps.setString(1, ag.getData().toString());
             ps.setString(2, ag.getHoraInicio().format(HORA_FORMATTER));
             ps.setString(3, ag.getHoraFim().format(HORA_FORMATTER));
             ps.setInt(4, ag.getProfissionalId());
@@ -53,7 +53,11 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorData(LocalDate data) {
-        String sql = "SELECT * FROM agendamento WHERE data = ? AND status <> ? ORDER BY hora_inicio";
+        String sql = "SELECT * FROM agendamento " +
+                "WHERE data = ? " +
+                "AND status NOT IN (?, ?) " +
+                "ORDER BY hora_inicio";
+
         List<Agendamento> lista = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -61,6 +65,7 @@ public class AgendamentoDAO {
 
             ps.setString(1, data.toString());
             ps.setString(2, StatusAgendamento.CONCLUIDO.name());
+            ps.setString(3, StatusAgendamento.CANCELADO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) lista.add(mapearAgendamento(rs));
@@ -73,7 +78,12 @@ public class AgendamentoDAO {
     }
 
     public List<Agendamento> listarPorDataEProfissional(LocalDate data, int profissionalId) {
-        String sql = "SELECT * FROM agendamento WHERE data = ? AND profissional_id = ? AND status <> ? ORDER BY hora_inicio";
+        String sql = "SELECT * FROM agendamento " +
+                "WHERE data = ? " +
+                "AND profissional_id = ? " +
+                "AND status NOT IN (?, ?) " +
+                "ORDER BY hora_inicio";
+
         List<Agendamento> lista = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -82,6 +92,7 @@ public class AgendamentoDAO {
             ps.setString(1, data.toString());
             ps.setInt(2, profissionalId);
             ps.setString(3, StatusAgendamento.CONCLUIDO.name());
+            ps.setString(4, StatusAgendamento.CANCELADO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) lista.add(mapearAgendamento(rs));
@@ -95,6 +106,7 @@ public class AgendamentoDAO {
 
     public void atualizarStatus(int agendamentoId, StatusAgendamento status) {
         String sql = "UPDATE agendamento SET status = ? WHERE id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -111,10 +123,32 @@ public class AgendamentoDAO {
         atualizarStatus(agendamentoId, StatusAgendamento.CONCLUIDO);
     }
 
+    public int cancelarAgendamentosAntigosPendentes(LocalDate dataLimite) {
+        String sql = "UPDATE agendamento " +
+                "SET status = ? " +
+                "WHERE date(data) <= date(?) " +
+                "AND status IN (?, ?)";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, StatusAgendamento.CANCELADO.name());
+            ps.setString(2, dataLimite.toString());
+            ps.setString(3, StatusAgendamento.AGENDADO.name());
+            ps.setString(4, StatusAgendamento.EM_ATENDIMENTO.name());
+
+            return ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cancelar agendamentos antigos pendentes", e);
+        }
+    }
+
     public boolean existeConflito(Agendamento ag) {
         String sql = "SELECT COUNT(1) " +
                 "FROM agendamento " +
-                "WHERE data = ? AND status <> ? " +
+                "WHERE data = ? " +
+                "AND status NOT IN (?, ?) " +
                 "AND ( (profissional_id = ?) OR (sala = ?) OR (paciente_id = ?) ) " +
                 "AND (hora_inicio < ? AND hora_fim > ?)";
 
@@ -123,14 +157,15 @@ public class AgendamentoDAO {
 
             ps.setString(1, ag.getData().toString());
             ps.setString(2, StatusAgendamento.CANCELADO.name());
-            ps.setInt(3, ag.getProfissionalId());
-            ps.setString(4, ag.getSala().name());
+            ps.setString(3, StatusAgendamento.CONCLUIDO.name());
+            ps.setInt(4, ag.getProfissionalId());
+            ps.setString(5, ag.getSala().name());
 
-            if (ag.getPacienteId() != null) ps.setInt(5, ag.getPacienteId());
-            else ps.setNull(5, java.sql.Types.INTEGER);
+            if (ag.getPacienteId() != null) ps.setInt(6, ag.getPacienteId());
+            else ps.setNull(6, java.sql.Types.INTEGER);
 
-            ps.setString(6, ag.getHoraFim().format(HORA_FORMATTER));
-            ps.setString(7, ag.getHoraInicio().format(HORA_FORMATTER));
+            ps.setString(7, ag.getHoraFim().format(HORA_FORMATTER));
+            ps.setString(8, ag.getHoraInicio().format(HORA_FORMATTER));
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1) > 0;
@@ -145,7 +180,7 @@ public class AgendamentoDAO {
     public List<Agendamento> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
         String sql = "SELECT * FROM agendamento " +
                 "WHERE date(data) BETWEEN ? AND ? " +
-                "AND status <> ? " +
+                "AND status NOT IN (?, ?) " +
                 "ORDER BY data, hora_inicio";
 
         List<Agendamento> lista = new ArrayList<>();
@@ -153,10 +188,10 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // ✅ fix do erro date >= varchar
             ps.setObject(1, inicio);
             ps.setObject(2, fim);
             ps.setString(3, StatusAgendamento.CONCLUIDO.name());
+            ps.setString(4, StatusAgendamento.CANCELADO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -174,7 +209,7 @@ public class AgendamentoDAO {
         String sql = "SELECT * FROM agendamento " +
                 "WHERE date(data) BETWEEN ? AND ? " +
                 "AND profissional_id = ? " +
-                "AND status <> ? " +
+                "AND status NOT IN (?, ?) " +
                 "ORDER BY data, hora_inicio";
 
         List<Agendamento> lista = new ArrayList<>();
@@ -182,11 +217,11 @@ public class AgendamentoDAO {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // ✅ fix do erro date >= varchar
             ps.setObject(1, inicio);
             ps.setObject(2, fim);
             ps.setInt(3, profissionalId);
             ps.setString(4, StatusAgendamento.CONCLUIDO.name());
+            ps.setString(5, StatusAgendamento.CANCELADO.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -202,7 +237,8 @@ public class AgendamentoDAO {
 
     private Agendamento mapearAgendamento(ResultSet rs) throws SQLException {
         Agendamento a = new Agendamento();
-        a.setId(rs.getInt("id")); // ✅ mantém int/Integer (como seu model)
+
+        a.setId(rs.getInt("id"));
         a.setData(LocalDate.parse(rs.getString("data")));
         a.setHoraInicio(LocalTime.parse(rs.getString("hora_inicio"), HORA_FORMATTER));
         a.setHoraFim(LocalTime.parse(rs.getString("hora_fim"), HORA_FORMATTER));
@@ -218,6 +254,7 @@ public class AgendamentoDAO {
         a.setProcedimento(rs.getString("procedimento"));
         a.setObservacoes(rs.getString("observacoes"));
         a.setStatus(StatusAgendamento.valueOf(rs.getString("status")));
+
         return a;
     }
 }

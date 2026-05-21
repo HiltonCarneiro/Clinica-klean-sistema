@@ -5,6 +5,7 @@ import br.com.clinica.dto.PacienteFormData;
 import br.com.clinica.mapper.PacienteFormMapper;
 import br.com.clinica.model.Paciente;
 import br.com.clinica.service.PacienteService;
+import br.com.clinica.util.AlertUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -63,6 +64,9 @@ public class PacienteController {
     private PacienteSearchManager searchManager;
     private PacienteActionManager actionManager;
     private PacienteCepManager cepManager;
+    private PacienteFieldSetupManager fieldSetupManager;
+    private PacienteMessageManager messageManager;
+    private PacienteStatusButtonManager statusButtonManager;
 
     private Paciente pacienteSelecionado;
     private boolean voltarParaBusca;
@@ -129,6 +133,10 @@ public class PacienteController {
                 this::setMensagem
         );
 
+        fieldSetupManager = new PacienteFieldSetupManager();
+        messageManager = new PacienteMessageManager();
+        statusButtonManager = new PacienteStatusButtonManager();
+
         configurarTelaInicial();
         configurarTabela();
         configurarCampos();
@@ -153,93 +161,25 @@ public class PacienteController {
 
     private void configurarCampos() {
 
-        if (txtNome != null) {
-            txtNome.setTextFormatter(
-                    PacienteTextFormatterFactory.nameFormatter()
-            );
-        }
-
-        if (txtCpf != null) {
-            txtCpf.setTextFormatter(
-                    PacienteTextFormatterFactory.digitsFormatter(
-                            11,
-                            formatter::formatCpf
-                    )
-            );
-        }
-
-        if (txtRg != null) {
-            txtRg.setTextFormatter(
-                    PacienteTextFormatterFactory.digitsFormatter(
-                            7,
-                            this::formatRg
-                    )
-            );
-        }
-
-        if (txtTelefone != null) {
-            txtTelefone.setTextFormatter(
-                    PacienteTextFormatterFactory.digitsFormatter(
-                            11,
-                            formatter::formatTelefone
-                    )
-            );
-        }
-
-        if (txtCep != null) {
-            txtCep.setTextFormatter(
-                    PacienteTextFormatterFactory.digitsFormatter(
-                            8,
-                            formatter::formatCep
-                    )
-            );
-        }
-
-        if (txtUf != null) {
-            txtUf.setTextFormatter(
-                    PacienteTextFormatterFactory.ufFormatter()
-            );
-        }
-
-        if (txtNumero != null) {
-            txtNumero.setTextFormatter(
-                    PacienteTextFormatterFactory.digitsFormatter(
-                            6,
-                            value -> value
-                    )
-            );
-        }
-
-        if (chkSemNumero != null && txtNumero != null) {
-
-            chkSemNumero.selectedProperty().addListener(
-                    (obs, oldValue, selected) -> {
-
-                        txtNumero.setDisable(selected);
-
-                        if (selected) {
-                            txtNumero.clear();
-                        }
-                    }
-            );
-        }
-
-        datePickerConfigurer.configure(
+        fieldSetupManager.configurarCampos(
+                txtNome,
+                txtCpf,
+                txtRg,
+                txtTelefone,
+                txtCep,
+                txtUf,
+                txtNumero,
+                chkSemNumero,
                 dpDataNascimento,
+                formatter,
+                datePickerConfigurer,
+                this::atualizarIdade,
+                this::onBuscarPaciente,
+                searchManager,
+                cepManager,
                 this::setMensagem,
-                this::atualizarIdade
+                this::formatRg
         );
-
-        if (dpDataNascimento != null) {
-
-            dpDataNascimento.valueProperty().addListener(
-                    (obs, oldValue, newValue) -> atualizarIdade()
-            );
-        }
-
-        searchManager.configurarCampoBusca(this::onBuscarPaciente);
-
-        cepManager.configurarBuscaPorEnter();
     }
 
     private void configurarBotoes() {
@@ -311,7 +251,7 @@ public class PacienteController {
 
         if (paciente == null) {
 
-            mostrarAviso("Selecione um paciente para editar.");
+            AlertUtils.aviso("Selecione um paciente para editar.");
 
             return;
         }
@@ -334,7 +274,7 @@ public class PacienteController {
 
         if (paciente == null) {
 
-            mostrarAviso("Selecione um paciente para ver o histórico.");
+            AlertUtils.aviso("Selecione um paciente para ver o histórico.");
 
             return;
         }
@@ -347,7 +287,7 @@ public class PacienteController {
 
             e.printStackTrace();
 
-            mostrarErro("Erro ao abrir histórico do paciente.");
+            AlertUtils.erro("Erro ao abrir histórico do paciente.");
         }
     }
 
@@ -440,21 +380,11 @@ public class PacienteController {
 
     private void atualizarBotoesStatus(Paciente paciente) {
 
-        boolean temPaciente =
-                paciente != null
-                        && paciente.getId() != null;
-
-        boolean ativo =
-                temPaciente
-                        && paciente.isAtivo();
-
-        if (btnInativar != null) {
-            btnInativar.setDisable(!temPaciente || !ativo);
-        }
-
-        if (btnAtivar != null) {
-            btnAtivar.setDisable(!temPaciente || ativo);
-        }
+        statusButtonManager.atualizarBotoesStatus(
+                paciente,
+                btnInativar,
+                btnAtivar
+        );
     }
 
     private String formatRg(String value) {
@@ -488,19 +418,6 @@ public class PacienteController {
     }
 
     private void setMensagem(String mensagem) {
-
-        if (lblMensagem != null) {
-            lblMensagem.setText(
-                    mensagem == null ? "" : mensagem
-            );
-        }
-    }
-
-    private void mostrarAviso(String mensagem) {
-        new Alert(Alert.AlertType.WARNING, mensagem).showAndWait();
-    }
-
-    private void mostrarErro(String mensagem) {
-        new Alert(Alert.AlertType.ERROR, mensagem).showAndWait();
+        messageManager.setMensagem(lblMensagem, mensagem);
     }
 }

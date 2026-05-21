@@ -18,6 +18,8 @@ import java.util.List;
 
 public class AgendaService {
 
+    private static final int DIAS_PARA_CANCELAMENTO_AUTOMATICO = 3;
+
     private final AgendamentoDAO agendamentoDAO;
     private final UsuarioDAO usuarioDAO;
     private final PacienteDAO pacienteDAO;
@@ -53,6 +55,7 @@ public class AgendaService {
     }
 
     public void salvar(AgendaFormData data) {
+        cancelarAgendamentosAntigosPendentes();
 
         String procedimentoNormalizado = normalizarProcedimento(data.getProcedimento());
         data.setProcedimento(procedimentoNormalizado);
@@ -77,6 +80,7 @@ public class AgendaService {
             boolean podeVerTodos,
             Usuario usuarioLogado
     ) {
+        cancelarAgendamentosAntigosPendentes();
 
         if (data == null) {
             throw new BusinessException("Selecione uma data para visualizar a agenda.");
@@ -109,7 +113,6 @@ public class AgendaService {
     }
 
     public void finalizarConsulta(Agendamento agendamento) {
-
         if (agendamento == null) {
             throw new BusinessException("Selecione um agendamento para finalizar.");
         }
@@ -117,8 +120,12 @@ public class AgendaService {
         agendamentoDAO.finalizarConsulta(agendamento.getId());
     }
 
-    private Agendamento montarAgendamento(AgendaFormData data) {
+    public void cancelarAgendamentosAntigosPendentes() {
+        LocalDate dataLimite = LocalDate.now().minusDays(DIAS_PARA_CANCELAMENTO_AUTOMATICO);
+        agendamentoDAO.cancelarAgendamentosAntigosPendentes(dataLimite);
+    }
 
+    private Agendamento montarAgendamento(AgendaFormData data) {
         Agendamento agendamento = new Agendamento();
 
         agendamento.setData(data.getData());
@@ -154,7 +161,6 @@ public class AgendaService {
     }
 
     private String resolverNomeProfissional(Usuario usuario) {
-
         if (usuario == null) {
             return "";
         }

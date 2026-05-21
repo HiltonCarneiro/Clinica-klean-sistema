@@ -2,160 +2,417 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.MainController">
+            fx:controller="br.com.clinica.controller.MainController"
+            styleClass="main-root">
 
-    <top>
-        <VBox spacing="8" styleClass="top-bar">
-            <padding>
-                <Insets top="10" right="15" bottom="10" left="15"/>
-            </padding>
+    <left>
+        <VBox spacing="12"
+              prefWidth="250"
+              styleClass="sidebar">
 
-            <!-- Barra de navegação -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
+            <VBox spacing="4">
+                <Label text="Clínica Klean"
+                       styleClass="sidebar-title"/>
 
-                <Button text="Início" onAction="#onInicio" styleClass="nav-btn"/>
-
-                <Button fx:id="btnBack" text="←" onAction="#onBack" styleClass="nav-btn"/>
-                <Button fx:id="btnForward" text="→" onAction="#onForward" styleClass="nav-btn"/>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <Label text="Logado:" styleClass="user-label" />
-                <Label fx:id="lblUsuarioLogado" text="-" styleClass="user-name" />
-
-                <!-- ✅ NOVO (seguindo o mesmo padrão visual) -->
-                <Button text="Sair" onAction="#onSair" styleClass="nav-btn"/>
-
-            </HBox>
+                <Label text="Gestão Clínica"
+                       styleClass="sidebar-sub"/>
+            </VBox>
 
             <Separator/>
 
-            <!-- Menu -->
-            <MenuBar fx:id="menuBarTop">
-                <Menu fx:id="menuCadastros" text="Cadastros">
-                    <MenuItem fx:id="miPacientes" text="Pacientes" onAction="#onPacientes"/>
-                </Menu>
+            <Button text="⌂ Início"
+                    onAction="#onInicio"
+                    styleClass="sidebar-btn"/>
 
-                <Menu fx:id="menuOperacoes" text="Operações">
-                    <MenuItem fx:id="miAgenda" text="Agenda" onAction="#onAgenda"/>
-                    <MenuItem fx:id="miCaixa" text="Caixa / Notas" onAction="#onCaixa"/>
-                    <MenuItem fx:id="miEstoque" text="Estoque" onAction="#onEstoque"/>
-                </Menu>
+            <Button fx:id="btnCardPacientes"
+                    text="♣ Pacientes"
+                    onAction="#onPacientes"
+                    styleClass="sidebar-btn"/>
 
-                <Menu fx:id="menuRelatorios" text="Relatórios">
-                    <MenuItem fx:id="miRelatorios" text="Relatórios Gerais" onAction="#onRelatorios"/>
-                </Menu>
+            <Button fx:id="btnCardAgenda"
+                    text="▣ Agenda"
+                    onAction="#onAgenda"
+                    styleClass="sidebar-btn"/>
 
-                <Menu fx:id="menuAdministracao" text="Administração">
-                    <MenuItem fx:id="miUsuarios" text="Usuários &amp; Perfis" onAction="#onUsuarios"/>
-                    <MenuItem fx:id="miAuditoria" text="Auditoria" onAction="#onAuditoria"/>
-                </Menu>
-            </MenuBar>
+            <Button fx:id="btnCardCaixa"
+                    text="▬ Caixa"
+                    onAction="#onCaixa"
+                    styleClass="sidebar-btn"/>
 
+            <Button fx:id="btnCardEstoque"
+                    text="▣ Estoque"
+                    onAction="#onEstoque"
+                    styleClass="sidebar-btn"/>
+
+            <Button text="||| Relatórios"
+                    onAction="#onRelatorios"
+                    styleClass="sidebar-btn"/>
+
+            <Button fx:id="btnCardUsuarios"
+                    text="♡ Administração"
+                    onAction="#onUsuarios"
+                    styleClass="sidebar-btn"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="↳ Sair"
+                    onAction="#onSair"
+                    styleClass="btn-ghost"/>
         </VBox>
-    </top>
+    </left>
 
     <center>
-        <StackPane alignment="TOP_CENTER">
 
-            <!-- HOME -->
-            <VBox fx:id="homeBox" spacing="18" alignment="TOP_CENTER">
-                <padding>
-                    <Insets top="18" right="20" bottom="20" left="20"/>
-                </padding>
+        <BorderPane>
 
-                <!-- LOGO acima do título -->
-                <VBox alignment="CENTER" spacing="8">
-                    <ImageView fx:id="imgLogoHome"
-                               opacity="0.95"
-                               fitHeight="110"
-                               preserveRatio="true"
-                               smooth="true"/>
+            <top>
+                <HBox alignment="CENTER_LEFT"
+                      spacing="12"
+                      styleClass="topbar">
 
-                    <Label text="Clínica Klean - Saúde Integrativa" styleClass="h1"/>
-                    <Label text="Selecione uma área para começar" styleClass="sub"/>
-                </VBox>
+                    <Button fx:id="btnBack"
+                            text="←"
+                            onAction="#onBack"
+                            styleClass="btn-ghost"/>
 
-                <!-- TILEPANE (reorganiza automático quando cards somem) -->
-                <TilePane fx:id="homeTiles"
-                          alignment="CENTER"
-                          hgap="18" vgap="18"
-                          prefColumns="3"
-                          prefTileWidth="260"
-                          prefTileHeight="120">
+                    <Button fx:id="btnForward"
+                            text="→"
+                            onAction="#onForward"
+                            styleClass="btn-ghost"/>
 
-                    <Button fx:id="btnCardPacientes"
-                            onAction="#onPacientes"
-                            prefWidth="260" prefHeight="120"
-                            styleClass="card-btn">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Pacientes" styleClass="card-title"/>
-                                <Label text="Cadastro, busca e prontuário" styleClass="card-desc"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Usuário:"
+                           styleClass="label-muted"/>
+
+                    <Label fx:id="lblUsuarioLogado"
+                           text="-"
+                           styleClass="section-title"/>
+                </HBox>
+            </top>
+
+            <center>
+
+                <StackPane>
+
+                    <ScrollPane fitToWidth="true"
+                                styleClass="dashboard-scroll">
+
+                        <content>
+
+                            <VBox fx:id="homeBox"
+                                  spacing="24"
+                                  maxWidth="1320"
+                                  styleClass="dashboard-root">
+
+                                <padding>
+                                    <Insets top="28"
+                                            right="32"
+                                            bottom="32"
+                                            left="32"/>
+                                </padding>
+
+                                <!-- HEADER -->
+
+                                <HBox alignment="CENTER_LEFT"
+                                      spacing="18">
+
+                                    <VBox spacing="6">
+
+                                        <ImageView fx:id="imgLogoHome"
+                                                   fitHeight="82"
+                                                   preserveRatio="true"
+                                                   smooth="true"/>
+
+                                        <Label text="Dashboard"
+                                               styleClass="page-title"/>
+
+                                        <Label text="Resumo operacional da Clínica Klean"
+                                               styleClass="page-subtitle"/>
+                                    </VBox>
+
+                                    <Region HBox.hgrow="ALWAYS"/>
+
+                                    <VBox alignment="CENTER_RIGHT"
+                                          spacing="4">
+
+                                        <Label text="Ambiente seguro"
+                                               styleClass="dashboard-badge"/>
+
+                                        <Label fx:id="lblPerfilUsuario"
+                                               text="Perfil"
+                                               styleClass="label-muted"/>
+                                    </VBox>
+                                </HBox>
+
+                                <!-- MÉTRICAS -->
+
+                                <HBox spacing="18">
+
+                                    <!-- AGENDA -->
+
+                                    <VBox spacing="10"
+                                          styleClass="metric-card">
+
+                                        <Label text="Agenda de hoje"
+                                               styleClass="metric-title"/>
+
+                                        <Label fx:id="lblAgendaHojeValor"
+                                               text="-"
+                                               styleClass="metric-value"/>
+
+                                        <Label fx:id="lblAgendaHojeSub"
+                                               text="-"
+                                               wrapText="true"
+                                               styleClass="metric-desc"/>
+                                    </VBox>
+
+                                    <!-- PACIENTES -->
+
+                                    <VBox spacing="10"
+                                          styleClass="metric-card">
+
+                                        <Label text="Pacientes ativos"
+                                               styleClass="metric-title"/>
+
+                                        <Label fx:id="lblPacientesAtivosValor"
+                                               text="-"
+                                               styleClass="metric-value"/>
+
+                                        <Label fx:id="lblPacientesAtivosSub"
+                                               text="-"
+                                               wrapText="true"
+                                               styleClass="metric-desc"/>
+                                    </VBox>
+
+                                    <!-- FINANCEIRO -->
+
+                                    <VBox fx:id="cardFinanceiroDashboard"
+                                          spacing="10"
+                                          styleClass="metric-card metric-card-admin">
+
+                                        <Label text="Financeiro"
+                                               styleClass="metric-title"/>
+
+                                        <Label fx:id="lblFinanceiroHojeValor"
+                                               text="-"
+                                               styleClass="metric-value"/>
+
+                                        <Label fx:id="lblFinanceiroHojeSub"
+                                               text="-"
+                                               wrapText="true"
+                                               styleClass="metric-desc"/>
+                                    </VBox>
+
+                                    <!-- ESTOQUE -->
+
+                                    <VBox fx:id="cardEstoqueDashboard"
+                                          spacing="10"
+                                          styleClass="metric-card">
+
+                                        <Label text="Estoque crítico"
+                                               styleClass="metric-title"/>
+
+                                        <Label fx:id="lblEstoqueCriticoValor"
+                                               text="-"
+                                               styleClass="metric-value"/>
+
+                                        <Label fx:id="lblEstoqueCriticoSub"
+                                               text="-"
+                                               wrapText="true"
+                                               styleClass="metric-desc"/>
+                                    </VBox>
+                                </HBox>
+
+                                <!-- PAINEL CENTRAL -->
+
+                                <HBox spacing="22"
+                                      VBox.vgrow="ALWAYS">
+
+                                    <!-- AÇÕES -->
+
+                                    <VBox spacing="14"
+                                          styleClass="dashboard-panel"
+                                          HBox.hgrow="ALWAYS">
+
+                                        <padding>
+                                            <Insets top="22"
+                                                    right="22"
+                                                    bottom="22"
+                                                    left="22"/>
+                                        </padding>
+
+                                        <Label text="Ações rápidas"
+                                               styleClass="section-title"/>
+
+                                        <TilePane hgap="14"
+                                                  vgap="14"
+                                                  prefColumns="2">
+
+                                            <Button text="Novo paciente"
+                                                    onAction="#onPacientes"
+                                                    styleClass="dashboard-action"/>
+
+                                            <Button text="Agenda"
+                                                    onAction="#onAgenda"
+                                                    styleClass="dashboard-action"/>
+
+                                            <Button fx:id="btnDashboardCaixa"
+                                                    text="Caixa"
+                                                    onAction="#onCaixa"
+                                                    styleClass="dashboard-action"/>
+
+                                            <Button fx:id="btnDashboardEstoque"
+                                                    text="Estoque"
+                                                    onAction="#onEstoque"
+                                                    styleClass="dashboard-action"/>
+
+                                            <Button fx:id="btnDashboardRelatorios"
+                                                    text="Relatórios"
+                                                    onAction="#onRelatorios"
+                                                    styleClass="dashboard-action"/>
+
+                                            <Button fx:id="btnDashboardUsuarios"
+                                                    text="Usuários"
+                                                    onAction="#onUsuarios"
+                                                    styleClass="dashboard-action"/>
+                                        </TilePane>
+                                    </VBox>
+
+                                    <!-- RESUMO OPERACIONAL -->
+
+                                    <VBox spacing="16"
+                                          styleClass="dashboard-panel"
+                                          HBox.hgrow="ALWAYS">
+
+                                        <padding>
+                                            <Insets top="22"
+                                                    right="22"
+                                                    bottom="22"
+                                                    left="22"/>
+                                        </padding>
+
+                                        <Label text="Resumo operacional"
+                                               styleClass="section-title"/>
+
+                                        <VBox spacing="12">
+
+                                            <Label fx:id="lblResumoAgenda"
+                                                   text="-"
+                                                   wrapText="true"
+                                                   styleClass="activity-text"/>
+
+                                            <Label fx:id="lblResumoPacientes"
+                                                   text="-"
+                                                   wrapText="true"
+                                                   styleClass="activity-text"/>
+
+                                            <Label fx:id="lblResumoEstoque"
+                                                   text="-"
+                                                   wrapText="true"
+                                                   styleClass="activity-text"/>
+
+                                            <Label fx:id="lblResumoFinanceiro"
+                                                   text="-"
+                                                   wrapText="true"
+                                                   styleClass="activity-text"/>
+                                        </VBox>
+                                    </VBox>
+                                </HBox>
+
+                                <!-- ADMIN -->
+
+                                <VBox fx:id="adminDashboardBox"
+                                      spacing="14"
+                                      styleClass="dashboard-panel dashboard-admin-panel">
+
+                                    <padding>
+                                        <Insets top="22"
+                                                right="22"
+                                                bottom="22"
+                                                left="22"/>
+                                    </padding>
+
+                                    <HBox alignment="CENTER_LEFT"
+                                          spacing="10">
+
+                                        <VBox spacing="4">
+
+                                            <Label text="Área administrativa"
+                                                   styleClass="section-title"/>
+
+                                            <Label text="Indicadores restritos para administradores e gestores autorizados."
+                                                   styleClass="page-subtitle"/>
+                                        </VBox>
+
+                                        <Region HBox.hgrow="ALWAYS"/>
+
+                                        <Label text="ADMIN"
+                                               styleClass="dashboard-badge-admin"/>
+                                    </HBox>
+
+                                    <HBox spacing="16">
+
+                                        <VBox spacing="8"
+                                              styleClass="admin-mini-card">
+
+                                            <Label text="Financeiro"
+                                                   styleClass="card-title"/>
+
+                                            <Label text="Acompanhamento financeiro diário da clínica."
+                                                   wrapText="true"
+                                                   styleClass="card-desc"/>
+                                        </VBox>
+
+                                        <VBox spacing="8"
+                                              styleClass="admin-mini-card">
+
+                                            <Label text="Relatórios"
+                                                   styleClass="card-title"/>
+
+                                            <Label text="Análises gerenciais e operacionais."
+                                                   wrapText="true"
+                                                   styleClass="card-desc"/>
+                                        </VBox>
+
+                                        <VBox spacing="8"
+                                              styleClass="admin-mini-card">
+
+                                            <Label text="Auditoria"
+                                                   styleClass="card-title"/>
+
+                                            <Label fx:id="lblAuditoriaRecente"
+                                                   text="-"
+                                                   wrapText="true"
+                                                   styleClass="card-desc"/>
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+
                             </VBox>
-                        </graphic>
-                    </Button>
 
-                    <Button fx:id="btnCardAgenda"
-                            onAction="#onAgenda"
-                            prefWidth="260" prefHeight="120"
-                            styleClass="card-btn">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Agenda" styleClass="card-title"/>
-                                <Label text="Consultas e horários" styleClass="card-desc"/>
-                            </VBox>
-                        </graphic>
-                    </Button>
+                        </content>
 
-                    <Button fx:id="btnCardCaixa"
-                            onAction="#onCaixa"
-                            prefWidth="260" prefHeight="120"
-                            styleClass="card-btn">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Caixa / Notas" styleClass="card-title"/>
-                                <Label text="Pagamentos e notas" styleClass="card-desc"/>
-                            </VBox>
-                        </graphic>
-                    </Button>
+                    </ScrollPane>
 
-                    <Button fx:id="btnCardEstoque"
-                            onAction="#onEstoque"
-                            prefWidth="260" prefHeight="120"
-                            styleClass="card-btn">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Estoque" styleClass="card-title"/>
-                                <Label text="Itens, validade e consumo" styleClass="card-desc"/>
-                            </VBox>
-                        </graphic>
-                    </Button>
+                    <!-- CONTEÚDO DINÂMICO -->
 
-                    <Button fx:id="btnCardUsuarios"
-                            onAction="#onUsuarios"
-                            prefWidth="260" prefHeight="120"
-                            styleClass="card-btn">
-                        <graphic>
-                            <VBox spacing="4">
-                                <Label text="Usuários &amp; Perfis" styleClass="card-title"/>
-                                <Label text="Permissões e acessos" styleClass="card-desc"/>
-                            </VBox>
-                        </graphic>
-                    </Button>
+                    <AnchorPane fx:id="contentPane"
+                                visible="false"
+                                managed="false"
+                                styleClass="page-root"/>
 
-                </TilePane>
-            </VBox>
+                </StackPane>
 
-            <!-- CONTEÚDO -->
-            <AnchorPane fx:id="contentPane" visible="false" managed="false"/>
+            </center>
 
-        </StackPane>
+        </BorderPane>
+
     </center>
 
 </BorderPane>
