@@ -21,7 +21,7 @@
                     <Label text="Histórico do Paciente"
                            styleClass="page-title"/>
 
-                    <Label text="Resumo clínico, anexos, exames, anamneses e evoluções do paciente."
+                    <Label text="Resumo clínico, anexos, exames, anamneses, avaliações físicas e evoluções do paciente."
                            styleClass="page-subtitle"/>
                 </VBox>
 
@@ -220,6 +220,133 @@
                                           styleClass="area-clean"/>
                             </VBox>
                         </VBox>
+                    </center>
+                </BorderPane>
+            </Tab>
+
+            <Tab text="Avaliação Física">
+                <BorderPane styleClass="tab-body">
+                    <padding>
+                        <Insets top="18" right="26" bottom="24" left="26"/>
+                    </padding>
+
+                    <top>
+                        <VBox spacing="16">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <VBox spacing="2">
+                                    <Label text="Histórico de Avaliações Físicas"
+                                           styleClass="section-title"/>
+
+                                    <Label text="Acompanhe evolução de peso, IMC, composição corporal, RCQ e observações do profissional."
+                                           styleClass="hint-text"/>
+                                </VBox>
+
+                                <Pane HBox.hgrow="ALWAYS"/>
+
+                                <Button fx:id="btnAtualizarAvaliacoesFisicas"
+                                        text="Atualizar"
+                                        onAction="#onAtualizarAvaliacoesFisicas"
+                                        styleClass="btn-ghost"/>
+                            </HBox>
+
+                            <GridPane hgap="12" vgap="12">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="14"/>
+                                    <ColumnConstraints percentWidth="14"/>
+                                    <ColumnConstraints percentWidth="14"/>
+                                    <ColumnConstraints percentWidth="14"/>
+                                    <ColumnConstraints percentWidth="14"/>
+                                    <ColumnConstraints percentWidth="15"/>
+                                    <ColumnConstraints percentWidth="15"/>
+                                </columnConstraints>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="0">
+                                    <Label text="Última avaliação" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimaData" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="1">
+                                    <Label text="Peso" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimoPeso" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="2">
+                                    <Label text="IMC" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimoImc" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="3">
+                                    <Label text="\% Gordura" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimaGordura" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="4">
+                                    <Label text="Massa magra" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimaMassaMagra" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="5">
+                                    <Label text="Massa gorda" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimaMassaGorda" text="-" styleClass="metric-value"/>
+                                </VBox>
+
+                                <VBox spacing="5" styleClass="metric-card" GridPane.columnIndex="6">
+                                    <Label text="RCQ" styleClass="metric-title"/>
+                                    <Label fx:id="lblAfUltimoRcq" text="-" styleClass="metric-value"/>
+                                </VBox>
+                            </GridPane>
+                        </VBox>
+                    </top>
+
+                    <center>
+                        <SplitPane dividerPositions="0.55">
+                            <VBox spacing="10">
+                                <padding>
+                                    <Insets top="16" right="14" bottom="0" left="0"/>
+                                </padding>
+
+                                <TableView fx:id="tableAvaliacoesFisicas"
+                                           VBox.vgrow="ALWAYS"
+                                           styleClass="table-soft">
+                                    <columns>
+                                        <TableColumn fx:id="colAfData" text="Data" prefWidth="110"/>
+                                        <TableColumn fx:id="colAfProfissional" text="Profissional" prefWidth="190"/>
+                                        <TableColumn fx:id="colAfPeso" text="Peso" prefWidth="80"/>
+                                        <TableColumn fx:id="colAfImc" text="IMC" prefWidth="80"/>
+                                        <TableColumn fx:id="colAfGordura" text="\% Gordura" prefWidth="110"/>
+                                        <TableColumn fx:id="colAfMassaMagra" text="Massa magra" prefWidth="120"/>
+                                        <TableColumn fx:id="colAfMassaGorda" text="Massa gorda" prefWidth="120"/>
+                                        <TableColumn fx:id="colAfRcq" text="RCQ" prefWidth="80"/>
+                                    </columns>
+                                </TableView>
+
+                                <Label text="Selecione uma avaliação para visualizar o resumo completo."
+                                       styleClass="hint-text"/>
+                            </VBox>
+
+                            <VBox spacing="10">
+                                <padding>
+                                    <Insets top="16" right="0" bottom="0" left="14"/>
+                                </padding>
+
+                                <VBox spacing="8" styleClass="card" VBox.vgrow="ALWAYS">
+                                    <padding>
+                                        <Insets top="16" right="18" bottom="18" left="18"/>
+                                    </padding>
+
+                                    <Label text="Resumo da avaliação física"
+                                           styleClass="field-title"/>
+
+                                    <TextArea fx:id="txtResumoAvaliacaoFisica"
+                                              prefRowCount="22"
+                                              wrapText="true"
+                                              editable="false"
+                                              VBox.vgrow="ALWAYS"
+                                              promptText="Selecione uma avaliação para visualizar os detalhes."
+                                              styleClass="area-clean"/>
+                                </VBox>
+                            </VBox>
+                        </SplitPane>
                     </center>
                 </BorderPane>
             </Tab>

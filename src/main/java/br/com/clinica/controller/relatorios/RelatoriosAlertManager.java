@@ -1,22 +1,16 @@
 package br.com.clinica.controller.relatorios;
 
-import javafx.scene.control.Alert;
+import br.com.clinica.service.DialogService;
 
 public class RelatoriosAlertManager {
 
+    private final DialogService dialogService = new DialogService();
+
     public void erro(String titulo, String mensagem) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erro");
-        alert.setHeaderText(titulo);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
+        dialogService.erro(titulo, mensagem);
     }
 
     public void aviso(String titulo, String mensagem) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
+        dialogService.informacao(titulo, mensagem);
     }
 }

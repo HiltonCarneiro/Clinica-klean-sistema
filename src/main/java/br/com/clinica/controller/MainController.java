@@ -1,25 +1,26 @@
 package br.com.clinica.controller;
 
-import br.com.clinica.auth.AuthGuard;
 import br.com.clinica.auth.Permissao;
 import br.com.clinica.auth.exceptions.AcessoNegadoException;
 import br.com.clinica.auth.exceptions.NaoAutenticadoException;
-import br.com.clinica.dao.AgendamentoDAO;
-import br.com.clinica.dao.AuditoriaDAO;
-import br.com.clinica.dao.MovimentoCaixaDAO;
-import br.com.clinica.dao.PacienteDAO;
-import br.com.clinica.dao.ProdutoDAO;
-import br.com.clinica.model.Agendamento;
-import br.com.clinica.model.MovimentoCaixa;
-import br.com.clinica.model.Produto;
-import br.com.clinica.model.enums.TipoMovimento;
+import br.com.clinica.navigation.NavigationService;
+import br.com.clinica.service.DialogService;
+import br.com.clinica.service.MainDashboardService;
+import br.com.clinica.service.MainDashboardService.DashboardResumo;
+import br.com.clinica.service.MainDashboardService.IndicadorResumo;
+import br.com.clinica.service.PermissionService;
+import br.com.clinica.service.SessionViewService;
 import br.com.clinica.session.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -27,16 +28,22 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Locale;
+import java.net.URL;
 
 public class MainController {
 
-    private static final String HOME = "__HOME__";
+    private static final String VIEW_LOGIN = "/view/login-view.fxml";
+    private static final String VIEW_PACIENTES = "/view/paciente-view.fxml";
+    private static final String VIEW_AGENDA = "/view/agenda-view.fxml";
+    private static final String VIEW_CAIXA = "/view/caixa-view.fxml";
+    private static final String VIEW_ESTOQUE = "/view/estoque-view.fxml";
+    private static final String VIEW_RELATORIOS = "/view/relatorios-view.fxml";
+    private static final String VIEW_USUARIOS = "/view/usuarios-view.fxml";
+    private static final String VIEW_AUDITORIA = "/view/auditoria-view.fxml";
+    private static final String VIEW_AVALIACAO_FISICA = "/view/avaliacao-fisica-view.fxml";
+
+    private static final String CSS_APP = "/styles/app.css";
+    private static final String LOGO_HOME = "/images/logo-klean.png";
 
     @FXML private MenuBar menuBarTop;
     @FXML private ImageView imgLogoHome;
@@ -53,17 +60,20 @@ public class MainController {
     @FXML private MenuItem miRelatorios;
     @FXML private MenuItem miUsuarios;
     @FXML private MenuItem miAuditoria;
+    @FXML private MenuItem miAvaliacaoFisica;
 
     @FXML private Button btnCardPacientes;
     @FXML private Button btnCardAgenda;
     @FXML private Button btnCardCaixa;
     @FXML private Button btnCardEstoque;
     @FXML private Button btnCardUsuarios;
+    @FXML private Button btnCardAvaliacaoFisica;
 
     @FXML private Button btnDashboardCaixa;
     @FXML private Button btnDashboardEstoque;
     @FXML private Button btnDashboardRelatorios;
     @FXML private Button btnDashboardUsuarios;
+    @FXML private Button btnDashboardAvaliacaoFisica;
 
     @FXML private VBox cardFinanceiroDashboard;
     @FXML private VBox cardEstoqueDashboard;
@@ -93,363 +103,141 @@ public class MainController {
     @FXML private Button btnBack;
     @FXML private Button btnForward;
 
+    private final MainDashboardService dashboardService = new MainDashboardService();
+    private final NavigationService navigationService = new NavigationService(MainController.class);
+    private final DialogService dialogService = new DialogService();
+    private final PermissionService permissionService = new PermissionService();
+    private final SessionViewService sessionViewService = new SessionViewService();
+
     private String usuarioLogado;
-
-    private final Deque<String> backStack = new ArrayDeque<>();
-    private final Deque<String> forwardStack = new ArrayDeque<>();
-
-    private String currentView = null;
-
-    private final PacienteDAO pacienteDAO = new PacienteDAO();
-    private final AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
-    private final ProdutoDAO produtoDAO = new ProdutoDAO();
-    private final MovimentoCaixaDAO movimentoCaixaDAO = new MovimentoCaixaDAO();
-    private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
 
     @FXML
     private void initialize() {
-        mostrarHome();
         atualizarUsuarioLogado();
+        carregarLogo();
         aplicarPermissoesHome();
         aplicarPermissoesMenu();
-        carregarLogo();
+        mostrarHome();
         carregarDashboard();
-    }
-
-    private void carregarLogo() {
-        var logoUrl = getClass().getResource("/images/logo-klean.png");
-
-        if (logoUrl != null && imgLogoHome != null) {
-            imgLogoHome.setImage(new Image(logoUrl.toExternalForm()));
-        }
-    }
-
-    private void atualizarUsuarioLogado() {
-        if (Session.getUsuario() != null) {
-            lblUsuarioLogado.setText(Session.getUsuario().getPessoaNome());
-
-            if (lblPerfilUsuario != null && Session.getUsuario().getPerfil() != null) {
-                lblPerfilUsuario.setText("Perfil: " + Session.getUsuario().getPerfil().getNome());
-            }
-        } else {
-            lblUsuarioLogado.setText("-");
-
-            if (lblPerfilUsuario != null) {
-                lblPerfilUsuario.setText("Perfil: -");
-            }
-        }
-
         atualizarBotoesNavegacao();
-    }
-
-    private void carregarDashboard() {
-        carregarResumoAgenda();
-        carregarResumoPacientes();
-
-        if (temPermissao(Permissao.ESTOQUE_VER)) {
-            carregarResumoEstoque();
-        } else {
-            setText(lblResumoEstoque, "• Consulte o histórico clínico antes de iniciar um atendimento.");
-        }
-
-        if (temPermissao(Permissao.FINANCEIRO_VER)) {
-            carregarResumoFinanceiro();
-        } else {
-            setText(lblResumoFinanceiro, "• Registre evoluções e prontuários conforme o atendimento.");
-        }
-
-        if (temPermissao(Permissao.AUDITORIA_VER)) {
-            carregarResumoAuditoria();
-        }
-    }
-
-    private void carregarResumoAgenda() {
-        try {
-            List<Agendamento> agendaHoje = agendamentoDAO.listarPorData(LocalDate.now());
-
-            setText(lblAgendaHojeValor, agendaHoje.size() + " agendamento(s)");
-            setText(lblAgendaHojeSub, agendaHoje.isEmpty()
-                    ? "Nenhum atendimento pendente hoje"
-                    : "Próximo: " + safe(agendaHoje.get(0).getPacienteNome()));
-
-            setText(lblResumoAgenda, agendaHoje.isEmpty()
-                    ? "• Hoje não há agendamentos pendentes."
-                    : "• Existem " + agendaHoje.size() + " atendimento(s) pendente(s) hoje.");
-
-        } catch (Exception e) {
-            setText(lblAgendaHojeValor, "-");
-            setText(lblAgendaHojeSub, "Não foi possível carregar a agenda");
-            setText(lblResumoAgenda, "• Agenda indisponível no momento.");
-        }
-    }
-
-    private void carregarResumoPacientes() {
-        try {
-            int ativos = pacienteDAO.listarTodos(false).size();
-
-            setText(lblPacientesAtivosValor, ativos + " ativo(s)");
-            setText(lblPacientesAtivosSub, "Pacientes disponíveis para atendimento");
-            setText(lblResumoPacientes, "• " + ativos + " paciente(s) ativo(s) cadastrados.");
-
-        } catch (Exception e) {
-            setText(lblPacientesAtivosValor, "-");
-            setText(lblPacientesAtivosSub, "Não foi possível carregar pacientes");
-            setText(lblResumoPacientes, "• Pacientes indisponíveis no momento.");
-        }
-    }
-
-    private void carregarResumoEstoque() {
-        try {
-            List<Produto> baixoEstoque = produtoDAO.listar(false, true, false);
-
-            setText(lblEstoqueCriticoValor, baixoEstoque.size() + " item(ns)");
-            setText(lblEstoqueCriticoSub, baixoEstoque.isEmpty()
-                    ? "Nenhum item crítico"
-                    : "Itens abaixo do estoque mínimo");
-
-            setText(lblResumoEstoque, baixoEstoque.isEmpty()
-                    ? "• Estoque sem alertas críticos."
-                    : "• " + baixoEstoque.size() + " item(ns) precisam de atenção no estoque.");
-
-        } catch (Exception e) {
-            setText(lblEstoqueCriticoValor, "-");
-            setText(lblEstoqueCriticoSub, "Não foi possível carregar estoque");
-            setText(lblResumoEstoque, "• Estoque indisponível no momento.");
-        }
-    }
-
-    private void carregarResumoFinanceiro() {
-        try {
-            List<MovimentoCaixa> movimentos = movimentoCaixaDAO.listarPorPeriodo(LocalDate.now(), LocalDate.now());
-
-            double entradas = movimentos.stream()
-                    .filter(m -> m.getTipo() == TipoMovimento.ENTRADA)
-                    .mapToDouble(MovimentoCaixa::getValor)
-                    .sum();
-
-            double saidas = movimentos.stream()
-                    .filter(m -> m.getTipo() == TipoMovimento.SAIDA)
-                    .mapToDouble(MovimentoCaixa::getValor)
-                    .sum();
-
-            double saldo = entradas - saidas;
-
-            setText(lblFinanceiroHojeValor, formatMoney(saldo));
-            setText(lblFinanceiroHojeSub, movimentos.size() + " movimentação(ões) hoje");
-            setText(lblResumoFinanceiro, "• Saldo do dia: " + formatMoney(saldo)
-                    + " | Entradas: " + formatMoney(entradas)
-                    + " | Saídas: " + formatMoney(saidas));
-
-        } catch (Exception e) {
-            setText(lblFinanceiroHojeValor, "-");
-            setText(lblFinanceiroHojeSub, "Não foi possível carregar financeiro");
-            setText(lblResumoFinanceiro, "• Financeiro indisponível no momento.");
-        }
-    }
-
-    private void carregarResumoAuditoria() {
-        try {
-            List<AuditoriaDAO.LinhaAuditoria> ultimos = auditoriaDAO.listarUltimos(3);
-
-            if (ultimos.isEmpty()) {
-                setText(lblAuditoriaRecente, "• Nenhuma atividade recente registrada.");
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-
-            for (AuditoriaDAO.LinhaAuditoria linha : ultimos) {
-                sb.append("• ")
-                        .append(safe(linha.acao))
-                        .append(" em ")
-                        .append(safe(linha.entidade))
-                        .append(" por ")
-                        .append(safe(linha.usuario))
-                        .append("\n");
-            }
-
-            setText(lblAuditoriaRecente, sb.toString().trim());
-
-        } catch (Exception e) {
-            setText(lblAuditoriaRecente, "• Auditoria indisponível no momento.");
-        }
-    }
-
-    private void atualizarBotoesNavegacao() {
-        if (btnBack != null) {
-            btnBack.setDisable(backStack.isEmpty());
-        }
-
-        if (btnForward != null) {
-            btnForward.setDisable(forwardStack.isEmpty());
-        }
-    }
-
-    private void aplicarPermissoesMenu() {
-        if (menuBarTop == null) {
-            return;
-        }
-
-        if (!temPermissao(Permissao.PACIENTE_VER)) removerItem(menuCadastros, miPacientes);
-        if (!temPermissao(Permissao.AGENDA_VER)) removerItem(menuOperacoes, miAgenda);
-        if (!temPermissao(Permissao.FINANCEIRO_VER)) removerItem(menuOperacoes, miCaixa);
-        if (!temPermissao(Permissao.ESTOQUE_VER)) removerItem(menuOperacoes, miEstoque);
-        if (!temPermissao(Permissao.RELATORIOS_VER)) removerItem(menuRelatorios, miRelatorios);
-        if (!temPermissao(Permissao.USUARIO_GERENCIAR)) removerItem(menuAdministracao, miUsuarios);
-        if (!temPermissao(Permissao.AUDITORIA_VER)) removerItem(menuAdministracao, miAuditoria);
-
-        removerMenuSeVazio(menuCadastros);
-        removerMenuSeVazio(menuOperacoes);
-        removerMenuSeVazio(menuRelatorios);
-        removerMenuSeVazio(menuAdministracao);
-    }
-
-    private boolean temPermissao(Permissao permissao) {
-        try {
-            AuthGuard.exigirPermissao(permissao);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void removerItem(Menu menu, MenuItem item) {
-        if (menu != null && item != null) {
-            menu.getItems().remove(item);
-        }
-    }
-
-    private void removerMenu(Menu menu) {
-        if (menuBarTop != null && menu != null) {
-            menuBarTop.getMenus().remove(menu);
-        }
-    }
-
-    private void removerMenuSeVazio(Menu menu) {
-        if (menu == null) {
-            return;
-        }
-
-        if (menu.getItems() == null || menu.getItems().isEmpty()) {
-            removerMenu(menu);
-        }
     }
 
     public void setUsuarioLogado(String usuario) {
         this.usuarioLogado = usuario;
-
-        if (lblUsuarioLogado != null) {
-            lblUsuarioLogado.setText(usuario);
-        }
+        setText(lblUsuarioLogado, usuario);
     }
 
     @FXML
     private void onInicio() {
-        backStack.clear();
-        forwardStack.clear();
-        currentView = null;
+        navigationService.clearHistory();
         mostrarHome();
         carregarDashboard();
-        atualizarBotoesNavegacao();
     }
 
     @FXML
     private void onBack() {
-        if (backStack.isEmpty()) return;
+        String destino = navigationService.back();
 
-        String previous = backStack.pop();
-
-        if (currentView != null) {
-            forwardStack.push(currentView);
+        if (destino == null) {
+            atualizarBotoesNavegacao();
+            return;
         }
 
-        if (HOME.equals(previous)) {
-            mostrarHome();
-        } else {
-            loadView(previous, false);
-        }
+        abrirDestinoHistorico(destino);
     }
 
     @FXML
     private void onForward() {
-        if (forwardStack.isEmpty()) return;
+        String destino = navigationService.forward();
 
-        String next = forwardStack.pop();
-
-        if (currentView != null) {
-            backStack.push(currentView);
+        if (destino == null) {
+            atualizarBotoesNavegacao();
+            return;
         }
 
-        if (HOME.equals(next)) {
-            mostrarHome();
-        } else {
-            loadView(next, false);
-        }
+        abrirDestinoHistorico(destino);
     }
 
-    @FXML private void onPacientes() { abrirTelaNoConteudo("/view/paciente-view.fxml", Permissao.PACIENTE_VER); }
-    @FXML private void onAgenda() { abrirTelaNoConteudo("/view/agenda-view.fxml", Permissao.AGENDA_VER); }
-    @FXML private void onCaixa() { abrirTelaNoConteudo("/view/caixa-view.fxml", Permissao.FINANCEIRO_VER); }
-    @FXML private void onEstoque() { abrirTelaNoConteudo("/view/estoque-view.fxml", Permissao.ESTOQUE_VER); }
-    @FXML private void onRelatorios() { abrirTelaNoConteudo("/view/relatorios-view.fxml", Permissao.RELATORIOS_VER); }
-    @FXML private void onUsuarios() { abrirTelaNoConteudo("/view/usuarios-view.fxml", Permissao.USUARIO_GERENCIAR); }
-    @FXML private void onAuditoria() { abrirTelaNoConteudo("/view/auditoria-view.fxml", Permissao.AUDITORIA_VER); }
+    @FXML private void onPacientes() { abrirTelaNoConteudo(VIEW_PACIENTES, Permissao.PACIENTE_VER); }
+    @FXML private void onAgenda() { abrirTelaNoConteudo(VIEW_AGENDA, Permissao.AGENDA_VER); }
+    @FXML private void onCaixa() { abrirTelaNoConteudo(VIEW_CAIXA, Permissao.FINANCEIRO_VER); }
+    @FXML private void onEstoque() { abrirTelaNoConteudo(VIEW_ESTOQUE, Permissao.ESTOQUE_VER); }
+    @FXML private void onRelatorios() { abrirTelaNoConteudo(VIEW_RELATORIOS, Permissao.RELATORIOS_VER); }
+    @FXML private void onUsuarios() { abrirTelaNoConteudo(VIEW_USUARIOS, Permissao.USUARIO_GERENCIAR); }
+    @FXML private void onAuditoria() { abrirTelaNoConteudo(VIEW_AUDITORIA, Permissao.AUDITORIA_VER); }
+    @FXML private void onAvaliacaoFisica() { abrirTelaNoConteudo(VIEW_AVALIACAO_FISICA, Permissao.PACIENTE_VER); }
+
+    @FXML
+    private void onSair() {
+        boolean confirmou = dialogService.confirmar(
+                "Sair do sistema",
+                "Encerrar sessão",
+                "Deseja realmente sair e voltar para a tela de login?"
+        );
+
+        if (!confirmou) return;
+
+        Session.limpar();
+        voltarParaLogin();
+    }
 
     private void abrirTelaNoConteudo(String fxmlPath, Permissao permissao) {
         try {
-            AuthGuard.exigirPermissao(permissao);
-            loadView(fxmlPath, true);
-        } catch (NaoAutenticadoException | AcessoNegadoException e) {
-            mostrarErro("Acesso negado", e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            mostrarErro("Erro ao abrir tela", e.getMessage());
-        }
-    }
+            permissionService.exigir(permissao);
 
-    private void loadView(String fxmlPath, boolean pushHistory) {
-        try {
-            if (pushHistory) {
-                if (currentView != null) {
-                    backStack.push(currentView);
-                }
+            Parent view = navigationService.load(fxmlPath);
+            navigationService.navigateTo(fxmlPath);
 
-                forwardStack.clear();
-            }
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent view = loader.load();
-
-            currentView = fxmlPath;
             mostrarConteudo(view);
             atualizarBotoesNavegacao();
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            mostrarErro("Erro ao carregar FXML", ex.getMessage());
+        } catch (NaoAutenticadoException | AcessoNegadoException e) {
+            dialogService.erro("Acesso negado", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            dialogService.erro("Erro ao abrir tela", e.getMessage());
+        }
+    }
+
+    private void abrirDestinoHistorico(String destino) {
+        try {
+            if (navigationService.isHome(destino)) {
+                mostrarHomeSemAlterarHistorico();
+                carregarDashboard();
+            } else {
+                Parent view = navigationService.load(destino);
+                mostrarConteudo(view);
+            }
+
+            atualizarBotoesNavegacao();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            dialogService.erro("Erro ao navegar", e.getMessage());
         }
     }
 
     private void mostrarHome() {
-        if (homeBox != null) {
-            homeBox.setVisible(true);
-            homeBox.setManaged(true);
-        }
-
-        if (contentPane != null) {
-            contentPane.getChildren().clear();
-            contentPane.setVisible(false);
-            contentPane.setManaged(false);
-        }
-
-        currentView = HOME;
+        navigationService.replaceCurrent(NavigationService.HOME);
+        mostrarHomeSemAlterarHistorico();
         atualizarBotoesNavegacao();
     }
 
+    private void mostrarHomeSemAlterarHistorico() {
+        permissionService.aplicarVisibilidade(homeBox, true);
+
+        if (contentPane != null) {
+            contentPane.getChildren().clear();
+            permissionService.aplicarVisibilidade(contentPane, false);
+        }
+    }
+
     private void mostrarConteudo(Parent view) {
-        if (homeBox != null) {
-            homeBox.setVisible(false);
-            homeBox.setManaged(false);
+        permissionService.aplicarVisibilidade(homeBox, false);
+
+        if (contentPane == null) {
+            dialogService.erro("Erro de layout", "A área de conteúdo principal não foi encontrada no FXML.");
+            return;
         }
 
         contentPane.getChildren().setAll(view);
@@ -459,71 +247,106 @@ public class MainController {
         AnchorPane.setBottomAnchor(view, 0.0);
         AnchorPane.setLeftAnchor(view, 0.0);
 
-        contentPane.setVisible(true);
-        contentPane.setManaged(true);
+        permissionService.aplicarVisibilidade(contentPane, true);
+    }
+
+    private void atualizarUsuarioLogado() {
+        sessionViewService.atualizarUsuarioLogado(lblUsuarioLogado, lblPerfilUsuario);
+        usuarioLogado = sessionViewService.obterNomeUsuarioLogado();
+    }
+
+    private void carregarLogo() {
+        URL logoUrl = getClass().getResource(LOGO_HOME);
+
+        if (logoUrl != null && imgLogoHome != null) {
+            imgLogoHome.setImage(new Image(logoUrl.toExternalForm()));
+        }
+    }
+
+    private void carregarDashboard() {
+        DashboardResumo resumo = dashboardService.carregarResumo();
+
+        aplicarIndicador(resumo.agenda(), lblAgendaHojeValor, lblAgendaHojeSub, lblResumoAgenda);
+        aplicarIndicador(resumo.pacientes(), lblPacientesAtivosValor, lblPacientesAtivosSub, lblResumoPacientes);
+        aplicarIndicador(resumo.estoque(), lblEstoqueCriticoValor, lblEstoqueCriticoSub, lblResumoEstoque);
+        aplicarIndicador(resumo.financeiro(), lblFinanceiroHojeValor, lblFinanceiroHojeSub, lblResumoFinanceiro);
+
+        setText(lblAuditoriaRecente, resumo.auditoriaRecente());
+    }
+
+    private void aplicarIndicador(IndicadorResumo indicador, Label valor, Label subtitulo, Label resumo) {
+        setText(valor, indicador.valor());
+        setText(subtitulo, indicador.subtitulo());
+        setText(resumo, indicador.resumo());
+    }
+
+    private void aplicarPermissoesMenu() {
+        if (menuBarTop == null) return;
+
+        permissionService.removerItemSeSemPermissao(menuCadastros, miPacientes, Permissao.PACIENTE_VER);
+        permissionService.removerItemSeSemPermissao(menuOperacoes, miAgenda, Permissao.AGENDA_VER);
+        permissionService.removerItemSeSemPermissao(menuOperacoes, miCaixa, Permissao.FINANCEIRO_VER);
+        permissionService.removerItemSeSemPermissao(menuOperacoes, miEstoque, Permissao.ESTOQUE_VER);
+        permissionService.removerItemSeSemPermissao(menuOperacoes, miAvaliacaoFisica, Permissao.PACIENTE_VER);
+        permissionService.removerItemSeSemPermissao(menuRelatorios, miRelatorios, Permissao.RELATORIOS_VER);
+        permissionService.removerItemSeSemPermissao(menuAdministracao, miUsuarios, Permissao.USUARIO_GERENCIAR);
+        permissionService.removerItemSeSemPermissao(menuAdministracao, miAuditoria, Permissao.AUDITORIA_VER);
+
+        permissionService.removerMenuSeVazio(menuBarTop, menuCadastros);
+        permissionService.removerMenuSeVazio(menuBarTop, menuOperacoes);
+        permissionService.removerMenuSeVazio(menuBarTop, menuRelatorios);
+        permissionService.removerMenuSeVazio(menuBarTop, menuAdministracao);
     }
 
     private void aplicarPermissoesHome() {
-        aplicarPermissao(btnCardPacientes, Permissao.PACIENTE_VER);
-        aplicarPermissao(btnCardAgenda, Permissao.AGENDA_VER);
-        aplicarPermissao(btnCardCaixa, Permissao.FINANCEIRO_VER);
-        aplicarPermissao(btnCardEstoque, Permissao.ESTOQUE_VER);
-        aplicarPermissao(btnCardUsuarios, Permissao.USUARIO_GERENCIAR);
+        permissionService.aplicarPermissao(btnCardPacientes, Permissao.PACIENTE_VER);
+        permissionService.aplicarPermissao(btnCardAgenda, Permissao.AGENDA_VER);
+        permissionService.aplicarPermissao(btnCardCaixa, Permissao.FINANCEIRO_VER);
+        permissionService.aplicarPermissao(btnCardEstoque, Permissao.ESTOQUE_VER);
+        permissionService.aplicarPermissao(btnCardUsuarios, Permissao.USUARIO_GERENCIAR);
+        permissionService.aplicarPermissao(btnCardAvaliacaoFisica, Permissao.PACIENTE_VER);
 
-        aplicarPermissao(btnDashboardCaixa, Permissao.FINANCEIRO_VER);
-        aplicarPermissao(btnDashboardEstoque, Permissao.ESTOQUE_VER);
-        aplicarPermissao(btnDashboardRelatorios, Permissao.RELATORIOS_VER);
-        aplicarPermissao(btnDashboardUsuarios, Permissao.USUARIO_GERENCIAR);
+        permissionService.aplicarPermissao(btnDashboardCaixa, Permissao.FINANCEIRO_VER);
+        permissionService.aplicarPermissao(btnDashboardEstoque, Permissao.ESTOQUE_VER);
+        permissionService.aplicarPermissao(btnDashboardRelatorios, Permissao.RELATORIOS_VER);
+        permissionService.aplicarPermissao(btnDashboardUsuarios, Permissao.USUARIO_GERENCIAR);
+        permissionService.aplicarPermissao(btnDashboardAvaliacaoFisica, Permissao.PACIENTE_VER);
 
-        aplicarPermissao(cardFinanceiroDashboard, Permissao.FINANCEIRO_VER);
-        aplicarPermissao(cardEstoqueDashboard, Permissao.ESTOQUE_VER);
+        permissionService.aplicarPermissao(cardFinanceiroDashboard, Permissao.FINANCEIRO_VER);
+        permissionService.aplicarPermissao(cardEstoqueDashboard, Permissao.ESTOQUE_VER);
 
-        boolean podeVerAreaAdmin =
-                temPermissao(Permissao.FINANCEIRO_VER)
-                        || temPermissao(Permissao.RELATORIOS_VER)
-                        || temPermissao(Permissao.USUARIO_GERENCIAR)
-                        || temPermissao(Permissao.AUDITORIA_VER);
-
-        aplicarVisibilidade(adminDashboardBox, podeVerAreaAdmin);
+        permissionService.aplicarVisibilidade(adminDashboardBox, deveExibirAreaAdministrativa());
     }
 
-    private void aplicarPermissao(Button btn, Permissao permissao) {
-        aplicarVisibilidade(btn, temPermissao(permissao));
+    private boolean deveExibirAreaAdministrativa() {
+        return permissionService.temAlgumaPermissao(
+                Permissao.FINANCEIRO_VER,
+                Permissao.RELATORIOS_VER,
+                Permissao.USUARIO_GERENCIAR,
+                Permissao.AUDITORIA_VER
+        );
     }
 
-    private void aplicarPermissao(VBox box, Permissao permissao) {
-        aplicarVisibilidade(box, temPermissao(permissao));
-    }
+    private void voltarParaLogin() {
+        URL loginUrl = getClass().getResource(VIEW_LOGIN);
 
-    private void aplicarVisibilidade(Node node, boolean visivel) {
-        if (node == null) return;
-
-        node.setVisible(visivel);
-        node.setManaged(visivel);
-    }
-
-    @FXML
-    private void onSair() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Sair do sistema");
-        confirm.setHeaderText("Encerrar sessão");
-        confirm.setContentText("Deseja realmente sair e voltar para a tela de login?");
-
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+        if (loginUrl == null) {
+            dialogService.erro("FXML não encontrado", "Não foi possível localizar a tela de login.");
             return;
         }
 
-        Session.limpar();
-
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
-            Parent root = loader.load();
+            Parent root = new FXMLLoader(loginUrl).load();
+            Stage stage = obterStageAtual();
 
-            Stage stage = (Stage) contentPane.getScene().getWindow();
+            if (stage == null) {
+                dialogService.erro("Erro", "Não foi possível identificar a janela atual.");
+                return;
+            }
 
             Scene scene = new Scene(root);
 
-            var cssUrl = getClass().getResource("/styles/app.css");
+            URL cssUrl = getClass().getResource(CSS_APP);
             if (cssUrl != null) {
                 scene.getStylesheets().add(cssUrl.toExternalForm());
             }
@@ -533,7 +356,29 @@ public class MainController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarErro("Erro", "Não foi possível voltar para a tela de login.");
+            dialogService.erro("Erro", "Não foi possível voltar para a tela de login.");
+        }
+    }
+
+    private Stage obterStageAtual() {
+        Node[] candidatos = {contentPane, homeBox, menuBarTop};
+
+        for (Node candidato : candidatos) {
+            if (candidato != null && candidato.getScene() != null) {
+                return (Stage) candidato.getScene().getWindow();
+            }
+        }
+
+        return null;
+    }
+
+    private void atualizarBotoesNavegacao() {
+        if (btnBack != null) {
+            btnBack.setDisable(!navigationService.canGoBack());
+        }
+
+        if (btnForward != null) {
+            btnForward.setDisable(!navigationService.canGoForward());
         }
     }
 
@@ -541,23 +386,5 @@ public class MainController {
         if (label != null) {
             label.setText(texto == null ? "" : texto);
         }
-    }
-
-    private String safe(String value) {
-        return value == null ? "" : value;
-    }
-
-    private String formatMoney(double valor) {
-        return NumberFormat
-                .getCurrencyInstance(new Locale("pt", "BR"))
-                .format(valor);
-    }
-
-    private void mostrarErro(String titulo, String mensagem) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erro");
-        alert.setHeaderText(titulo);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
     }
 }

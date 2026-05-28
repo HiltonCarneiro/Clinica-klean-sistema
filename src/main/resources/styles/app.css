@@ -637,3 +637,349 @@
 .tabs-clean .tab-content-area {
     -fx-background-color: #F8FAFC;
 }
+/* =========================================================
+   TABPANE MODERNO
+========================================================= */
+
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.tab-pane .tab-header-area {
+    -fx-padding: 0 0 15 0;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .headers-region {
+    -fx-background-color: transparent;
+}
+
+/* =========================================================
+   ABAS
+========================================================= */
+
+.tab {
+    -fx-background-color: #F3F6FB;
+    -fx-background-radius: 12 12 0 0;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab:selected {
+    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
+}
+
+.tab:hover {
+    -fx-background-color: #E4ECFF;
+}
+
+.tab:selected:hover {
+    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
+}
+
+/* =========================================================
+   TEXTO DAS ABAS
+========================================================= */
+
+.tab .tab-label {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* =========================================================
+   AREA INTERNA
+========================================================= */
+
+.tab-pane .tab-content-area {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 18;
+    -fx-padding: 25;
+}
+
+/* =========================================================
+   BOTÕES MODERNOS
+========================================================= */
+
+.button {
+    -fx-background-radius: 14;
+    -fx-cursor: hand;
+    -fx-font-weight: 600;
+}
+
+.button:hover {
+    -fx-opacity: 0.92;
+}
+
+/* BOTÃO AZUL */
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
+    -fx-text-fill: white;
+}
+
+/* BOTÃO VERDE */
+
+.btn-success {
+    -fx-background-color: linear-gradient(to right, #10B981, #34D399);
+    -fx-text-fill: white;
+}
+
+/* BOTÃO CINZA */
+
+.btn-secondary {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #334155;
+}
+/* =========================================================
+   PACIENTES - HOME PROFISSIONAL
+========================================================= */
+
+.paciente-home-root {
+    -fx-background-color: linear-gradient(to bottom, #F8FAFC, #EEF2F7);
+}
+
+.paciente-hero {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-padding: 24 28;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.22, 0, 5);
+}
+
+.paciente-hero-icon {
+    -fx-min-width: 56;
+    -fx-min-height: 56;
+    -fx-background-color: linear-gradient(to bottom right, #DBEAFE, #CCFBF1);
+    -fx-background-radius: 18;
+    -fx-text-fill: #2563EB;
+    -fx-font-size: 24px;
+    -fx-font-weight: 900;
+}
+
+.paciente-metric-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-padding: 20;
+    -fx-min-height: 126;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.05), 14, 0.18, 0, 4);
+}
+
+.paciente-metric-card:hover {
+    -fx-border-color: #BFDBFE;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.12), 20, 0.22, 0, 6);
+}
+
+.paciente-metric-card-highlight {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #EFF6FF);
+    -fx-border-color: #BFDBFE;
+}
+
+.paciente-action-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-padding: 26;
+    -fx-min-height: 230;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.22, 0, 5);
+}
+
+.paciente-action-card:hover {
+    -fx-border-color: #93C5FD;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.14), 24, 0.25, 0, 8);
+}
+
+.paciente-action-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.paciente-action-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+    -fx-line-spacing: 3;
+}
+
+.paciente-info-panel {
+    -fx-background-color: linear-gradient(to bottom right, #ECFEFF, #EFF6FF);
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #BAE6FD;
+    -fx-border-width: 1;
+    -fx-padding: 26;
+    -fx-min-height: 230;
+    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.10), 18, 0.2, 0, 5);
+}
+/* =========================================================
+   CARD AUDITORIA
+========================================================= */
+
+.audit-log-card {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F8FAFC);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-padding: 24;
+}
+
+.audit-log-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+    -fx-line-spacing: 6;
+}
+.custom-dialog {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+}
+
+.custom-dialog > *.button-bar > *.container {
+    -fx-background-color: #ffffff;
+    -fx-padding: 0 20 18 20;
+}
+
+.custom-dialog .content {
+    -fx-padding: 0;
+}
+
+.dialog-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #111827;
+}
+
+.dialog-message {
+    -fx-font-size: 13px;
+    -fx-text-fill: #4b5563;
+    -fx-line-spacing: 3px;
+}
+
+.dialog-icon {
+    -fx-min-width: 52px;
+    -fx-min-height: 52px;
+    -fx-max-width: 52px;
+    -fx-max-height: 52px;
+    -fx-alignment: center;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 999px;
+}
+
+.dialog-icon-confirm {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #6d28d9;
+}
+
+.dialog-icon-success {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #15803d;
+}
+
+.dialog-icon-error {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+}
+
+.dialog-icon-warning {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #b45309;
+}
+
+.dialog-button-primary {
+    -fx-background-color: #6d28d9;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.dialog-button-primary:hover {
+    -fx-background-color: #5b21b6;
+}
+
+.dialog-button-secondary {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.dialog-button-secondary:hover {
+    -fx-background-color: #e5e7eb;
+}
+.dialog-icon-info {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #2563eb;
+}
+.avaliacao-result-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-padding: 18 18 18 18;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 16, 0.15, 0, 4);
+    -fx-min-height: 135;
+}
+
+.avaliacao-result-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #64748b;
+}
+
+.avaliacao-result-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.avaliacao-result-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.result-imc {
+    -fx-border-color: #bfdbfe;
+}
+
+.result-gordura {
+    -fx-border-color: #fecaca;
+}
+
+.result-massa-magra {
+    -fx-border-color: #bbf7d0;
+}
+
+.result-massa-gorda {
+    -fx-border-color: #fed7aa;
+}
+
+.result-rcq {
+    -fx-border-color: #ddd6fe;
+}

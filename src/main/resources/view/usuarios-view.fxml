@@ -4,183 +4,423 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.clinica.controller.UsuariosPerfisController">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.clinica.controller.UsuariosPerfisController"
+            stylesheets="@/styles/app.css"
+            styleClass="page-root">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
 
     <top>
-        <VBox spacing="8">
+        <VBox spacing="16"
+              styleClass="top-clean">
+
             <padding>
-                <Insets top="10" right="12" bottom="10" left="12"/>
+                <Insets top="24" right="28" bottom="18" left="28"/>
             </padding>
-            <Label text="Usuários &amp; Perfis"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-            <Separator/>
+
+            <HBox alignment="CENTER_LEFT">
+
+                <VBox spacing="5">
+
+                    <Label text="Usuários &amp; Perfis"
+                           styleClass="page-title"/>
+
+                    <Label text="Gerencie acessos, permissões e perfis operacionais da clínica."
+                           styleClass="page-subtitle"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <VBox alignment="CENTER_RIGHT"
+                      spacing="4">
+
+                    <Label text="Administração"
+                           styleClass="dashboard-badge-admin"/>
+
+                    <Label text="Controle de acesso"
+                           styleClass="label-muted"/>
+                </VBox>
+            </HBox>
         </VBox>
     </top>
 
-    <center>
-        <TabPane>
+    <!-- ===================================================== -->
+    <!-- CONTENT -->
+    <!-- ===================================================== -->
 
+    <center>
+
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 styleClass="modern-tab-pane">
+
+            <!-- ================================================= -->
             <!-- USUÁRIOS -->
-            <Tab text="Usuários" closable="false">
-                <BorderPane>
-                    <top>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
+            <!-- ================================================= -->
+
+            <tabs>
+
+                <Tab text="Usuários">
+
+                    <BorderPane>
+
+                        <top>
+                            <VBox spacing="16"
+                                  styleClass="dashboard-panel">
+
+                                <padding>
+                                    <Insets top="20" right="22" bottom="20" left="22"/>
+                                </padding>
+
+                                <HBox spacing="14"
+                                      alignment="CENTER_LEFT">
+
+                                    <VBox spacing="4">
+
+                                        <Label text="Gestão de usuários"
+                                               styleClass="section-title"/>
+
+                                        <Label text="Pesquise usuários, cargos e acessos do sistema."
+                                               styleClass="page-subtitle"/>
+                                    </VBox>
+
+                                    <Region HBox.hgrow="ALWAYS"/>
+
+                                    <CheckBox fx:id="chkIncluirInativos"
+                                              text="Incluir inativos"/>
+
+                                    <TextField fx:id="txtBuscaUsuario"
+                                               promptText="Buscar login, pessoa ou cargo..."
+                                               prefWidth="340"/>
+
+                                    <Button text="Atualizar"
+                                            onAction="#onAtualizarUsuarios"
+                                            styleClass="btn-secondary"/>
+
+                                    <Button text="Backup agora"
+                                            onAction="#onFazerBackupAgora"
+                                            styleClass="btn-primary"/>
+                                </HBox>
+                            </VBox>
+                        </top>
+
+                        <center>
+
+                            <HBox spacing="18">
+
+                                <padding>
+                                    <Insets top="20" right="28" bottom="28" left="28"/>
+                                </padding>
+
+                                <!-- TABELA -->
+
+                                <VBox spacing="12"
+                                      HBox.hgrow="ALWAYS"
+                                      styleClass="dashboard-panel">
+
+                                    <padding>
+                                        <Insets top="18" right="18" bottom="18" left="18"/>
+                                    </padding>
+
+                                    <Label text="Usuários cadastrados"
+                                           styleClass="section-title"/>
+
+                                    <TableView fx:id="tblUsuarios"
+                                               VBox.vgrow="ALWAYS"
+                                               styleClass="table-soft">
+
+                                        <columns>
+
+                                            <TableColumn fx:id="colUId"
+                                                         text="ID"
+                                                         prefWidth="70"/>
+
+                                            <TableColumn fx:id="colULogin"
+                                                         text="Login"
+                                                         prefWidth="170"/>
+
+                                            <TableColumn fx:id="colUPessoa"
+                                                         text="Pessoa"
+                                                         prefWidth="220"/>
+
+                                            <TableColumn fx:id="colUCargo"
+                                                         text="Cargo"
+                                                         prefWidth="180"/>
+
+                                            <TableColumn fx:id="colUPerfil"
+                                                         text="Perfil"
+                                                         prefWidth="170"/>
+
+                                            <TableColumn fx:id="colUAtivo"
+                                                         text="Ativo"
+                                                         prefWidth="90"/>
+                                        </columns>
+                                    </TableView>
+
+                                    <Label fx:id="lblMsgUsuarios"
+                                           styleClass="status-label"/>
+                                </VBox>
+
+                                <!-- FORM -->
+
+                                <VBox spacing="16"
+                                      prefWidth="420"
+                                      styleClass="dashboard-panel">
+
+                                    <padding>
+                                        <Insets top="18" right="18" bottom="18" left="18"/>
+                                    </padding>
+
+                                    <Label text="Cadastro / edição"
+                                           styleClass="section-title"/>
+
+                                    <GridPane hgap="12"
+                                              vgap="14">
+
+                                        <columnConstraints>
+                                            <ColumnConstraints percentWidth="32"/>
+                                            <ColumnConstraints percentWidth="68"/>
+                                        </columnConstraints>
+
+                                        <Label text="Cargo:"
+                                               GridPane.rowIndex="0"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <TextField fx:id="txtCargo"
+                                                   GridPane.rowIndex="0"
+                                                   GridPane.columnIndex="1"/>
+
+                                        <Label text="Pessoa:"
+                                               GridPane.rowIndex="1"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <TextField fx:id="txtPessoaNome"
+                                                   GridPane.rowIndex="1"
+                                                   GridPane.columnIndex="1"/>
+
+                                        <Label text="Login:"
+                                               GridPane.rowIndex="2"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <TextField fx:id="txtLogin"
+                                                   GridPane.rowIndex="2"
+                                                   GridPane.columnIndex="1"/>
+
+                                        <Label text="Senha:"
+                                               GridPane.rowIndex="3"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <PasswordField fx:id="txtSenha"
+                                                       GridPane.rowIndex="3"
+                                                       GridPane.columnIndex="1"/>
+
+                                        <Label text="Perfil:"
+                                               GridPane.rowIndex="4"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <ComboBox fx:id="cbPerfilUsuario"
+                                                  GridPane.rowIndex="4"
+                                                  GridPane.columnIndex="1"/>
+
+                                        <Label text="Ativo:"
+                                               GridPane.rowIndex="5"
+                                               GridPane.columnIndex="0"
+                                               styleClass="form-label"/>
+
+                                        <CheckBox fx:id="chkAtivoUsuario"
+                                                  GridPane.rowIndex="5"
+                                                  GridPane.columnIndex="1"/>
+                                    </GridPane>
+
+                                    <HBox spacing="10">
+
+                                        <Button text="Novo"
+                                                onAction="#onNovoUsuario"
+                                                styleClass="btn-secondary"/>
+
+                                        <Button text="Salvar"
+                                                onAction="#onSalvarUsuario"
+                                                styleClass="btn-primary"/>
+
+                                        <Button text="Cancelar"
+                                                onAction="#onCancelarUsuario"
+                                                styleClass="btn-danger-outline"/>
+                                    </HBox>
+
+                                    <HBox spacing="10">
+
+                                        <Button text="Ativar/Inativar"
+                                                onAction="#onAtivarInativarUsuario"
+                                                styleClass="btn-secondary"/>
+
+                                        <Button text="Resetar senha"
+                                                onAction="#onResetarSenha"
+                                                styleClass="btn-secondary"/>
+                                    </HBox>
+
+                                    <Label fx:id="lblMsgUsuarioForm"
+                                           wrapText="true"
+                                           styleClass="status-label"/>
+                                </VBox>
+                            </HBox>
+                        </center>
+                    </BorderPane>
+                </Tab>
+
+                <!-- ================================================= -->
+                <!-- PERFIS -->
+                <!-- ================================================= -->
+
+                <Tab text="Perfis">
+
+                    <VBox spacing="18">
+
+                        <padding>
+                            <Insets top="22" right="28" bottom="28" left="28"/>
+                        </padding>
+
+                        <HBox spacing="18">
+
+                            <VBox spacing="12"
+                                  prefWidth="420"
+                                  styleClass="dashboard-panel">
+
+                                <padding>
+                                    <Insets top="18" right="18" bottom="18" left="18"/>
+                                </padding>
+
+                                <Label text="Novo perfil"
+                                       styleClass="section-title"/>
+
+                                <TextField fx:id="txtNovoPerfil"
+                                           promptText="Ex: NUTRICIONISTA"/>
+
+                                <Button text="Criar perfil"
+                                        onAction="#onCriarPerfil"
+                                        styleClass="btn-primary"/>
+                            </VBox>
+
+                            <VBox spacing="12"
+                                  HBox.hgrow="ALWAYS"
+                                  styleClass="dashboard-panel">
+
+                                <padding>
+                                    <Insets top="18" right="18" bottom="18" left="18"/>
+                                </padding>
+
+                                <Label text="Perfis cadastrados"
+                                       styleClass="section-title"/>
+
+                                <TableView fx:id="tblPerfis"
+                                           VBox.vgrow="ALWAYS"
+                                           styleClass="table-soft">
+
+                                    <columns>
+
+                                        <TableColumn fx:id="colPId"
+                                                     text="ID"
+                                                     prefWidth="80"/>
+
+                                        <TableColumn fx:id="colPNome"
+                                                     text="Nome"
+                                                     prefWidth="420"/>
+                                    </columns>
+                                </TableView>
+
+                                <HBox spacing="10">
+
+                                    <TextField fx:id="txtRenomearPerfil"
+                                               promptText="Novo nome"/>
+
+                                    <Button text="Renomear"
+                                            onAction="#onRenomearPerfil"
+                                            styleClass="btn-secondary"/>
+
+                                    <Button fx:id="btnExcluirPerfil"
+                                            text="Excluir"
+                                            onAction="#onExcluirPerfil"
+                                            styleClass="btn-danger-outline"/>
+                                </HBox>
+
+                                <Label fx:id="lblMsgPerfis"
+                                       styleClass="status-label"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </Tab>
+
+                <!-- ================================================= -->
+                <!-- PERMISSÕES -->
+                <!-- ================================================= -->
+
+                <Tab text="Permissões">
+
+                    <VBox spacing="18">
+
+                        <padding>
+                            <Insets top="22" right="28" bottom="28" left="28"/>
+                        </padding>
+
+                        <VBox spacing="16"
+                              styleClass="dashboard-panel">
+
                             <padding>
-                                <Insets top="10" right="12" bottom="10" left="12"/>
+                                <Insets top="18" right="18" bottom="18" left="18"/>
                             </padding>
 
-                            <Label text="Buscar:"/>
-                            <TextField fx:id="txtBuscaUsuario" promptText="login, cargo ou pessoa..." HBox.hgrow="ALWAYS"/>
-                            <CheckBox fx:id="chkIncluirInativos" text="Incluir inativos"/>
-                            <Button text="Atualizar" onAction="#onAtualizarUsuarios"/>
-                            <Button text="Backup agora" onAction="#onFazerBackupAgora"/>
-                        </HBox>
-                    </top>
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
 
-                    <center>
-                        <SplitPane dividerPositions="0.62">
-                            <TableView fx:id="tblUsuarios">
-                                <columns>
-                                    <TableColumn fx:id="colUId" text="ID" prefWidth="70"/>
-                                    <TableColumn fx:id="colULogin" text="Login" prefWidth="140"/>
-                                    <TableColumn fx:id="colUPessoa" text="Pessoa" prefWidth="180"/>
-                                    <TableColumn fx:id="colUCargo" text="Cargo" prefWidth="160"/>
-                                    <TableColumn fx:id="colUPerfil" text="Perfil" prefWidth="160"/>
-                                    <TableColumn fx:id="colUAtivo" text="Ativo" prefWidth="80"/>
-                                </columns>
-                            </TableView>
+                                <Label text="Perfil:"
+                                       styleClass="form-label"/>
 
-                            <VBox spacing="10">
-                                <padding>
-                                    <Insets top="10" right="12" bottom="10" left="12"/>
-                                </padding>
+                                <ComboBox fx:id="cbPerfilPermissoes"
+                                          prefWidth="280"/>
 
-                                <Label text="Cadastro / edição" style="-fx-font-weight: bold;"/>
+                                <Button text="Carregar"
+                                        onAction="#onCarregarPermissoes"
+                                        styleClass="btn-secondary"/>
 
-                                <GridPane hgap="10" vgap="10">
-                                    <columnConstraints>
-                                        <ColumnConstraints minWidth="110"/>
-                                        <ColumnConstraints hgrow="ALWAYS"/>
-                                    </columnConstraints>
+                                <Button text="Salvar permissões"
+                                        onAction="#onSalvarPermissoes"
+                                        styleClass="btn-primary"/>
+                            </HBox>
 
-                                    <Label text="Cargo:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="txtCargo" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                            <ScrollPane fitToWidth="true"
+                                        VBox.vgrow="ALWAYS"
+                                        styleClass="scroll-clean">
 
-                                    <Label text="Pessoa:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="txtPessoaNome" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                <content>
 
-                                    <Label text="Login:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="txtLogin" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                    <VBox fx:id="boxPermissoes"
+                                          spacing="10"
+                                          styleClass="permissions-box">
 
-                                    <Label text="Senha:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                    <PasswordField fx:id="txtSenha" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                        <padding>
+                                            <Insets top="10"
+                                                    right="10"
+                                                    bottom="10"
+                                                    left="10"/>
+                                        </padding>
+                                    </VBox>
+                                </content>
+                            </ScrollPane>
 
-                                    <Label text="Perfil:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                                    <ComboBox fx:id="cbPerfilUsuario" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            <Label fx:id="lblMsgPermissoes"
+                                   styleClass="status-label"/>
+                        </VBox>
+                    </VBox>
+                </Tab>
 
-                                    <Label text="Ativo:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                                    <CheckBox fx:id="chkAtivoUsuario" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-                                </GridPane>
-
-                                <HBox spacing="10">
-                                    <Button text="Novo" onAction="#onNovoUsuario"/>
-                                    <Button text="Salvar" onAction="#onSalvarUsuario"/>
-                                    <Button text="Cancelar" onAction="#onCancelarUsuario"/>
-                                </HBox>
-
-                                <HBox spacing="10">
-                                    <Button text="Ativar/Inativar" onAction="#onAtivarInativarUsuario"/>
-                                    <Button text="Resetar senha" onAction="#onResetarSenha"/>
-                                </HBox>
-
-                                <Label fx:id="lblMsgUsuarioForm" textFill="red"/>
-                                <Label fx:id="lblMsgUsuarios" textFill="red"/>
-                            </VBox>
-                        </SplitPane>
-                    </center>
-                </BorderPane>
-            </Tab>
-
-            <!-- PERFIS -->
-            <Tab text="Perfis" closable="false">
-                <BorderPane>
-                    <padding>
-                        <Insets top="10" right="12" bottom="12" left="12"/>
-                    </padding>
-
-                    <top>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label text="Novo perfil:"/>
-                            <TextField fx:id="txtNovoPerfil" promptText="Ex: NUTRICIONISTA" HBox.hgrow="ALWAYS"/>
-                            <Button text="Criar" onAction="#onCriarPerfil"/>
-                            <Button text="Atualizar" onAction="#onAtualizarPerfis"/>
-                            <!-- ✅ NOVO -->
-                            <Button fx:id="btnExcluirPerfil" text="Excluir" onAction="#onExcluirPerfil" disable="true"/>
-                        </HBox>
-                    </top>
-
-                    <center>
-                        <SplitPane dividerPositions="0.55">
-                            <TableView fx:id="tblPerfis">
-                                <columns>
-                                    <TableColumn fx:id="colPId" text="ID" prefWidth="80"/>
-                                    <TableColumn fx:id="colPNome" text="Nome" prefWidth="300"/>
-                                </columns>
-                            </TableView>
-
-                            <VBox spacing="10" alignment="TOP_LEFT">
-                                <padding>
-                                    <Insets top="10" right="12" bottom="10" left="12"/>
-                                </padding>
-
-                                <Label text="Renomear perfil" style="-fx-font-weight: bold;"/>
-                                <Label text="Selecione um perfil na tabela e informe o novo nome:" wrapText="true"/>
-                                <TextField fx:id="txtRenomearPerfil" promptText="Novo nome"/>
-                                <Button text="Salvar nome" onAction="#onRenomearPerfil"/>
-                                <Label fx:id="lblMsgPerfis" textFill="red"/>
-                            </VBox>
-                        </SplitPane>
-                    </center>
-                </BorderPane>
-            </Tab>
-
-            <!-- PERMISSÕES -->
-            <Tab text="Permissões" closable="false">
-                <BorderPane>
-                    <padding>
-                        <Insets top="10" right="12" bottom="12" left="12"/>
-                    </padding>
-
-                    <top>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label text="Perfil:"/>
-                            <ComboBox fx:id="cbPerfilPermissoes" prefWidth="260"/>
-                            <Button text="Carregar" onAction="#onCarregarPermissoes"/>
-                            <Button text="Salvar" onAction="#onSalvarPermissoes"/>
-                        </HBox>
-                    </top>
-
-                    <center>
-                        <ScrollPane fitToWidth="true">
-                            <VBox fx:id="boxPermissoes" spacing="6">
-                                <padding>
-                                    <Insets top="10" right="10" bottom="10" left="10"/>
-                                </padding>
-                            </VBox>
-                        </ScrollPane>
-                    </center>
-
-                    <bottom>
-                        <HBox>
-                            <Label fx:id="lblMsgPermissoes" textFill="red"/>
-                        </HBox>
-                    </bottom>
-                </BorderPane>
-            </Tab>
-
+            </tabs>
         </TabPane>
     </center>
-
 </BorderPane>

@@ -15,39 +15,115 @@
 
             <!-- TELA INICIAL -->
             <VBox fx:id="boxEscolha"
-                  alignment="CENTER"
-                  spacing="26"
-                  styleClass="paciente-escolha-root">
+                  spacing="24"
+                  styleClass="paciente-home-root">
 
-                <VBox alignment="CENTER" spacing="8">
-                    <Label text="Pacientes" styleClass="page-title"/>
-                    <Label text="Gerencie cadastros, buscas e históricos clínicos dos pacientes."
-                           styleClass="page-subtitle"/>
-                </VBox>
+                <padding>
+                    <Insets top="34" right="42" bottom="36" left="42"/>
+                </padding>
 
-                <HBox alignment="CENTER" spacing="22">
+                <!-- HEADER -->
+                <HBox alignment="CENTER_LEFT" spacing="18" styleClass="paciente-hero">
 
-                    <VBox spacing="12" alignment="CENTER" styleClass="choice-card" prefWidth="280" prefHeight="150">
-                        <Label text="Novo paciente" styleClass="card-title"/>
-                        <Label text="Cadastre dados pessoais, contato e endereço."
-                               wrapText="true"
-                               styleClass="card-desc"/>
-                        <Button text="Cadastrar"
-                                onAction="#irParaCadastro"
-                                styleClass="btn-primary"/>
+                    <Label text="P"
+                           alignment="CENTER"
+                           styleClass="paciente-hero-icon"/>
+
+                    <VBox spacing="5">
+                        <Label text="Pacientes" styleClass="page-title"/>
+                        <Label text="Gerencie cadastros, buscas, histórico clínico e acompanhamento dos pacientes."
+                               styleClass="page-subtitle"/>
                     </VBox>
 
-                    <VBox spacing="12" alignment="CENTER" styleClass="choice-card" prefWidth="280" prefHeight="150">
-                        <Label text="Buscar paciente" styleClass="card-title"/>
-                        <Label text="Localize pacientes e acesse histórico clínico."
-                               wrapText="true"
-                               styleClass="card-desc"/>
-                        <Button text="Buscar"
-                                onAction="#irParaBusca"
-                                styleClass="btn-primary"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button text="+ Novo paciente"
+                            onAction="#irParaCadastro"
+                            styleClass="btn-primary"/>
+
+                    <Button text="Buscar paciente"
+                            onAction="#irParaBusca"
+                            styleClass="btn-ghost"/>
+                </HBox>
+
+                <!-- INDICADORES -->
+                <HBox spacing="18" alignment="CENTER">
+
+                    <VBox spacing="8" styleClass="paciente-metric-card" HBox.hgrow="ALWAYS">
+                        <Label text="Pacientes ativos" styleClass="metric-title"/>
+                        <Label text="Gestão clínica" styleClass="metric-value"/>
+                        <Label text="Acesse, edite e acompanhe dados cadastrais." styleClass="metric-desc" wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="paciente-metric-card" HBox.hgrow="ALWAYS">
+                        <Label text="Histórico clínico" styleClass="metric-title"/>
+                        <Label text="Prontuário" styleClass="metric-value"/>
+                        <Label text="Consulte evoluções, registros e atendimentos anteriores." styleClass="metric-desc" wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="paciente-metric-card" HBox.hgrow="ALWAYS">
+                        <Label text="Busca rápida" styleClass="metric-title"/>
+                        <Label text="Localização" styleClass="metric-value"/>
+                        <Label text="Encontre pacientes por nome, CPF, RG ou telefone." styleClass="metric-desc" wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="paciente-metric-card paciente-metric-card-highlight" HBox.hgrow="ALWAYS">
+                        <Label text="Área segura" styleClass="metric-title"/>
+                        <Label text="Controle" styleClass="metric-value"/>
+                        <Label text="Dados organizados para uma rotina clínica confiável." styleClass="metric-desc" wrapText="true"/>
                     </VBox>
 
                 </HBox>
+
+                <!-- AÇÕES PRINCIPAIS -->
+                <HBox spacing="22" alignment="CENTER">
+
+                    <VBox spacing="16" styleClass="paciente-action-card" HBox.hgrow="ALWAYS">
+                        <Label text="Novo paciente" styleClass="paciente-action-title"/>
+                        <Label text="Cadastre dados pessoais, documentos, contato, endereço e responsável legal quando necessário."
+                               wrapText="true"
+                               styleClass="paciente-action-desc"/>
+
+                        <Region VBox.vgrow="ALWAYS"/>
+
+                        <Button text="Cadastrar paciente"
+                                onAction="#irParaCadastro"
+                                maxWidth="1.7976931348623157E308"
+                                styleClass="btn-primary"/>
+                    </VBox>
+
+                    <VBox spacing="16" styleClass="paciente-action-card" HBox.hgrow="ALWAYS">
+                        <Label text="Buscar paciente" styleClass="paciente-action-title"/>
+                        <Label text="Localize registros existentes, edite informações cadastrais e acesse o histórico clínico."
+                               wrapText="true"
+                               styleClass="paciente-action-desc"/>
+
+                        <Region VBox.vgrow="ALWAYS"/>
+
+                        <Button text="Ir para busca"
+                                onAction="#irParaBusca"
+                                maxWidth="1.7976931348623157E308"
+                                styleClass="btn-primary"/>
+                    </VBox>
+
+                    <VBox spacing="16" styleClass="paciente-info-panel" HBox.hgrow="ALWAYS">
+                        <Label text="Rotina recomendada" styleClass="paciente-action-title"/>
+
+                        <Label text="• Antes de cadastrar, verifique se o paciente já existe no sistema."
+                               wrapText="true"
+                               styleClass="hint-text"/>
+
+                        <Label text="• Mantenha telefone, CPF e data de nascimento sempre atualizados."
+                               wrapText="true"
+                               styleClass="hint-text"/>
+
+                        <Label text="• Use o histórico clínico para acompanhar atendimentos anteriores."
+                               wrapText="true"
+                               styleClass="hint-text"/>
+                    </VBox>
+
+                </HBox>
+
             </VBox>
 
             <!-- CADASTRO -->

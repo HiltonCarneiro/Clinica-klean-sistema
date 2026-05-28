@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.clinica.controller.AvaliacaoFisicaController"
+            styleClass="page-root">
+
+    <top>
+        <VBox spacing="14" styleClass="page-header">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Avaliação Física" styleClass="page-title"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+
+                <Button text="Nova Avaliação" onAction="#onNovaAvaliacao" styleClass="btn-primary"/>
+                <Button text="Salvar" onAction="#onSalvar" styleClass="btn-success"/>
+                <Button text="Excluir" onAction="#onExcluir" styleClass="btn-danger"/>
+            </HBox>
+
+            <GridPane hgap="12" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="35"/>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="20"/>
+                </columnConstraints>
+
+                <ComboBox fx:id="cbPacientes" promptText="Selecione o paciente" maxWidth="Infinity" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cbProfissionais" promptText="Profissional responsável" maxWidth="Infinity" GridPane.columnIndex="1"/>
+                <DatePicker fx:id="dpDataAvaliacao" maxWidth="Infinity" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtObjetivo" promptText="Objetivo do paciente" GridPane.columnIndex="3"/>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="18">
+                <padding>
+                    <Insets top="20" right="20" bottom="24" left="20"/>
+                </padding>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Dados Gerais" styleClass="section-title"/>
+
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                        </columnConstraints>
+
+                        <TextField fx:id="txtPeso" promptText="Peso (kg)" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtAltura" promptText="Altura (m)" GridPane.columnIndex="1"/>
+                        <ComboBox fx:id="cbSexo" promptText="Sexo biológico" GridPane.columnIndex="2"/>
+                        <TextField fx:id="txtIdade" promptText="Idade" GridPane.columnIndex="3"/>
+                        <ComboBox fx:id="cbNivelAtividade" promptText="Nível de atividade" GridPane.columnIndex="4"/>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Dobras Cutâneas (mm)" styleClass="section-title"/>
+
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                        </columnConstraints>
+
+                        <TextField fx:id="txtDobraTricipital" promptText="Tricipital" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtDobraBicipital" promptText="Bicipital" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtDobraAbdominal" promptText="Abdominal" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtDobraSubescapular" promptText="Subescapular" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtDobraAxilarMedia" promptText="Axilar média" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+
+                        <TextField fx:id="txtDobraCoxa" promptText="Coxa" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtDobraToracica" promptText="Torácica" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtDobraSuprailiaca" promptText="Suprailíaca" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtDobraPanturrilha" promptText="Panturrilha" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Circunferências (cm)" styleClass="section-title"/>
+
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                        </columnConstraints>
+
+                        <TextField fx:id="txtCircPescoco" promptText="Pescoço" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCircTorax" promptText="Tórax" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCircOmbro" promptText="Ombro" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCircCintura" promptText="Cintura" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCircQuadril" promptText="Quadril" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+
+                        <TextField fx:id="txtCircAbdomen" promptText="Abdômen" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtCircBracoEsqRelaxado" promptText="Braço esq. relaxado" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtCircBracoDirRelaxado" promptText="Braço dir. relaxado" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtCircBracoEsqContraido" promptText="Braço esq. contraído" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtCircBracoDirContraido" promptText="Braço dir. contraído" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+
+                        <TextField fx:id="txtCircAntebracoEsq" promptText="Antebraço esq." GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtCircAntebracoDir" promptText="Antebraço dir." GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtCircCoxaEsqProximal" promptText="Coxa esq. proximal" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtCircCoxaDirProximal" promptText="Coxa dir. proximal" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtCircCoxaEsqMedial" promptText="Coxa esq. medial" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
+
+                        <TextField fx:id="txtCircCoxaDirMedial" promptText="Coxa dir. medial" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <TextField fx:id="txtCircCoxaEsqDistal" promptText="Coxa esq. distal" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <TextField fx:id="txtCircCoxaDirDistal" promptText="Coxa dir. distal" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                        <TextField fx:id="txtCircPanturrilhaEsq" promptText="Panturrilha esq." GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                        <TextField fx:id="txtCircPanturrilhaDir" promptText="Panturrilha dir." GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="14" styleClass="card-section">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <VBox spacing="3">
+                            <Label text="Resultados Calculados" styleClass="section-title"/>
+                            <Label text="Indicadores gerados automaticamente com base nas medidas informadas."
+                                   styleClass="hint-text"/>
+                        </VBox>
+                    </HBox>
+
+                    <GridPane hgap="14" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                            <ColumnConstraints percentWidth="20"/>
+                        </columnConstraints>
+
+                        <VBox spacing="7" styleClass="avaliacao-result-card result-imc" GridPane.columnIndex="0">
+                            <Label text="IMC" styleClass="avaliacao-result-title"/>
+                            <Label fx:id="lblImc" text="-" styleClass="avaliacao-result-value"/>
+                            <Label fx:id="lblClassificacaoImc" text="-" wrapText="true" styleClass="avaliacao-result-subtitle"/>
+                        </VBox>
+
+                        <VBox spacing="7" styleClass="avaliacao-result-card result-gordura" GridPane.columnIndex="1">
+                            <Label text="\% Gordura" styleClass="avaliacao-result-title"/>
+                            <Label fx:id="lblPercentualGordura" text="-" styleClass="avaliacao-result-value"/>
+                            <Label fx:id="lblProtocolo" text="-" wrapText="true" styleClass="avaliacao-result-subtitle"/>
+                        </VBox>
+
+                        <VBox spacing="7" styleClass="avaliacao-result-card result-massa-magra" GridPane.columnIndex="2">
+                            <Label text="Massa Magra" styleClass="avaliacao-result-title"/>
+                            <Label fx:id="lblMassaMagra" text="-" styleClass="avaliacao-result-value"/>
+                            <Label text="Estimativa em kg" styleClass="avaliacao-result-subtitle"/>
+                        </VBox>
+
+                        <VBox spacing="7" styleClass="avaliacao-result-card result-massa-gorda" GridPane.columnIndex="3">
+                            <Label text="Massa Gorda" styleClass="avaliacao-result-title"/>
+                            <Label fx:id="lblMassaGorda" text="-" styleClass="avaliacao-result-value"/>
+                            <Label text="Estimativa em kg" styleClass="avaliacao-result-subtitle"/>
+                        </VBox>
+
+                        <VBox spacing="7" styleClass="avaliacao-result-card result-rcq" GridPane.columnIndex="4">
+                            <Label text="RCQ" styleClass="avaliacao-result-title"/>
+                            <Label fx:id="lblRcq" text="-" styleClass="avaliacao-result-value"/>
+                            <Label fx:id="lblClassificacaoRcq" text="-" wrapText="true" styleClass="avaliacao-result-subtitle"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Observações" styleClass="section-title"/>
+
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="34"/>
+                        </columnConstraints>
+
+                        <TextArea fx:id="txtObservacoesGerais" promptText="Observações gerais" prefRowCount="3" GridPane.columnIndex="0"/>
+                        <TextArea fx:id="txtObservacoesNutricionais" promptText="Observações nutricionais" prefRowCount="3" GridPane.columnIndex="1"/>
+                        <TextArea fx:id="txtAnotacoesProfissional" promptText="Anotações do profissional" prefRowCount="3" GridPane.columnIndex="2"/>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Histórico do Paciente" styleClass="section-title"/>
+
+                    <TableView fx:id="tableAvaliacoes" prefHeight="260">
+                        <columns>
+                            <TableColumn fx:id="colData" text="Data" prefWidth="120"/>
+                            <TableColumn fx:id="colProfissional" text="Profissional" prefWidth="220"/>
+                            <TableColumn fx:id="colPeso" text="Peso" prefWidth="100"/>
+                            <TableColumn fx:id="colImc" text="IMC" prefWidth="100"/>
+                            <TableColumn fx:id="colPercentual" text="\% Gordura" prefWidth="120"/>
+                            <TableColumn fx:id="colMassaMagra" text="Massa Magra" prefWidth="130"/>
+                            <TableColumn fx:id="colMassaGorda" text="Massa Gorda" prefWidth="130"/>
+                            <TableColumn fx:id="colRcq" text="RCQ" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <VBox spacing="12" styleClass="card-section">
+                    <Label text="Evolução do Peso" styleClass="section-title"/>
+
+                    <LineChart fx:id="chartPeso" animated="false" createSymbols="true">
+                        <xAxis>
+                            <CategoryAxis label="Data"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Peso"/>
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

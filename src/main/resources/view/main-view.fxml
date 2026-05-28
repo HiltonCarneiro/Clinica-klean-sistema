@@ -39,6 +39,11 @@
                     onAction="#onAgenda"
                     styleClass="sidebar-btn"/>
 
+            <Button fx:id="btnCardAvaliacaoFisica"
+                    text="◈ Avaliação Física"
+                    onAction="#onAvaliacaoFisica"
+                    styleClass="sidebar-btn"/>
+
             <Button fx:id="btnCardCaixa"
                     text="▬ Caixa"
                     onAction="#onCaixa"
@@ -117,8 +122,6 @@
                                             left="32"/>
                                 </padding>
 
-                                <!-- HEADER -->
-
                                 <HBox alignment="CENTER_LEFT"
                                       spacing="18">
 
@@ -150,11 +153,7 @@
                                     </VBox>
                                 </HBox>
 
-                                <!-- MÉTRICAS -->
-
                                 <HBox spacing="18">
-
-                                    <!-- AGENDA -->
 
                                     <VBox spacing="10"
                                           styleClass="metric-card">
@@ -172,8 +171,6 @@
                                                styleClass="metric-desc"/>
                                     </VBox>
 
-                                    <!-- PACIENTES -->
-
                                     <VBox spacing="10"
                                           styleClass="metric-card">
 
@@ -189,8 +186,6 @@
                                                wrapText="true"
                                                styleClass="metric-desc"/>
                                     </VBox>
-
-                                    <!-- FINANCEIRO -->
 
                                     <VBox fx:id="cardFinanceiroDashboard"
                                           spacing="10"
@@ -208,8 +203,6 @@
                                                wrapText="true"
                                                styleClass="metric-desc"/>
                                     </VBox>
-
-                                    <!-- ESTOQUE -->
 
                                     <VBox fx:id="cardEstoqueDashboard"
                                           spacing="10"
@@ -229,12 +222,8 @@
                                     </VBox>
                                 </HBox>
 
-                                <!-- PAINEL CENTRAL -->
-
                                 <HBox spacing="22"
                                       VBox.vgrow="ALWAYS">
-
-                                    <!-- AÇÕES -->
 
                                     <VBox spacing="14"
                                           styleClass="dashboard-panel"
@@ -262,6 +251,11 @@
                                                     onAction="#onAgenda"
                                                     styleClass="dashboard-action"/>
 
+                                            <Button fx:id="btnDashboardAvaliacaoFisica"
+                                                    text="Avaliação Física"
+                                                    onAction="#onAvaliacaoFisica"
+                                                    styleClass="dashboard-action"/>
+
                                             <Button fx:id="btnDashboardCaixa"
                                                     text="Caixa"
                                                     onAction="#onCaixa"
@@ -283,8 +277,6 @@
                                                     styleClass="dashboard-action"/>
                                         </TilePane>
                                     </VBox>
-
-                                    <!-- RESUMO OPERACIONAL -->
 
                                     <VBox spacing="16"
                                           styleClass="dashboard-panel"
@@ -324,8 +316,6 @@
                                         </VBox>
                                     </VBox>
                                 </HBox>
-
-                                <!-- ADMIN -->
 
                                 <VBox fx:id="adminDashboardBox"
                                       spacing="14"
@@ -399,8 +389,6 @@
                         </content>
 
                     </ScrollPane>
-
-                    <!-- CONTEÚDO DINÂMICO -->
 
                     <AnchorPane fx:id="contentPane"
                                 visible="false"

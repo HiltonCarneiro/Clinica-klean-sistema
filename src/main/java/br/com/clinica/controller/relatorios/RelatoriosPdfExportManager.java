@@ -30,19 +30,16 @@ public class RelatoriosPdfExportManager {
             return;
         }
 
-        File destino = escolherArquivoPdf(
-                ownerNode,
-                "Salvar relatório do caixa (PDF)",
-                "relatorio_caixa.pdf"
-        );
+        File destino = escolherArquivoPdf(ownerNode, "Salvar relatório do caixa (PDF)", "relatorio_caixa.pdf");
 
-        if (destino == null) {
-            return;
-        }
+        if (destino == null) return;
 
         try {
             relCaixaPdf.gerar(inicio, fim, caixaObs, destino);
-            avisoConsumer.accept("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
+            avisoConsumer.accept(
+                    "PDF gerado com sucesso",
+                    "O relatório de caixa foi salvo em:\n" + destino.getAbsolutePath()
+            );
         } catch (Exception e) {
             e.printStackTrace();
             erroConsumer.accept("Erro ao gerar PDF", e.getMessage());
@@ -64,19 +61,16 @@ public class RelatoriosPdfExportManager {
             return;
         }
 
-        File destino = escolherArquivoPdf(
-                ownerNode,
-                "Salvar relatório de agendamentos (PDF)",
-                "relatorio_agendamentos.pdf"
-        );
+        File destino = escolherArquivoPdf(ownerNode, "Salvar relatório de agendamentos (PDF)", "relatorio_agendamentos.pdf");
 
-        if (destino == null) {
-            return;
-        }
+        if (destino == null) return;
 
         try {
             relAgPdf.gerar(inicio, fim, profissional, agObs, destino);
-            avisoConsumer.accept("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
+            avisoConsumer.accept(
+                    "PDF gerado com sucesso",
+                    "O relatório de agendamentos foi salvo em:\n" + destino.getAbsolutePath()
+            );
         } catch (Exception e) {
             e.printStackTrace();
             erroConsumer.accept("Erro ao gerar PDF", e.getMessage());
@@ -100,44 +94,26 @@ public class RelatoriosPdfExportManager {
             return;
         }
 
-        File destino = escolherArquivoPdf(
-                ownerNode,
-                "Salvar relatório de notas (PDF)",
-                "relatorio_notas.pdf"
-        );
+        File destino = escolherArquivoPdf(ownerNode, "Salvar relatório de notas (PDF)", "relatorio_notas.pdf");
 
-        if (destino == null) {
-            return;
-        }
+        if (destino == null) return;
 
         try {
-            relNotasPdf.gerar(
-                    inicio,
-                    fim,
-                    pacienteFiltro,
-                    profissional,
-                    formaPagamento,
-                    notasObs,
-                    destino
+            relNotasPdf.gerar(inicio, fim, pacienteFiltro, profissional, formaPagamento, notasObs, destino);
+            avisoConsumer.accept(
+                    "PDF gerado com sucesso",
+                    "O relatório de notas foi salvo em:\n" + destino.getAbsolutePath()
             );
-
-            avisoConsumer.accept("Concluído", "PDF gerado em:\n" + destino.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
             erroConsumer.accept("Erro ao gerar PDF", e.getMessage());
         }
     }
 
-    private File escolherArquivoPdf(
-            Node ownerNode,
-            String titulo,
-            String nomeInicial
-    ) {
+    private File escolherArquivoPdf(Node ownerNode, String titulo, String nomeInicial) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(titulo);
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF", "*.pdf")
-        );
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
         fileChooser.setInitialFileName(nomeInicial);
 
         return fileChooser.showSaveDialog(ownerNode.getScene().getWindow());
