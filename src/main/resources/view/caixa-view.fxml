@@ -90,9 +90,17 @@
                         <VBox spacing="12" styleClass="box-soft">
                             <Label text="Adicionar item" styleClass="section-title"/>
 
-                            <HBox spacing="16">
-                                <RadioButton fx:id="rbProduto" text="Produto"/>
-                                <RadioButton fx:id="rbProcedimento" text="Procedimento"/>
+                            <HBox spacing="10"
+                                  alignment="CENTER_LEFT"
+                                  styleClass="caixa-radio-toggle">
+
+                                <RadioButton fx:id="rbProduto"
+                                             text="Produto"
+                                             styleClass="caixa-radio-option"/>
+
+                                <RadioButton fx:id="rbProcedimento"
+                                             text="Procedimento"
+                                             styleClass="caixa-radio-option"/>
                             </HBox>
 
                             <VBox spacing="8">

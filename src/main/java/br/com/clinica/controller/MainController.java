@@ -47,6 +47,7 @@ public class MainController {
 
     @FXML private MenuBar menuBarTop;
     @FXML private ImageView imgLogoHome;
+    @FXML private ImageView imgLogoSidebar;
 
     @FXML private Menu menuCadastros;
     @FXML private Menu menuOperacoes;
@@ -165,7 +166,7 @@ public class MainController {
     @FXML private void onRelatorios() { abrirTelaNoConteudo(VIEW_RELATORIOS, Permissao.RELATORIOS_VER); }
     @FXML private void onUsuarios() { abrirTelaNoConteudo(VIEW_USUARIOS, Permissao.USUARIO_GERENCIAR); }
     @FXML private void onAuditoria() { abrirTelaNoConteudo(VIEW_AUDITORIA, Permissao.AUDITORIA_VER); }
-    @FXML private void onAvaliacaoFisica() { abrirTelaNoConteudo(VIEW_AVALIACAO_FISICA, Permissao.PACIENTE_VER); }
+    @FXML private void onAvaliacaoFisica() { abrirTelaNoConteudo(VIEW_AVALIACAO_FISICA, Permissao.AVALIACAO_FISICA_VER); }
 
     @FXML
     private void onSair() {
@@ -258,8 +259,16 @@ public class MainController {
     private void carregarLogo() {
         URL logoUrl = getClass().getResource(LOGO_HOME);
 
-        if (logoUrl != null && imgLogoHome != null) {
-            imgLogoHome.setImage(new Image(logoUrl.toExternalForm()));
+        if (logoUrl == null) return;
+
+        Image logo = new Image(logoUrl.toExternalForm());
+
+        if (imgLogoHome != null) {
+            imgLogoHome.setImage(logo);
+        }
+
+        if (imgLogoSidebar != null) {
+            imgLogoSidebar.setImage(logo);
         }
     }
 
@@ -287,7 +296,7 @@ public class MainController {
         permissionService.removerItemSeSemPermissao(menuOperacoes, miAgenda, Permissao.AGENDA_VER);
         permissionService.removerItemSeSemPermissao(menuOperacoes, miCaixa, Permissao.FINANCEIRO_VER);
         permissionService.removerItemSeSemPermissao(menuOperacoes, miEstoque, Permissao.ESTOQUE_VER);
-        permissionService.removerItemSeSemPermissao(menuOperacoes, miAvaliacaoFisica, Permissao.PACIENTE_VER);
+        permissionService.removerItemSeSemPermissao(menuOperacoes, miAvaliacaoFisica, Permissao.AVALIACAO_FISICA_VER);
         permissionService.removerItemSeSemPermissao(menuRelatorios, miRelatorios, Permissao.RELATORIOS_VER);
         permissionService.removerItemSeSemPermissao(menuAdministracao, miUsuarios, Permissao.USUARIO_GERENCIAR);
         permissionService.removerItemSeSemPermissao(menuAdministracao, miAuditoria, Permissao.AUDITORIA_VER);
@@ -304,13 +313,13 @@ public class MainController {
         permissionService.aplicarPermissao(btnCardCaixa, Permissao.FINANCEIRO_VER);
         permissionService.aplicarPermissao(btnCardEstoque, Permissao.ESTOQUE_VER);
         permissionService.aplicarPermissao(btnCardUsuarios, Permissao.USUARIO_GERENCIAR);
-        permissionService.aplicarPermissao(btnCardAvaliacaoFisica, Permissao.PACIENTE_VER);
+        permissionService.aplicarPermissao(btnCardAvaliacaoFisica, Permissao.AVALIACAO_FISICA_VER);
 
         permissionService.aplicarPermissao(btnDashboardCaixa, Permissao.FINANCEIRO_VER);
         permissionService.aplicarPermissao(btnDashboardEstoque, Permissao.ESTOQUE_VER);
         permissionService.aplicarPermissao(btnDashboardRelatorios, Permissao.RELATORIOS_VER);
         permissionService.aplicarPermissao(btnDashboardUsuarios, Permissao.USUARIO_GERENCIAR);
-        permissionService.aplicarPermissao(btnDashboardAvaliacaoFisica, Permissao.PACIENTE_VER);
+        permissionService.aplicarPermissao(btnDashboardAvaliacaoFisica, Permissao.AVALIACAO_FISICA_VER);
 
         permissionService.aplicarPermissao(cardFinanceiroDashboard, Permissao.FINANCEIRO_VER);
         permissionService.aplicarPermissao(cardEstoqueDashboard, Permissao.ESTOQUE_VER);
@@ -352,7 +361,9 @@ public class MainController {
             }
 
             stage.setScene(scene);
-            stage.centerOnScreen();
+            stage.setMinWidth(1200);
+            stage.setMinHeight(760);
+            stage.setMaximized(true);
 
         } catch (IOException e) {
             e.printStackTrace();

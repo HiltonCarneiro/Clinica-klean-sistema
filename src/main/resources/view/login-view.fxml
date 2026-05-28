@@ -8,96 +8,124 @@
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="br.com.clinica.controller.LoginController"
-           styleClass="login-root">
+           styleClass="login-root login-premium-root">
 
-    <HBox maxWidth="1180"
-          maxHeight="680"
-          styleClass="login-shell">
+    <VBox alignment="CENTER"
+          maxWidth="1120"
+          maxHeight="660"
+          styleClass="login-premium-shell">
 
-        <VBox spacing="18"
-              alignment="CENTER_LEFT"
-              prefWidth="520"
-              styleClass="login-left">
+        <HBox HBox.hgrow="ALWAYS"
+              VBox.vgrow="ALWAYS">
 
-            <ImageView fx:id="imgLogoLogin"
-                       fitHeight="120"
-                       preserveRatio="true"
-                       smooth="true"/>
+            <VBox spacing="22"
+                  alignment="CENTER_LEFT"
+                  prefWidth="500"
+                  styleClass="login-premium-brand-panel">
 
-            <Label text="Clínica Klean"
-                   styleClass="login-brand"/>
+                <ImageView fx:id="imgLogoLogin"
+                           fitWidth="230"
+                           preserveRatio="true"
+                           smooth="true"/>
 
-            <Label text="Sistema profissional para gestão clínica moderna, segura e intuitiva."
-                   wrapText="true"
-                   styleClass="login-brand-sub"/>
+                <VBox spacing="8">
+                    <Label text="Clínica Klean"
+                           styleClass="login-premium-brand-title"/>
 
-        </VBox>
-
-        <VBox spacing="22"
-              alignment="CENTER"
-              HBox.hgrow="ALWAYS"
-              styleClass="login-right">
-
-            <VBox spacing="6" alignment="CENTER">
-                <Label text="Bem-vindo"
-                       styleClass="login-title"/>
-
-                <Label text="Entre com suas credenciais para acessar o sistema"
-                       styleClass="page-subtitle"/>
-            </VBox>
-
-            <VBox spacing="14" maxWidth="360">
-
-                <VBox spacing="6">
-                    <Label text="Usuário"
-                           styleClass="login-label"/>
-
-                    <TextField fx:id="txtUsuario"
-                               styleClass="login-field"/>
+                    <Label text="Saúde Integrativa"
+                           styleClass="login-premium-brand-subtitle"/>
                 </VBox>
 
-                <VBox spacing="6">
-                    <Label text="Senha"
-                           styleClass="login-label"/>
+                <Region VBox.vgrow="ALWAYS"/>
 
-                    <HBox spacing="10">
+                <VBox spacing="8" styleClass="login-premium-mini-card">
+                    <Label text="Sistema de gestão clínica"
+                           styleClass="login-premium-mini-title"/>
 
-                        <PasswordField fx:id="txtSenha"
+                    <Label text="Acesso seguro ao ambiente administrativo da clínica."
+                           wrapText="true"
+                           styleClass="login-premium-mini-subtitle"/>
+                </VBox>
+            </VBox>
+
+            <VBox spacing="26"
+                  alignment="CENTER"
+                  HBox.hgrow="ALWAYS"
+                  styleClass="login-premium-form-panel">
+
+                <VBox spacing="8" alignment="CENTER">
+                    <Label text="Bem-vindo"
+                           styleClass="login-premium-title"/>
+
+                    <Label text="Entre para acessar o sistema da clínica"
+                           styleClass="login-premium-subtitle"/>
+                </VBox>
+
+                <VBox spacing="16" maxWidth="390">
+
+                    <VBox spacing="7">
+                        <Label text="Usuário"
+                               styleClass="login-label"/>
+
+                        <TextField fx:id="txtUsuario"
+                                   promptText="Digite seu usuário"
+                                   prefHeight="48"
+                                   styleClass="login-field login-premium-field"/>
+                    </VBox>
+
+                    <VBox spacing="7">
+                        <Label text="Senha"
+                               styleClass="login-label"/>
+
+                        <HBox spacing="10">
+                            <PasswordField fx:id="txtSenha"
+                                           promptText="Digite sua senha"
+                                           prefHeight="48"
+                                           HBox.hgrow="ALWAYS"
+                                           styleClass="login-field login-premium-field"/>
+
+                            <TextField fx:id="txtSenhaVisivel"
+                                       promptText="Digite sua senha"
+                                       prefHeight="48"
+                                       visible="false"
+                                       managed="false"
                                        HBox.hgrow="ALWAYS"
-                                       styleClass="login-field"/>
+                                       styleClass="login-field login-premium-field"/>
 
-                        <TextField fx:id="txtSenhaVisivel"
-                                   visible="false"
-                                   managed="false"
-                                   HBox.hgrow="ALWAYS"
-                                   styleClass="login-field"/>
+                            <Button fx:id="btnToggleSenha"
+                                    text="👁"
+                                    onAction="#onToggleSenha"
+                                    prefWidth="54"
+                                    prefHeight="48"
+                                    styleClass="login-premium-eye"/>
+                        </HBox>
+                    </VBox>
 
-                        <Button fx:id="btnToggleSenha"
-                                text="👁"
-                                onAction="#onToggleSenha"
-                                styleClass="login-eye"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <CheckBox fx:id="chkLembrarUsuario"
+                                  text="Lembrar usuário"
+                                  styleClass="login-premium-check"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
                     </HBox>
+
+                    <Label fx:id="lblErro"
+                           wrapText="true"
+                           styleClass="login-error"/>
+
+                    <Button text="Entrar no sistema"
+                            onAction="#onEntrar"
+                            defaultButton="true"
+                            maxWidth="Infinity"
+                            prefHeight="50"
+                            styleClass="login-button login-premium-button"/>
                 </VBox>
-
-                <CheckBox fx:id="chkLembrarUsuario"
-                          text="Lembrar usuário"/>
-
-                <Label fx:id="lblErro"
-                       styleClass="login-error"/>
-
-                <Button text="Entrar"
-                        onAction="#onEntrar"
-                        defaultButton="true"
-                        maxWidth="999"
-                        styleClass="login-button"/>
             </VBox>
-
-        </VBox>
-
-    </HBox>
+        </HBox>
+    </VBox>
 
     <padding>
-        <Insets top="24" right="24" bottom="24" left="24"/>
+        <Insets top="28" right="28" bottom="28" left="28"/>
     </padding>
 
 </StackPane>

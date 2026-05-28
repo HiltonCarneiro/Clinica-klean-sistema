@@ -1,344 +1,539 @@
-.root{
-    -fx-font-family: "Segoe UI";
-    -fx-background-color: #F8FAFC;
-    -fx-base: #FFFFFF;
+/* =========================================================
+   CLÍNICA KLEAN - APP.CSS GLOBAL
+   Estilo premium para sistema JavaFX/FXML
+========================================================= */
 
-    -color-primary: #2563EB;
-    -color-primary-hover: #1D4ED8;
-    -color-secondary: #14B8A6;
-    -color-bg: #F8FAFC;
+.root {
+    -fx-font-family: "Segoe UI", "Arial";
+    -fx-background-color: #F4F7F5;
+
+    -color-primary: #047857;
+    -color-primary-dark: #065F46;
+    -color-primary-soft: #ECFDF5;
+    -color-secondary: #2563EB;
+    -color-bg: #F4F7F5;
     -color-surface: #FFFFFF;
-    -color-border: #E2E8F0;
-    -color-text: #0F172A;
+    -color-border: #DDE7DF;
+    -color-text: #10231B;
     -color-muted: #64748B;
     -color-success: #16A34A;
     -color-danger: #DC2626;
+    -color-warning: #D97706;
 }
 
-/* =========================
-   BASE
-   ========================= */
+/* =========================================================
+   BASE GLOBAL
+========================================================= */
 
-.page-root{
-    -fx-background-color: #F8FAFC;
+.page-root,
+.page-clean,
+.page-content,
+.dashboard-root,
+.paciente-home-root {
+    -fx-background-color: #F4F7F5;
 }
 
-.card{
-    -fx-background-color: white;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.2, 0, 4);
+.page-scroll,
+.scroll-clean,
+.dashboard-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
-.page-title{
-    -fx-font-size: 28px;
+.page-scroll > .viewport,
+.scroll-clean > .viewport,
+.dashboard-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.page-title,
+.titulo-principal {
+    -fx-font-size: 30px;
     -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #10231B;
 }
 
-.page-subtitle{
+.page-subtitle,
+.subtitulo-principal {
     -fx-font-size: 14px;
     -fx-text-fill: #64748B;
 }
 
-.section-title{
-    -fx-font-size: 15px;
-    -fx-font-weight: 800;
-    -fx-text-fill: #0F172A;
+.section-title,
+.header-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
 }
 
-.label-muted{
+.label-muted,
+.hint-text {
+    -fx-font-size: 12px;
     -fx-text-fill: #64748B;
-    -fx-font-weight: 700;
 }
 
-/* =========================
-   BUTTONS
-   ========================= */
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #263A31;
+}
 
-.button{
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
+.card,
+.box-soft,
+.area-clean,
+.dashboard-card,
+.dashboard-panel,
+.metric-card,
+.metric-card-pro,
+.paciente-action-card,
+.paciente-info-panel,
+.clinical-summary-card,
+.permissions-box {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.08), 22, 0.18, 0, 6);
+}
+
+.card:hover,
+.dashboard-card:hover,
+.metric-card:hover,
+.metric-card-pro:hover,
+.paciente-action-card:hover {
+    -fx-border-color: #8BE2B8;
+    -fx-effect: dropshadow(gaussian, rgba(4, 120, 87, 0.15), 26, 0.22, 0, 8);
+}
+
+/* =========================================================
+   BOTÕES GLOBAIS
+========================================================= */
+
+.button {
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
     -fx-font-weight: 800;
     -fx-cursor: hand;
+    -fx-padding: 10 16;
 }
 
 .btn-primary,
-.login-button{
-    -fx-background-color: #2563EB;
+.login-button {
+    -fx-background-color: #047857;
     -fx-text-fill: white;
-    -fx-padding: 10 18;
+    -fx-border-color: transparent;
 }
 
 .btn-primary:hover,
-.login-button:hover{
-    -fx-background-color: #1D4ED8;
+.login-button:hover {
+    -fx-background-color: #065F46;
 }
 
-.btn-secondary{
-    -fx-background-color: #14B8A6;
-    -fx-text-fill: white;
-}
-
-.btn-ghost{
-    -fx-background-color: white;
-    -fx-border-color: #E2E8F0;
+.btn-secondary,
+.secondary-button {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #263A31;
 }
 
-.btn-ghost:hover{
-    -fx-background-color: #F8FAFC;
+.btn-secondary:hover,
+.secondary-button:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+    -fx-text-fill: #047857;
 }
 
-/* =========================
-   INPUTS
-   ========================= */
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-text-fill: #263A31;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.danger-button,
+.btn-danger-outline {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 1;
+    -fx-text-fill: #B91C1C;
+}
+
+.danger-button:hover,
+.btn-danger-outline:hover {
+    -fx-background-color: #FEE2E2;
+}
+
+/* =========================================================
+   CAMPOS / INPUTS
+========================================================= */
 
 .text-field,
 .password-field,
 .text-area,
 .combo-box,
-.date-picker{
-    -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
-    -fx-border-color: #E2E8F0;
+.date-picker,
+.field-clean {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
-    -fx-padding: 10 12;
+    -fx-padding: 10 13;
     -fx-font-size: 13px;
+    -fx-text-fill: #10231B;
+    -fx-prompt-text-fill: #9AA7A0;
 }
 
 .text-field:focused,
 .password-field:focused,
-.text-area:focused{
-    -fx-border-color: #2563EB;
-    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.16), 12, 0.2, 0, 0);
+.text-area:focused,
+.combo-box:focused,
+.date-picker:focused,
+.field-clean:focused {
+    -fx-border-color: #047857;
+    -fx-effect: dropshadow(gaussian, rgba(4, 120, 87, 0.18), 14, 0.20, 0, 0);
 }
 
-/* =========================
+.combo-box .list-cell {
+    -fx-text-fill: #10231B;
+}
+
+.text-area .content {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+}
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
+.table-view,
+.table-soft {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-padding: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F0FDF4;
+    -fx-background-radius: 18 18 0 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 42;
+    -fx-border-color: transparent transparent #DDE7DF transparent;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #064E3B;
+}
+
+.table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #EEF2EF transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FBFDFC;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #064E3B;
+}
+
+/* =========================================================
    LOGIN
-   ========================= */
+========================================================= */
 
-.login-root{
-    -fx-background-color: linear-gradient(to bottom right,#EFF6FF,#F8FAFC);
+.login-root {
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #F8FAFC);
 }
 
-.login-shell{
-    -fx-max-width: 1180;
-    -fx-max-height: 680;
-    -fx-background-radius: 28;
-    -fx-border-radius: 28;
-    -fx-background-color: white;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 30, 0.2, 0, 8);
+.login-shell {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 30;
+    -fx-border-radius: 30;
+    -fx-border-color: #DDE7DF;
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.15), 34, 0.22, 0, 10);
 }
 
-.login-left{
-    -fx-background-color: linear-gradient(to bottom right,#2563EB,#14B8A6);
-    -fx-background-radius: 28 0 0 28;
+.login-left {
+    -fx-background-color: linear-gradient(to bottom right, #064E3B, #047857);
+    -fx-background-radius: 30 0 0 30;
     -fx-padding: 42;
 }
 
-.login-brand{
-    -fx-font-size: 30px;
+.login-brand {
+    -fx-font-size: 32px;
     -fx-font-weight: 900;
     -fx-text-fill: white;
 }
 
-.login-brand-sub{
+.login-brand-sub {
     -fx-font-size: 15px;
-    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-text-fill: rgba(255,255,255,0.90);
 }
 
-.login-right{
+.login-right {
     -fx-padding: 42;
 }
 
-.login-title{
-    -fx-font-size: 24px;
+.login-title {
+    -fx-font-size: 26px;
     -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #10231B;
 }
 
-.login-label{
+.login-label {
     -fx-font-size: 13px;
     -fx-font-weight: 800;
-    -fx-text-fill: #334155;
+    -fx-text-fill: #263A31;
 }
 
-.login-field{
-    -fx-pref-height: 44;
+.login-field {
+    -fx-pref-height: 46;
 }
 
-.login-eye{
-    -fx-background-color: white;
-    -fx-border-color: #E2E8F0;
+.login-eye {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
 }
 
-.login-error{
+.login-error {
     -fx-text-fill: #DC2626;
     -fx-font-size: 12px;
     -fx-font-weight: 800;
 }
 
-/* =========================
-   MAIN
-   ========================= */
+/* =========================================================
+   MAIN VIEW - TOPO
+========================================================= */
 
-.main-root{
-    -fx-background-color: #F8FAFC;
+.main-root {
+    -fx-background-color: #F4F7F5;
 }
 
-.sidebar{
-    -fx-background-color: white;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 0 1 0 0;
-    -fx-padding: 20 16;
+.top-menu-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 0 0 1 0;
 }
 
-.sidebar-title{
+.main-topbar,
+.main-header,
+.top-clean {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 0 0 1 0;
+}
+
+.main-topbar-title {
     -fx-font-size: 18px;
     -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #10231B;
 }
 
-.sidebar-sub{
+.main-topbar-subtitle {
+    -fx-font-size: 12px;
     -fx-text-fill: #64748B;
 }
 
-.sidebar-btn{
+.label-topo {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748B;
+    -fx-font-weight: 700;
+}
+
+.usuario-topo {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.perfil-topo {
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #047857;
+}
+
+/* =========================================================
+   SIDEBAR MODERNA
+========================================================= */
+
+.sidebar,
+.sidebar-modern {
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #F7FAF8);
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-brand-card {
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #EAF7EF);
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #BDECCF;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(4, 120, 87, 0.10), 18, 0.18, 0, 4);
+}
+
+.sidebar-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #064E3B;
+}
+
+.sidebar-sub {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #047857;
+}
+
+.sidebar-section-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #8A9B92;
+    -fx-padding: 8 0 2 4;
+}
+
+.sidebar .button,
+.sidebar-modern .button,
+.sidebar-btn,
+.menu-button,
+.sidebar-nav-button {
     -fx-background-color: transparent;
+    -fx-background-image: none;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
     -fx-text-fill: #334155;
+    -fx-font-size: 13px;
     -fx-font-weight: 800;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 12 14;
-}
-
-.sidebar-btn:hover{
-    -fx-background-color: #EFF6FF;
-    -fx-text-fill: #2563EB;
-}
-
-.topbar{
-    -fx-background-color: white;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 14 20;
-}
-
-.dashboard-card{
-    -fx-background-color: white;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-border-color: #E2E8F0;
-    -fx-padding: 22;
-    -fx-pref-width: 260;
-    -fx-pref-height: 120;
-    -fx-cursor: hand;
-}
-
-.dashboard-card:hover{
-    -fx-background-color: #F8FAFC;
-    -fx-border-color: #BFDBFE;
-}
-
-.card-title{
-    -fx-font-size: 16px;
-    -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
-}
-
-.card-desc{
-    -fx-text-fill: #64748B;
-    -fx-font-size: 12px;
-}
-
-/* =========================
-   TABLES
-   ========================= */
-
-.table-view{
-    -fx-background-color: white;
-    -fx-border-color: #E2E8F0;
-    -fx-border-radius: 16;
+    -fx-padding: 12 16;
     -fx-background-radius: 16;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
+    -fx-border-radius: 16;
+    -fx-effect: none;
 }
 
-.table-view .column-header-background{
+.sidebar .button:hover,
+.sidebar-modern .button:hover,
+.sidebar-btn:hover,
+.menu-button:hover,
+.sidebar-nav-button:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.sidebar-nav-featured {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #047857;
+    -fx-border-color: #86EFAC;
+    -fx-border-width: 1;
+}
+
+.sidebar-separator {
+    -fx-padding: 8 0;
+}
+
+.sidebar-small-button {
     -fx-background-color: #F8FAFC;
-    -fx-background-radius: 16 16 0 0;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-text-fill: #334155;
+    -fx-alignment: CENTER;
 }
 
-.table-view .column-header{
-    -fx-background-color: transparent;
+.sidebar-home-button {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+    -fx-border-width: 1;
+    -fx-text-fill: #047857;
+    -fx-alignment: CENTER;
 }
 
-.table-view .column-header .label{
-    -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+.sidebar-exit-button {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 1;
+    -fx-text-fill: #B91C1C;
+    -fx-alignment: CENTER;
 }
 
-.table-row-cell:filled:hover{
-    -fx-background-color: #F8FAFC;
-}
+/* =========================================================
+   DASHBOARD PRINCIPAL
+========================================================= */
 
-.table-row-cell:filled:selected{
-    -fx-background-color: #DBEAFE;
-}
-
-.table-row-cell:filled:selected .table-cell{
-    -fx-text-fill: #0F172A;
-}
-.dashboard-scroll {
-    -fx-background-color: transparent;
-}
-
-.dashboard-scroll > .viewport {
-    -fx-background-color: transparent;
+.main-content-shell {
+    -fx-background-color: #F4F7F5;
 }
 
 .dashboard-root {
-    -fx-background-color: #F8FAFC;
+    -fx-background-color: #F4F7F5;
 }
 
+.dashboard-badge,
+.dashboard-badge-admin {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-background-radius: 999;
+    -fx-border-color: #BDECCF;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+.metric-card-pro,
+.dashboard-card,
 .metric-card {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 18;
-    -fx-border-radius: 18;
-    -fx-border-color: #E2E8F0;
+    -fx-background-radius: 26;
+    -fx-border-radius: 26;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
-    -fx-padding: 20;
-    -fx-pref-width: 245;
-    -fx-min-height: 128;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 16, 0.2, 0, 4);
+    -fx-padding: 24;
+    -fx-min-height: 145;
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.10), 24, 0.18, 0, 7);
 }
 
+.metric-card-pro:hover,
+.dashboard-card:hover,
 .metric-card:hover {
-    -fx-border-color: #BFDBFE;
-    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.10), 20, 0.22, 0, 6);
+    -fx-border-color: #86EFAC;
+    -fx-effect: dropshadow(gaussian, rgba(4, 120, 87, 0.18), 28, 0.22, 0, 9);
 }
 
-.metric-card-admin {
-    -fx-border-color: #C7D2FE;
-}
-
+.dashboard-card-title,
 .metric-title {
     -fx-font-size: 13px;
     -fx-font-weight: 900;
     -fx-text-fill: #64748B;
 }
 
+.dashboard-card-value,
 .metric-value {
-    -fx-font-size: 20px;
+    -fx-font-size: 31px;
     -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #10231B;
 }
 
+.dashboard-card-sub,
 .metric-desc {
     -fx-font-size: 12px;
     -fx-text-fill: #64748B;
@@ -346,640 +541,1198 @@
 
 .dashboard-panel {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-border-color: #E2E8F0;
+    -fx-background-radius: 26;
+    -fx-border-radius: 26;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.05), 16, 0.2, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.08), 24, 0.18, 0, 7);
 }
 
-.dashboard-admin-panel {
-    -fx-border-color: #C7D2FE;
-    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F8FAFC);
+.dashboard-panel-padded {
+    -fx-padding: 24;
 }
 
-.dashboard-action {
-    -fx-background-color: #EFF6FF;
-    -fx-text-fill: #1E3A8A;
-    -fx-font-weight: 900;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
-    -fx-border-color: #BFDBFE;
-    -fx-border-width: 1;
-    -fx-pref-width: 190;
-    -fx-pref-height: 58;
-    -fx-cursor: hand;
+.dashboard-admin-panel,
+.metric-card-admin {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F0FDF4);
+    -fx-border-color: #BDECCF;
 }
 
-.dashboard-action:hover {
-    -fx-background-color: #DBEAFE;
-    -fx-border-color: #2563EB;
-}
-
-.dashboard-badge {
-    -fx-background-color: #ECFDF5;
-    -fx-text-fill: #047857;
-    -fx-font-weight: 900;
-    -fx-padding: 6 12;
-    -fx-background-radius: 999;
-}
-
-.dashboard-badge-admin {
-    -fx-background-color: #EEF2FF;
-    -fx-text-fill: #4338CA;
-    -fx-font-weight: 900;
-    -fx-padding: 7 14;
-    -fx-background-radius: 999;
+.activity-text,
+.audit-log-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #334155;
+    -fx-line-spacing: 5;
 }
 
 .activity-text {
-    -fx-font-size: 13px;
-    -fx-text-fill: #334155;
-    -fx-font-weight: 700;
-}
-
-.admin-mini-card {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-    -fx-padding: 16;
-    -fx-pref-width: 260;
-}
-/* =========================
-   AGENDA
-   ========================= */
-
-.form-label{
-    -fx-font-size: 13px;
     -fx-font-weight: 800;
-    -fx-text-fill: #334155;
 }
 
-.top-clean{
-    -fx-background-color: transparent;
-}
-
-.page-center{
-    -fx-background-color: transparent;
-}
-
-.page-content{
-    -fx-max-width: 1320;
-}
-
-.page-scroll{
-    -fx-background-color: transparent;
-}
-
-.page-scroll > .viewport{
-    -fx-background-color: transparent;
-}
-
-.dashboard-panel{
+.dashboard-action {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-    -fx-border-color: #E2E8F0;
+    -fx-background-image: none;
+    -fx-border-color: #BDECCF;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.2, 0, 4);
-}
-
-.table-soft{
-    -fx-background-color: white;
+    -fx-text-fill: #065F46;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
     -fx-background-radius: 18;
     -fx-border-radius: 18;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
+    -fx-pref-height: 50;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 18;
+    -fx-effect: none;
 }
 
-.table-soft .column-header-background{
-    -fx-background-color: #F8FAFC;
-    -fx-background-radius: 18 18 0 0;
+.dashboard-action:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #34D399;
 }
 
-.table-soft .column-header{
-    -fx-background-color: transparent;
-}
-
-.table-soft .column-header .label{
-    -fx-font-size: 13px;
-    -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
-}
-
-.table-soft .table-row-cell{
-    -fx-cell-size: 46px;
-}
-
-.table-soft .table-row-cell:hover{
-    -fx-background-color: #F8FAFC;
-}
-
-.table-soft .table-row-cell:selected{
-    -fx-background-color: #DBEAFE;
-}
-
-.table-soft .table-row-cell:selected .table-cell{
-    -fx-text-fill: #0F172A;
-}
-
-.hint-text{
-    -fx-font-size: 12px;
-    -fx-text-fill: #64748B;
-}
-
-.area-clean{
-    -fx-background-color: white;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-}
-/* =========================
-   ANAMNESE / ATENDIMENTO
-   ========================= */
-
-.anamnese-header {
-    -fx-background-color: #F8FAFC;
-}
-
-.clinical-summary-card {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.05), 16, 0.2, 0, 4);
-}
-
-.clinical-info-value {
-    -fx-font-size: 13px;
-    -fx-font-weight: 800;
-    -fx-text-fill: #0F172A;
-}
-
-.anamnese-tabs .tab-header-area {
-    -fx-padding: 8 26 0 26;
-}
-
-.anamnese-tab-content {
-    -fx-background-color: #F8FAFC;
-}
-
-.unit-label {
-    -fx-background-color: #EFF6FF;
-    -fx-text-fill: #1D4ED8;
-    -fx-font-weight: 900;
-    -fx-font-size: 12px;
-    -fx-padding: 8 10;
-    -fx-background-radius: 999;
-    -fx-alignment: CENTER;
-}
-
-.clinical-checks .check-box {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-    -fx-background-radius: 999;
-    -fx-border-radius: 999;
-    -fx-padding: 7 10;
-}
-
-.clinical-checks .check-box:selected {
-    -fx-background-color: #EFF6FF;
-    -fx-border-color: #93C5FD;
-}
-.btn-close-clean{
-    -fx-background-color: #FEF2F2;
-    -fx-text-fill: #DC2626;
-    -fx-font-weight: 800;
-    -fx-background-radius: 999;
-    -fx-padding: 8 14;
-    -fx-cursor: hand;
-}
-
-.btn-close-clean:hover{
-    -fx-background-color: #FEE2E2;
-}
-/* =========================
-   FINANCEIRO / CAIXA
-   ========================= */
-
-.finance-total-value {
-    -fx-font-size: 30px;
-    -fx-font-weight: 900;
-    -fx-text-fill: #2563EB;
-}
-
-.finance-positive {
-    -fx-text-fill: #16A34A;
-}
-
-.finance-negative {
-    -fx-text-fill: #DC2626;
-}
-/* =========================
-   TABS MODERNAS / RELATÓRIOS
-   ========================= */
-
-.tabs-clean {
-    -fx-background-color: #F8FAFC;
-    -fx-tab-min-height: 42px;
-}
-
-.tabs-clean .tab-header-area {
-    -fx-padding: 0 28 0 28;
-}
-
-.tabs-clean .tab-header-background {
-    -fx-background-color: #F8FAFC;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 0 0 1 0;
-}
-
-.tabs-clean .headers-region {
-    -fx-background-color: #EEF2FF;
-    -fx-background-radius: 999;
-    -fx-padding: 5;
-}
-
-.tabs-clean .tab {
-    -fx-background-color: transparent;
-    -fx-background-radius: 999;
-    -fx-border-radius: 999;
-    -fx-padding: 8 18;
-}
-
-.tabs-clean .tab:selected {
-    -fx-background-color: #2563EB;
-}
-
-.tabs-clean .tab .tab-label {
-    -fx-text-fill: #334155;
-    -fx-font-size: 13px;
-    -fx-font-weight: 800;
-}
-
-.tabs-clean .tab:selected .tab-label {
+.dashboard-action-featured {
+    -fx-background-color: #047857;
+    -fx-border-color: #047857;
     -fx-text-fill: white;
 }
 
-.tabs-clean .tab:hover {
-    -fx-background-color: #DBEAFE;
-}
-
-.tabs-clean .tab:selected:hover {
-    -fx-background-color: #1D4ED8;
-}
-
-.tabs-clean .tab-content-area {
-    -fx-background-color: #F8FAFC;
-}
-/* =========================================================
-   TABPANE MODERNO
-========================================================= */
-
-.tab-pane {
-    -fx-background-color: transparent;
-    -fx-padding: 0;
-}
-
-.tab-pane .tab-header-area {
-    -fx-padding: 0 0 15 0;
-}
-
-.tab-pane .tab-header-background {
-    -fx-background-color: transparent;
-}
-
-.tab-pane .headers-region {
-    -fx-background-color: transparent;
+.dashboard-action-featured:hover {
+    -fx-background-color: #065F46;
 }
 
 /* =========================================================
-   ABAS
+   PACIENTES
 ========================================================= */
-
-.tab {
-    -fx-background-color: #F3F6FB;
-    -fx-background-radius: 12 12 0 0;
-    -fx-padding: 8 18;
-    -fx-cursor: hand;
-    -fx-border-width: 0;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.tab:selected {
-    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
-}
-
-.tab:hover {
-    -fx-background-color: #E4ECFF;
-}
-
-.tab:selected:hover {
-    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
-}
-
-/* =========================================================
-   TEXTO DAS ABAS
-========================================================= */
-
-.tab .tab-label {
-    -fx-text-fill: #64748B;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
-
-.tab:selected .tab-label {
-    -fx-text-fill: white;
-}
-
-/* =========================================================
-   AREA INTERNA
-========================================================= */
-
-.tab-pane .tab-content-area {
-    -fx-background-color: white;
-    -fx-background-radius: 18;
-    -fx-border-color: #E2E8F0;
-    -fx-border-radius: 18;
-    -fx-padding: 25;
-}
-
-/* =========================================================
-   BOTÕES MODERNOS
-========================================================= */
-
-.button {
-    -fx-background-radius: 14;
-    -fx-cursor: hand;
-    -fx-font-weight: 600;
-}
-
-.button:hover {
-    -fx-opacity: 0.92;
-}
-
-/* BOTÃO AZUL */
-
-.btn-primary {
-    -fx-background-color: linear-gradient(to right, #2563EB, #3B82F6);
-    -fx-text-fill: white;
-}
-
-/* BOTÃO VERDE */
-
-.btn-success {
-    -fx-background-color: linear-gradient(to right, #10B981, #34D399);
-    -fx-text-fill: white;
-}
-
-/* BOTÃO CINZA */
-
-.btn-secondary {
-    -fx-background-color: #F1F5F9;
-    -fx-text-fill: #334155;
-}
-/* =========================================================
-   PACIENTES - HOME PROFISSIONAL
-========================================================= */
-
-.paciente-home-root {
-    -fx-background-color: linear-gradient(to bottom, #F8FAFC, #EEF2F7);
-}
 
 .paciente-hero {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 24;
-    -fx-border-radius: 24;
-    -fx-border-color: #E2E8F0;
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #FFFFFF);
+    -fx-background-radius: 28;
+    -fx-border-radius: 28;
+    -fx-border-color: #BDECCF;
     -fx-border-width: 1;
-    -fx-padding: 24 28;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.22, 0, 5);
+    -fx-padding: 28;
 }
 
 .paciente-hero-icon {
-    -fx-min-width: 56;
-    -fx-min-height: 56;
-    -fx-background-color: linear-gradient(to bottom right, #DBEAFE, #CCFBF1);
-    -fx-background-radius: 18;
-    -fx-text-fill: #2563EB;
+    -fx-background-color: #047857;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
     -fx-font-size: 24px;
     -fx-font-weight: 900;
 }
 
 .paciente-metric-card {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-border-color: #E2E8F0;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
     -fx-padding: 20;
-    -fx-min-height: 126;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.05), 14, 0.18, 0, 4);
-}
-
-.paciente-metric-card:hover {
-    -fx-border-color: #BFDBFE;
-    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.12), 20, 0.22, 0, 6);
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.08), 18, 0.18, 0, 5);
 }
 
 .paciente-metric-card-highlight {
-    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #EFF6FF);
-    -fx-border-color: #BFDBFE;
-}
-
-.paciente-action-card {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 24;
-    -fx-border-radius: 24;
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1;
-    -fx-padding: 26;
-    -fx-min-height: 230;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.22, 0, 5);
-}
-
-.paciente-action-card:hover {
-    -fx-border-color: #93C5FD;
-    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.14), 24, 0.25, 0, 8);
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
 }
 
 .paciente-action-title {
-    -fx-font-size: 18px;
+    -fx-font-size: 15px;
     -fx-font-weight: 900;
-    -fx-text-fill: #0F172A;
+    -fx-text-fill: #10231B;
 }
 
 .paciente-action-desc {
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-text-fill: #64748B;
-    -fx-line-spacing: 3;
 }
 
-.paciente-info-panel {
-    -fx-background-color: linear-gradient(to bottom right, #ECFEFF, #EFF6FF);
-    -fx-background-radius: 24;
-    -fx-border-radius: 24;
-    -fx-border-color: #BAE6FD;
-    -fx-border-width: 1;
-    -fx-padding: 26;
-    -fx-min-height: 230;
-    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.10), 18, 0.2, 0, 5);
-}
 /* =========================================================
-   CARD AUDITORIA
+   AVALIAÇÃO FÍSICA / ÁREAS CLÍNICAS
 ========================================================= */
 
-.audit-log-card {
-    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F8FAFC);
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-    -fx-border-color: #E2E8F0;
+.field-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #263A31;
+}
+
+.unit-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748B;
+    -fx-font-weight: 700;
+}
+
+.resultado-label,
+.total-label,
+.finance-total-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #047857;
+}
+
+.status-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-padding: 6 12;
+    -fx-background-radius: 999;
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.clinical-checks {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-padding: 14;
+}
+
+.clinical-info-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.info-grid {
+    -fx-hgap: 14;
+    -fx-vgap: 14;
+}
+
+/* =========================================================
+   ABAS
+========================================================= */
+
+.tab-pane,
+.modern-tab-pane,
+.tabs-clean,
+.anamnese-tabs {
+    -fx-background-color: transparent;
+    -fx-tab-min-height: 42;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14 14 0 0;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1 1 0 1;
+    -fx-border-radius: 14 14 0 0;
+    -fx-padding: 8 16;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #334155;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #047857;
+}
+
+.tab-body,
+.anamnese-tab-content {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 0 22 22 22;
+    -fx-border-radius: 0 22 22 22;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-padding: 22;
+}
+
+/* =========================================================
+   ANAMNESE
+========================================================= */
+
+.anamnese-header {
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #FFFFFF);
+    -fx-background-radius: 26;
+    -fx-border-radius: 26;
+    -fx-border-color: #BDECCF;
     -fx-border-width: 1;
     -fx-padding: 24;
 }
 
-.audit-log-text {
+/* =========================================================
+   FINANCEIRO
+========================================================= */
+
+.finance-positive {
+    -fx-text-fill: #16A34A;
+    -fx-font-weight: 900;
+}
+
+.finance-negative {
+    -fx-text-fill: #DC2626;
+    -fx-font-weight: 900;
+}
+
+/* =========================================================
+   JANELAS / FECHAR
+========================================================= */
+
+.btn-close-clean {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 1;
+    -fx-text-fill: #B91C1C;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-font-weight: 900;
+}
+
+.btn-close-clean:hover {
+    -fx-background-color: #FEE2E2;
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+}
+
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 10;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #B7C8BF;
+    -fx-background-radius: 999;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #047857;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* =========================================================
+   AJUSTES FINAIS PARA EVITAR ESTILO ANTIGO DO JAVAFX
+========================================================= */
+
+.sidebar-modern .button,
+.sidebar-modern .menu-button,
+.sidebar-modern .sidebar-nav-button {
+    -fx-background-image: none;
+    -fx-effect: none;
+}
+
+.dashboard-root .button {
+    -fx-background-image: none;
+}
+
+.separator .line {
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1 0 0 0;
+}
+/* =========================================================
+   ADMIN DASHBOARD PREMIUM
+========================================================= */
+
+.main-admin-root {
+    -fx-background-color: #F4F7F7;
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.admin-topbar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E4ECE7;
+    -fx-border-width: 0 0 1 0;
+}
+
+.admin-top-icon-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #334155;
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 999;
+    -fx-padding: 8 12;
+}
+
+.admin-top-icon-button:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.admin-top-home-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #047857;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+}
+
+.admin-user-avatar {
+    -fx-background-color: #EEF2F7;
+    -fx-background-radius: 999;
+    -fx-padding: 10;
+    -fx-font-size: 18px;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.admin-sidebar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E5ECE8;
+    -fx-border-width: 0 1 0 0;
+}
+
+.admin-sidebar-brand {
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #F5FAF7);
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #BFE7CF;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+}
+
+.admin-sidebar-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.admin-sidebar-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B;
+    -fx-font-weight: 700;
+}
+
+.admin-nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 13 16;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.admin-nav-button:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.admin-nav-active {
+    -fx-background-color: #DCFCE7;
+    -fx-border-color: #86EFAC;
+    -fx-border-width: 1;
+    -fx-text-fill: #047857;
+}
+
+.admin-exit-button {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 1;
+    -fx-text-fill: #B91C1C;
+    -fx-font-weight: 900;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.admin-exit-button:hover {
+    -fx-background-color: #FEE2E2;
+}
+
+/* =========================================================
+   DASHBOARD ROOT
+========================================================= */
+
+.admin-dashboard-root {
+    -fx-background-color: #F4F7F7;
+}
+
+.admin-date-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #E4ECE7;
+    -fx-border-width: 1;
+    -fx-padding: 14 18;
+}
+
+/* =========================================================
+   CARDS PRINCIPAIS
+========================================================= */
+
+.admin-metric-card,
+.admin-panel-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: #E4ECE7;
+    -fx-border-width: 1;
+    -fx-padding: 22;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 24, 0.18, 0, 6);
+}
+
+.admin-metric-card:hover,
+.admin-panel-card:hover {
+    -fx-border-color: #9AE6B4;
+    -fx-effect: dropshadow(gaussian, rgba(4,120,87,0.14), 28, 0.20, 0, 8);
+}
+
+.admin-card-icon {
+    -fx-background-radius: 999;
+    -fx-padding: 12;
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+}
+
+.admin-card-icon.green {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #15803D;
+}
+
+.admin-card-icon.blue {
+    -fx-background-color: #DBEAFE;
+    -fx-text-fill: #2563EB;
+}
+
+.admin-card-icon.orange {
+    -fx-background-color: #FEF3C7;
+    -fx-text-fill: #D97706;
+}
+
+.green-text {
+    -fx-text-fill: #15803D;
+}
+
+/* =========================================================
+   MINI ACTION
+========================================================= */
+
+.admin-mini-action {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 999;
+    -fx-padding: 6 12;
+}
+
+.admin-mini-action:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.admin-empty-state {
+    -fx-min-height: 150;
+}
+
+.admin-empty-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #334155;
+}
+
+.admin-empty-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+    -fx-text-alignment: center;
+}
+
+/* =========================================================
+   CIRCLE INDICATOR
+========================================================= */
+
+.admin-circle-indicator {
+    -fx-min-width: 160;
+    -fx-min-height: 160;
+    -fx-max-width: 160;
+    -fx-max-height: 160;
+
+    -fx-background-color: white;
+    -fx-border-color: #BBF7D0;
+    -fx-border-width: 8;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+}
+
+.admin-circle-value {
+    -fx-font-size: 38px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.admin-status-line {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.admin-status-line.success {
+    -fx-text-fill: #16A34A;
+}
+
+.admin-status-line.warning {
+    -fx-text-fill: #D97706;
+}
+
+.admin-status-line.danger {
+    -fx-text-fill: #DC2626;
+}
+
+.blue-text {
+    -fx-text-fill: #2563EB;
+}
+
+/* =========================================================
+   FINANCEIRO
+========================================================= */
+
+.admin-finance-box {
+    -fx-background-color: #FAFCFB;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #E5ECE8;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.admin-finance-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.admin-balance-value {
+    -fx-font-size: 38px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #15803D;
+}
+
+.admin-chart-icon {
+    -fx-font-size: 20px;
+    -fx-text-fill: #64748B;
+}
+
+/* =========================================================
+   ESTOQUE
+========================================================= */
+
+.admin-stock-box {
+    -fx-background-color: #FAFCFB;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #E5ECE8;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+}
+
+/* =========================================================
+   AUDITORIA
+========================================================= */
+
+.admin-audit-preview {
     -fx-font-size: 13px;
     -fx-text-fill: #475569;
     -fx-line-spacing: 6;
 }
-.custom-dialog {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+
+.admin-small-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.admin-small-link:hover {
+    -fx-text-fill: #047857;
+}
+
+/* =========================================================
+   SHORTCUTS
+========================================================= */
+
+.admin-modules-panel {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F5FBF7);
+}
+
+.admin-dashboard-shortcut {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-padding: 16;
 }
 
-.custom-dialog > *.button-bar > *.container {
-    -fx-background-color: #ffffff;
-    -fx-padding: 0 20 18 20;
+.admin-dashboard-shortcut:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+    -fx-text-fill: #047857;
 }
 
-.custom-dialog .content {
+.admin-dashboard-shortcut.featured {
+    -fx-background-color: #047857;
+    -fx-text-fill: white;
+    -fx-border-color: #047857;
+}
+
+.admin-dashboard-shortcut.featured:hover {
+    -fx-background-color: #065F46;
+}
+
+/* =========================================================
+   TITLES
+========================================================= */
+
+.page-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.page-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748B;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.dashboard-card-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #64748B;
+}
+
+.dashboard-card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.dashboard-card-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B;
+}
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #C9D8D0;
+    -fx-background-radius: 999;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #047857;
+}
+/* =========================================================
+   AJUSTE TOPBAR - SETAS E BOTÃO INÍCIO
+========================================================= */
+
+.admin-top-icon-button {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
+.admin-top-icon-button:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+    -fx-text-fill: #047857;
+}
+
+.admin-top-home-button {
+    -fx-background-color: #047857;
+    -fx-border-color: #047857;
+    -fx-border-width: 1;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-min-height: 42;
+    -fx-padding: 0 22;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
+.admin-top-home-button:hover {
+    -fx-background-color: #065F46;
+    -fx-border-color: #065F46;
+}
+/* =========================================================
+   LOGIN PREMIUM - CLÍNICA KLEAN
+========================================================= */
+
+.login-premium-root {
+    -fx-background-color: linear-gradient(to bottom right, #ECFDF5, #F8FAFC);
+}
+
+.login-premium-shell {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 34;
+    -fx-border-radius: 34;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 35, 27, 0.18), 40, 0.22, 0, 12);
+}
+
+.login-premium-brand-panel {
+    -fx-background-color: linear-gradient(to bottom right, #064E3B, #047857);
+    -fx-background-radius: 34 0 0 34;
+    -fx-padding: 56;
+}
+
+.login-premium-brand-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.login-premium-brand-subtitle {
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #D1FAE5;
+}
+
+.login-premium-mini-card {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-width: 1;
+    -fx-padding: 18;
+}
+
+.login-premium-mini-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.login-premium-mini-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #D1FAE5;
+}
+
+.login-premium-form-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 0 34 34 0;
+    -fx-padding: 56;
+}
+
+.login-premium-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #10231B;
+}
+
+.login-premium-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748B;
+}
+
+.login-premium-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-size: 14px;
+    -fx-padding: 0 16;
+}
+
+.login-premium-field:focused {
+    -fx-border-color: #047857;
+    -fx-effect: dropshadow(gaussian, rgba(4,120,87,0.18), 14, 0.2, 0, 0);
+}
+
+.login-premium-eye {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-size: 14px;
+}
+
+.login-premium-eye:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+}
+
+.login-premium-check {
+    -fx-font-size: 13px;
+    -fx-text-fill: #334155;
+}
+
+.login-premium-button {
+    -fx-background-color: #047857;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.login-premium-button:hover {
+    -fx-background-color: #065F46;
+}
+/* =========================================================
+   ANAMNESE PREMIUM FIX
+========================================================= */
+
+.anamnese-scroll {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.anamnese-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.anamnese-tabs {
+    -fx-tab-min-height: 52;
+}
+
+.anamnese-tabs .tab {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18 18 0 0;
+    -fx-border-radius: 18 18 0 0;
+
+    -fx-padding: 12 22;
+
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1 1 0 1;
+}
+
+.anamnese-tabs .tab:selected {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #86EFAC;
+}
+
+.anamnese-tabs .tab .tab-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+}
+
+.anamnese-tab-content {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.compact-clinical-header {
+    -fx-background-color: white;
+
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.06), 18, 0.16, 0, 4);
+}
+
+.anamnese-header {
+    -fx-padding: 14 20 12 20;
+}
+
+.dashboard-panel {
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+
+    -fx-padding: 4;
+
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.05), 16, 0.15, 0, 3);
+}
+
+.text-area {
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+}
+
+.text-area .content {
+    -fx-background-radius: 18;
+}
+
+.clinical-checks {
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+
+    -fx-padding: 16;
+}
+
+.page-scroll {
+    -fx-padding: 0;
+}
+/* =========================================================
+   AGENDA ACTION BAR
+========================================================= */
+
+.agenda-action-bar {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-padding: 12 14;
+}
+/* =========================================================
+   AGENDA - LINHA SELECIONADA DA TABELA
+========================================================= */
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #047857;
+    -fx-text-background-color: #FFFFFF;
+}
+
+.table-view .table-row-cell:selected .text {
+    -fx-fill: #FFFFFF;
+}
+
+.table-view .table-row-cell:selected:hover {
+    -fx-background-color: #065F46;
+}
+
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #ECFDF5;
+}
+
+.table-view .table-row-cell:filled:hover .text {
+    -fx-fill: #064E3B;
+}
+
+/* Mantém o texto branco quando estiver selecionado mesmo passando o mouse */
+.table-view .table-row-cell:selected:hover .text {
+    -fx-fill: #FFFFFF;
+}
+/* =========================================================
+   AGENDA - DATEPICKER E COMBOBOX CLEAN
+========================================================= */
+
+.date-picker,
+.combo-box {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
     -fx-padding: 0;
 }
 
-.dialog-title {
-    -fx-font-size: 17px;
-    -fx-font-weight: 800;
-    -fx-text-fill: #111827;
+.date-picker:hover,
+.combo-box:hover {
+    -fx-border-color: #A7F3D0;
 }
 
-.dialog-message {
+.date-picker:focused,
+.combo-box:focused {
+    -fx-border-color: #047857;
+    -fx-effect: dropshadow(gaussian, rgba(4,120,87,0.14), 12, 0.20, 0, 0);
+}
+
+.date-picker .text-field,
+.combo-box .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: none;
+    -fx-padding: 0 14;
+    -fx-pref-height: 44;
+}
+
+.date-picker .arrow-button,
+.combo-box .arrow-button {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 0 18 18 0;
+    -fx-border-color: transparent;
+    -fx-padding: 0 13;
+    -fx-pref-width: 42;
+}
+
+.date-picker .arrow-button:hover,
+.combo-box .arrow-button:hover {
+    -fx-background-color: #ECFDF5;
+}
+
+.date-picker .arrow-button .arrow,
+.combo-box .arrow-button .arrow {
+    -fx-background-color: #64748B;
+}
+
+.date-picker .arrow-button:hover .arrow,
+.combo-box .arrow-button:hover .arrow {
+    -fx-background-color: #047857;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #10231B;
     -fx-font-size: 13px;
-    -fx-text-fill: #4b5563;
-    -fx-line-spacing: 3px;
+    -fx-padding: 0 14;
 }
 
-.dialog-icon {
-    -fx-min-width: 52px;
-    -fx-min-height: 52px;
-    -fx-max-width: 52px;
-    -fx-max-height: 52px;
-    -fx-alignment: center;
-    -fx-font-size: 26px;
-    -fx-font-weight: 900;
-    -fx-background-radius: 999px;
+.combo-box-popup .list-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 18, 0.20, 0, 6);
 }
 
-.dialog-icon-confirm {
-    -fx-background-color: #ede9fe;
-    -fx-text-fill: #6d28d9;
+.combo-box-popup .list-view .list-cell {
+    -fx-padding: 10 14;
+    -fx-text-fill: #10231B;
 }
 
-.dialog-icon-success {
-    -fx-background-color: #dcfce7;
-    -fx-text-fill: #15803d;
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
 }
 
-.dialog-icon-error {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #b91c1c;
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #047857;
 }
 
-.dialog-icon-warning {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #b45309;
-}
+/* Calendário aberto do DatePicker */
 
-.dialog-button-primary {
-    -fx-background-color: #6d28d9;
-    -fx-text-fill: white;
-    -fx-font-weight: 700;
-    -fx-background-radius: 10px;
-    -fx-padding: 8 18;
-    -fx-cursor: hand;
-}
-
-.dialog-button-primary:hover {
-    -fx-background-color: #5b21b6;
-}
-
-.dialog-button-secondary {
-    -fx-background-color: #f3f4f6;
-    -fx-text-fill: #374151;
-    -fx-font-weight: 700;
-    -fx-background-radius: 10px;
-    -fx-padding: 8 18;
-    -fx-cursor: hand;
-}
-
-.dialog-button-secondary:hover {
-    -fx-background-color: #e5e7eb;
-}
-.dialog-icon-info {
-    -fx-background-color: #dbeafe;
-    -fx-text-fill: #2563eb;
-}
-.avaliacao-result-card {
-    -fx-background-color: white;
+.date-picker-popup {
+    -fx-background-color: #FFFFFF;
     -fx-background-radius: 18;
     -fx-border-radius: 18;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #DDE7DF;
     -fx-border-width: 1;
-    -fx-padding: 18 18 18 18;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 16, 0.15, 0, 4);
-    -fx-min-height: 135;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.15), 24, 0.22, 0, 8);
 }
 
-.avaliacao-result-title {
-    -fx-font-size: 13px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #64748b;
+.date-picker-popup .month-year-pane {
+    -fx-background-color: #ECFDF5;
+    -fx-background-radius: 18 18 0 0;
 }
 
-.avaliacao-result-value {
-    -fx-font-size: 30px;
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #064E3B;
     -fx-font-weight: 900;
-    -fx-text-fill: #0f172a;
 }
 
-.avaliacao-result-subtitle {
-    -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 999;
 }
 
-.result-imc {
-    -fx-border-color: #bfdbfe;
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: #DCFCE7;
 }
 
-.result-gordura {
-    -fx-border-color: #fecaca;
+.date-picker-popup .day-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #10231B;
+    -fx-font-weight: 700;
 }
 
-.result-massa-magra {
-    -fx-border-color: #bbf7d0;
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
 }
 
-.result-massa-gorda {
-    -fx-border-color: #fed7aa;
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #047857;
+    -fx-text-fill: white;
 }
 
-.result-rcq {
-    -fx-border-color: #ddd6fe;
+.date-picker-popup .today {
+    -fx-border-color: #047857;
+    -fx-border-width: 1;
+}
+/* =========================================================
+   CAIXA - OPÇÕES PRODUTO / PROCEDIMENTO
+========================================================= */
+
+.caixa-radio-toggle {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #DDE7DF;
+    -fx-border-width: 1;
+    -fx-padding: 8;
+}
+
+.caixa-radio-option {
+    -fx-background-color: transparent;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-padding: 10 18;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #334155;
+}
+
+.caixa-radio-option:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #047857;
+}
+
+.caixa-radio-option:selected {
+    -fx-background-color: #047857;
+    -fx-text-fill: white;
+}
+
+.caixa-radio-option .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.caixa-radio-option .dot {
+    -fx-background-color: transparent;
 }

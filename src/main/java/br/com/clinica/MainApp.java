@@ -23,7 +23,7 @@ public class MainApp extends Application {
 
         //carrega tela de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login-view.fxml"));
-        Scene scene = new Scene(loader.load(), 900, 560);
+        Scene scene = new Scene(loader.load(), 980, 620);
 
         var cssUrl = getClass().getResource("/styles/app.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -40,6 +40,8 @@ public class MainApp extends Application {
 
         stage.setScene(scene);
         stage.setResizable(true);
+        stage.setMinWidth(900);
+        stage.setMinHeight(560);
         stage.centerOnScreen();
         stage.show();
     }

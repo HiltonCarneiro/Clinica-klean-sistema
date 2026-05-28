@@ -12,12 +12,14 @@
             stylesheets="@/styles/app.css">
 
     <top>
-        <VBox spacing="16" styleClass="anamnese-header">
+        <VBox spacing="10"
+              styleClass="anamnese-header">
+
             <padding>
-                <Insets top="22" right="28" bottom="18" left="28"/>
+                <Insets top="16" right="24" bottom="14" left="24"/>
             </padding>
 
-            <HBox alignment="CENTER_LEFT" spacing="16">
+            <HBox alignment="CENTER_LEFT" spacing="14">
 
                 <Button text="← Voltar"
                         onAction="#onVoltar"
@@ -27,20 +29,26 @@
                         onAction="#onFechar"
                         styleClass="btn-close-clean"/>
 
-                <VBox spacing="4">
-                    <Label text="Atendimento Clínico" styleClass="page-title"/>
+                <VBox spacing="3">
+                    <Label text="Atendimento Clínico"
+                           styleClass="page-title"/>
+
                     <Label text="Anamnese, evolução, sinais vitais, histórico clínico e anexos do paciente."
                            styleClass="page-subtitle"/>
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Label text="Prontuário" styleClass="dashboard-badge"/>
+                <Label text="Prontuário"
+                       styleClass="dashboard-badge"/>
             </HBox>
 
-            <VBox spacing="12" styleClass="clinical-summary-card">
+            <VBox spacing="8"
+                  maxHeight="160"
+                  styleClass="clinical-summary-card compact-clinical-header">
+
                 <padding>
-                    <Insets top="16" right="18" bottom="16" left="18"/>
+                    <Insets top="14" right="18" bottom="14" left="18"/>
                 </padding>
 
                 <GridPane hgap="18" vgap="8">
@@ -51,19 +59,47 @@
                         <ColumnConstraints hgrow="ALWAYS"/>
                     </columnConstraints>
 
-                    <Label text="Paciente:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <Label fx:id="lblPaciente" text="Paciente:" styleClass="clinical-info-value" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label text="Paciente:"
+                           styleClass="label-muted"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="0"/>
 
-                    <Label text="Profissional:" styleClass="label-muted" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                    <Label fx:id="lblProfissional" text="Profissional:" styleClass="clinical-info-value" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                    <Label fx:id="lblPaciente"
+                           text="Paciente:"
+                           styleClass="clinical-info-value"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="1"/>
 
-                    <Label text="Agendamento:" styleClass="label-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <Label fx:id="lblAgendamento" text="Agendamento:" styleClass="clinical-info-value" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                    <Label text="Profissional:"
+                           styleClass="label-muted"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="2"/>
+
+                    <Label fx:id="lblProfissional"
+                           text="Profissional:"
+                           styleClass="clinical-info-value"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="3"/>
+
+                    <Label text="Agendamento:"
+                           styleClass="label-muted"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="0"/>
+
+                    <Label fx:id="lblAgendamento"
+                           text="Agendamento:"
+                           styleClass="clinical-info-value"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="1"
+                           GridPane.columnSpan="3"/>
                 </GridPane>
 
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Tipo:" styleClass="label-muted"/>
-                    <ComboBox fx:id="cbTipo" prefWidth="220"/>
+                    <Label text="Tipo:"
+                           styleClass="label-muted"/>
+
+                    <ComboBox fx:id="cbTipo"
+                              prefWidth="220"/>
 
                     <Region HBox.hgrow="ALWAYS"/>
 
@@ -92,25 +128,33 @@
     </top>
 
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tabs-clean anamnese-tabs">
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 VBox.vgrow="ALWAYS"
+                 styleClass="tabs-clean anamnese-tabs">
+
             <tabs>
 
                 <Tab text="Principal">
-                    <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                    <ScrollPane fitToWidth="true"
+                                fitToHeight="true"
+                                pannable="true"
+                                styleClass="page-scroll anamnese-scroll">
+
                         <content>
                             <VBox spacing="16" styleClass="anamnese-tab-content">
                                 <padding>
-                                    <Insets top="22" right="28" bottom="28" left="28"/>
+                                    <Insets top="18" right="24" bottom="28" left="24"/>
                                 </padding>
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <Label text="Queixa principal" styleClass="section-title"/>
+
                                     <TextArea fx:id="taQueixa"
-                                              prefRowCount="5"
+                                              prefRowCount="4"
                                               wrapText="true"
                                               promptText="Descreva a queixa principal do paciente..."
                                               styleClass="area-clean"/>
@@ -118,12 +162,13 @@
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <Label text="Evolução" styleClass="section-title"/>
+
                                     <TextArea fx:id="taEvolucao"
-                                              prefRowCount="6"
+                                              prefRowCount="5"
                                               wrapText="true"
                                               promptText="Registre a evolução clínica do atendimento..."
                                               styleClass="area-clean"/>
@@ -131,12 +176,13 @@
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <Label text="Observações" styleClass="section-title"/>
+
                                     <TextArea fx:id="taObservacoes"
-                                              prefRowCount="4"
+                                              prefRowCount="3"
                                               wrapText="true"
                                               promptText="Observações complementares..."
                                               styleClass="area-clean"/>
@@ -147,11 +193,15 @@
                 </Tab>
 
                 <Tab text="Sinais Vitais">
-                    <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                    <ScrollPane fitToWidth="true"
+                                fitToHeight="true"
+                                pannable="true"
+                                styleClass="page-scroll anamnese-scroll">
+
                         <content>
                             <VBox spacing="18" styleClass="anamnese-tab-content">
                                 <padding>
-                                    <Insets top="22" right="28" bottom="28" left="28"/>
+                                    <Insets top="18" right="24" bottom="28" left="24"/>
                                 </padding>
 
                                 <VBox spacing="6">
@@ -200,15 +250,8 @@
                                     <Label text="m" styleClass="unit-label" GridPane.rowIndex="2" GridPane.columnIndex="5"/>
 
                                     <Label text="SpO₂:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                    <TextField fx:id="tfSpO2"
-                                               promptText="98"
-                                               styleClass="field-clean"
-                                               GridPane.rowIndex="3"
-                                               GridPane.columnIndex="1"/>
-                                    <Label text="\%"
-                                           styleClass="unit-label"
-                                           GridPane.rowIndex="3"
-                                           GridPane.columnIndex="2"/>
+                                    <TextField fx:id="tfSpO2" promptText="98" styleClass="field-clean" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                    <Label text="\%" styleClass="unit-label" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
                                 </GridPane>
                             </VBox>
                         </content>
@@ -216,16 +259,20 @@
                 </Tab>
 
                 <Tab text="Histórico Clínico">
-                    <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                    <ScrollPane fitToWidth="true"
+                                fitToHeight="true"
+                                pannable="true"
+                                styleClass="page-scroll anamnese-scroll">
+
                         <content>
                             <VBox spacing="16" styleClass="anamnese-tab-content">
                                 <padding>
-                                    <Insets top="22" right="28" bottom="28" left="28"/>
+                                    <Insets top="18" right="24" bottom="32" left="24"/>
                                 </padding>
 
                                 <VBox spacing="14" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <HBox spacing="10" alignment="CENTER_LEFT">
@@ -248,12 +295,16 @@
                                     </FlowPane>
 
                                     <Label text="Outros / detalhes" styleClass="form-label"/>
-                                    <TextArea fx:id="taAntecedentes" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+
+                                    <TextArea fx:id="taAntecedentes"
+                                              prefRowCount="3"
+                                              wrapText="true"
+                                              styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="14" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <HBox spacing="10" alignment="CENTER_LEFT">
@@ -262,12 +313,15 @@
                                         <CheckBox fx:id="chkSemMedicacoes" text="Não faz uso"/>
                                     </HBox>
 
-                                    <TextArea fx:id="taMedicacoes" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taMedicacoes"
+                                              prefRowCount="3"
+                                              wrapText="true"
+                                              styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="14" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <HBox spacing="10" alignment="CENTER_LEFT">
@@ -276,12 +330,15 @@
                                         <CheckBox fx:id="chkNegaAlergias" text="Nega alergias"/>
                                     </HBox>
 
-                                    <TextArea fx:id="taAlergias" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taAlergias"
+                                              prefRowCount="3"
+                                              wrapText="true"
+                                              styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="14" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <HBox spacing="10" alignment="CENTER_LEFT">
@@ -290,7 +347,10 @@
                                         <CheckBox fx:id="chkNegaCirurgias" text="Nega cirurgias"/>
                                     </HBox>
 
-                                    <TextArea fx:id="taCirurgias" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taCirurgias"
+                                              prefRowCount="3"
+                                              wrapText="true"
+                                              styleClass="area-clean"/>
                                 </VBox>
                             </VBox>
                         </content>
@@ -298,11 +358,15 @@
                 </Tab>
 
                 <Tab text="Hábitos">
-                    <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                    <ScrollPane fitToWidth="true"
+                                fitToHeight="true"
+                                pannable="true"
+                                styleClass="page-scroll anamnese-scroll">
+
                         <content>
                             <VBox spacing="16" styleClass="anamnese-tab-content">
                                 <padding>
-                                    <Insets top="22" right="28" bottom="28" left="28"/>
+                                    <Insets top="18" right="24" bottom="28" left="24"/>
                                 </padding>
 
                                 <GridPane hgap="16" vgap="14" styleClass="dashboard-panel">
@@ -326,26 +390,29 @@
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
+
                                     <Label text="Sono" styleClass="section-title"/>
-                                    <TextArea fx:id="taSono" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taSono" prefRowCount="3" wrapText="true" styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
+
                                     <Label text="Atividade física" styleClass="section-title"/>
-                                    <TextArea fx:id="taAtividadeFisica" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taAtividadeFisica" prefRowCount="3" wrapText="true" styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
+
                                     <Label text="Alimentação" styleClass="section-title"/>
-                                    <TextArea fx:id="taAlimentacao" prefRowCount="4" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taAlimentacao" prefRowCount="3" wrapText="true" styleClass="area-clean"/>
                                 </VBox>
                             </VBox>
                         </content>
@@ -353,29 +420,33 @@
                 </Tab>
 
                 <Tab text="Exame Físico">
-                    <ScrollPane fitToWidth="true" styleClass="page-scroll">
+                    <ScrollPane fitToWidth="true"
+                                fitToHeight="true"
+                                pannable="true"
+                                styleClass="page-scroll anamnese-scroll">
+
                         <content>
                             <VBox spacing="16" styleClass="anamnese-tab-content">
                                 <padding>
-                                    <Insets top="22" right="28" bottom="28" left="28"/>
+                                    <Insets top="18" right="24" bottom="28" left="24"/>
                                 </padding>
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <Label text="Exame geral" styleClass="section-title"/>
-                                    <TextArea fx:id="taExameGeral" prefRowCount="7" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taExameGeral" prefRowCount="6" wrapText="true" styleClass="area-clean"/>
                                 </VBox>
 
                                 <VBox spacing="10" styleClass="dashboard-panel">
                                     <padding>
-                                        <Insets top="20" right="22" bottom="22" left="22"/>
+                                        <Insets top="18" right="22" bottom="20" left="22"/>
                                     </padding>
 
                                     <Label text="Exame segmentar" styleClass="section-title"/>
-                                    <TextArea fx:id="taExameSegmentar" prefRowCount="7" wrapText="true" styleClass="area-clean"/>
+                                    <TextArea fx:id="taExameSegmentar" prefRowCount="6" wrapText="true" styleClass="area-clean"/>
                                 </VBox>
                             </VBox>
                         </content>
@@ -385,7 +456,7 @@
                 <Tab text="Histórico de Registros">
                     <VBox spacing="16" styleClass="anamnese-tab-content">
                         <padding>
-                            <Insets top="22" right="28" bottom="28" left="28"/>
+                            <Insets top="18" right="24" bottom="28" left="24"/>
                         </padding>
 
                         <VBox spacing="6">
@@ -406,7 +477,7 @@
                 <Tab text="Anexos">
                     <VBox spacing="16" styleClass="anamnese-tab-content">
                         <padding>
-                            <Insets top="22" right="28" bottom="28" left="28"/>
+                            <Insets top="18" right="24" bottom="28" left="24"/>
                         </padding>
 
                         <VBox spacing="6">
@@ -421,6 +492,7 @@
                             </padding>
 
                             <Label text="Descrição:" styleClass="form-label"/>
+
                             <TextField fx:id="tfDescricaoAnexo"
                                        promptText="Ex: exame laboratorial, laudo, imagem..."
                                        HBox.hgrow="ALWAYS"

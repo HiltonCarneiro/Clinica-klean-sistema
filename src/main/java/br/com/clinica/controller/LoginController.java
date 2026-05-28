@@ -211,7 +211,7 @@ public class LoginController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main-view.fxml"));
                 Parent root = loader.load();
 
-                Scene scene = new Scene(root, 1100, 720);
+                Scene scene = new Scene(root, 1280, 800);
 
                 // css seguro
                 var cssUrl = getClass().getResource("/styles/app.css");
@@ -224,7 +224,9 @@ public class LoginController {
                 stage.setTitle("Clínica Klean - Saúde Integrativa | Sistema");
                 stage.setScene(scene);
                 stage.setResizable(true);
-                stage.centerOnScreen();
+                stage.setMinWidth(1200);
+                stage.setMinHeight(760);
+                stage.setMaximized(true);
 
             } catch (Exception e) {
                 if (lblErro != null) lblErro.setText("Erro ao abrir tela principal.");

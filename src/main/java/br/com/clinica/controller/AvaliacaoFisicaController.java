@@ -1,5 +1,15 @@
 package br.com.clinica.controller;
 
+import br.com.clinica.auth.Permissao;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaChartManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaComboManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaFormFields;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaFormManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaHistoryManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaMaskManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaResultManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaSelectionManager;
+import br.com.clinica.controller.avaliacaofisica.AvaliacaoFisicaTableManager;
 import br.com.clinica.dao.PacienteDAO;
 import br.com.clinica.dao.UsuarioDAO;
 import br.com.clinica.model.AvaliacaoFisica;
@@ -8,19 +18,21 @@ import br.com.clinica.model.Usuario;
 import br.com.clinica.service.AvaliacaoFisicaCalculoService;
 import br.com.clinica.service.AvaliacaoFisicaService;
 import br.com.clinica.service.DialogService;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
+import br.com.clinica.service.PermissionService;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
-public class AvaliacaoFisicaController {
+public class    AvaliacaoFisicaController {
 
     @FXML private ComboBox<Paciente> cbPacientes;
     @FXML private ComboBox<Usuario> cbProfissionais;
@@ -94,32 +106,54 @@ public class AvaliacaoFisicaController {
     private final AvaliacaoFisicaService avaliacaoService = new AvaliacaoFisicaService();
     private final AvaliacaoFisicaCalculoService calculoService = new AvaliacaoFisicaCalculoService();
     private final DialogService dialogService = new DialogService();
+    private final PermissionService permissionService = new PermissionService();
 
-    private AvaliacaoFisica avaliacaoSelecionada;
-
-    private static final DateTimeFormatter DATA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private AvaliacaoFisicaComboManager comboManager;
+    private AvaliacaoFisicaTableManager tableManager;
+    private AvaliacaoFisicaMaskManager maskManager;
+    private AvaliacaoFisicaFormManager formManager;
+    private AvaliacaoFisicaResultManager resultManager;
+    private AvaliacaoFisicaChartManager chartManager;
+    private AvaliacaoFisicaHistoryManager historyManager;
+    private AvaliacaoFisicaSelectionManager selectionManager;
 
     @FXML
     private void initialize() {
-        configurarCombos();
-        configurarTabela();
+        permissionService.exigir(Permissao.AVALIACAO_FISICA_VER);
+
+        inicializarManagers();
+        comboManager.configurarCombos(cbSexo, cbNivelAtividade);
+        tableManager.configurarTabela(
+                tableAvaliacoes,
+                colData,
+                colProfissional,
+                colPeso,
+                colImc,
+                colPercentual,
+                colMassaMagra,
+                colMassaGorda,
+                colRcq,
+                this::preencherFormularioSelecionado
+        );
         configurarMascarasNumericas();
         configurarEventos();
-        carregarPacientes();
-        carregarProfissionais();
+        comboManager.carregarPacientes(cbPacientes);
+        comboManager.carregarProfissionais(cbProfissionais);
         novaAvaliacao();
     }
 
     @FXML
     private void onNovaAvaliacao() {
+        permissionService.exigir(Permissao.AVALIACAO_FISICA_VER);
         novaAvaliacao();
     }
 
     @FXML
     private void onSalvar() {
-        try {
-            AvaliacaoFisica avaliacao = montarAvaliacaoDoFormulario();
+        permissionService.exigir(Permissao.AVALIACAO_FISICA_VER);
 
+        try {
+            AvaliacaoFisica avaliacao = formManager.montarAvaliacaoDoFormulario();
             avaliacaoService.salvar(avaliacao);
 
             dialogService.sucesso(
@@ -127,9 +161,8 @@ public class AvaliacaoFisicaController {
                     "A avaliação física foi registrada com sucesso."
             );
 
-            avaliacaoSelecionada = avaliacao;
+            formManager.setSelecionada(avaliacao);
             carregarHistoricoPaciente();
-
         } catch (IllegalArgumentException e) {
             dialogService.aviso("Dados inválidos", e.getMessage());
         } catch (Exception e) {
@@ -140,7 +173,14 @@ public class AvaliacaoFisicaController {
 
     @FXML
     private void onExcluir() {
-        AvaliacaoFisica selecionada = tableAvaliacoes.getSelectionModel().getSelectedItem();
+        permissionService.exigir(Permissao.AVALIACAO_FISICA_VER);
+
+        if (tableAvaliacoes == null) {
+            dialogService.aviso("Histórico indisponível", "A tabela de avaliações não foi carregada corretamente.");
+            return;
+        }
+
+        AvaliacaoFisica selecionada = selectionManager.obterSelecionada(tableAvaliacoes);
 
         if (selecionada == null) {
             dialogService.aviso("Nenhuma avaliação selecionada", "Selecione uma avaliação no histórico para excluir.");
@@ -153,7 +193,9 @@ public class AvaliacaoFisicaController {
                 "Deseja realmente excluir esta avaliação física?"
         );
 
-        if (!confirmou) return;
+        if (!confirmou) {
+            return;
+        }
 
         try {
             avaliacaoService.excluir(selecionada.getId());
@@ -166,484 +208,202 @@ public class AvaliacaoFisicaController {
         }
     }
 
-    private void configurarCombos() {
-        cbSexo.setItems(FXCollections.observableArrayList("Masculino", "Feminino"));
-
-        cbNivelAtividade.setItems(FXCollections.observableArrayList(
-                "Sedentário",
-                "Levemente ativo",
-                "Moderadamente ativo",
-                "Muito ativo",
-                "Atleta"
-        ));
+    private void inicializarManagers() {
+        comboManager = new AvaliacaoFisicaComboManager(pacienteDAO, usuarioDAO);
+        tableManager = new AvaliacaoFisicaTableManager();
+        maskManager = new AvaliacaoFisicaMaskManager();
+        resultManager = new AvaliacaoFisicaResultManager(calculoService);
+        chartManager = new AvaliacaoFisicaChartManager();
+        historyManager = new AvaliacaoFisicaHistoryManager(avaliacaoService, tableManager, chartManager);
+        selectionManager = new AvaliacaoFisicaSelectionManager();
+        formManager = new AvaliacaoFisicaFormManager(criarFormFields(), comboManager, resultManager);
     }
 
-    private void configurarTabela() {
-        colData.setCellValueFactory(cell -> {
-            LocalDate data = cell.getValue().getDataAvaliacao();
-            return new SimpleStringProperty(data == null ? "" : data.format(DATA_FORMATTER));
-        });
-
-        colProfissional.setCellValueFactory(cell ->
-                new SimpleStringProperty(valorTexto(cell.getValue().getProfissionalResponsavel()))
+    private AvaliacaoFisicaFormFields criarFormFields() {
+        return new AvaliacaoFisicaFormFields(
+                cbPacientes,
+                cbProfissionais,
+                dpDataAvaliacao,
+                txtObjetivo,
+                txtPeso,
+                txtAltura,
+                cbSexo,
+                txtIdade,
+                cbNivelAtividade,
+                txtDobraTricipital,
+                txtDobraBicipital,
+                txtDobraAbdominal,
+                txtDobraSubescapular,
+                txtDobraAxilarMedia,
+                txtDobraCoxa,
+                txtDobraToracica,
+                txtDobraSuprailiaca,
+                txtDobraPanturrilha,
+                txtCircPescoco,
+                txtCircTorax,
+                txtCircOmbro,
+                txtCircCintura,
+                txtCircQuadril,
+                txtCircAbdomen,
+                txtCircBracoEsqRelaxado,
+                txtCircBracoDirRelaxado,
+                txtCircBracoEsqContraido,
+                txtCircBracoDirContraido,
+                txtCircAntebracoEsq,
+                txtCircAntebracoDir,
+                txtCircCoxaEsqProximal,
+                txtCircCoxaDirProximal,
+                txtCircCoxaEsqMedial,
+                txtCircCoxaDirMedial,
+                txtCircCoxaEsqDistal,
+                txtCircCoxaDirDistal,
+                txtCircPanturrilhaEsq,
+                txtCircPanturrilhaDir,
+                txtObservacoesGerais,
+                txtObservacoesNutricionais,
+                txtAnotacoesProfissional
         );
-
-        colPeso.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getPesoKg()));
-        colImc.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getImc()));
-        colPercentual.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getPercentualGordura()));
-        colMassaMagra.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getMassaMagraKg()));
-        colMassaGorda.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getMassaGordaKg()));
-        colRcq.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getRcq()));
-
-        tableAvaliacoes.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, antigo, novo) -> {
-                    if (novo != null) {
-                        preencherFormulario(novo);
-                    }
-                });
     }
 
     private void configurarMascarasNumericas() {
-        configurarCampoDecimalAutomatico(txtPeso);
-        configurarCampoDecimalAutomatico(txtAltura);
-
-        configurarCampoDecimalAutomatico(txtDobraTricipital);
-        configurarCampoDecimalAutomatico(txtDobraBicipital);
-        configurarCampoDecimalAutomatico(txtDobraAbdominal);
-        configurarCampoDecimalAutomatico(txtDobraSubescapular);
-        configurarCampoDecimalAutomatico(txtDobraAxilarMedia);
-        configurarCampoDecimalAutomatico(txtDobraCoxa);
-        configurarCampoDecimalAutomatico(txtDobraToracica);
-        configurarCampoDecimalAutomatico(txtDobraSuprailiaca);
-        configurarCampoDecimalAutomatico(txtDobraPanturrilha);
-
-        configurarCampoDecimalAutomatico(txtCircPescoco);
-        configurarCampoDecimalAutomatico(txtCircTorax);
-        configurarCampoDecimalAutomatico(txtCircOmbro);
-        configurarCampoDecimalAutomatico(txtCircCintura);
-        configurarCampoDecimalAutomatico(txtCircQuadril);
-        configurarCampoDecimalAutomatico(txtCircAbdomen);
-
-        configurarCampoDecimalAutomatico(txtCircBracoEsqRelaxado);
-        configurarCampoDecimalAutomatico(txtCircBracoDirRelaxado);
-        configurarCampoDecimalAutomatico(txtCircBracoEsqContraido);
-        configurarCampoDecimalAutomatico(txtCircBracoDirContraido);
-
-        configurarCampoDecimalAutomatico(txtCircAntebracoEsq);
-        configurarCampoDecimalAutomatico(txtCircAntebracoDir);
-
-        configurarCampoDecimalAutomatico(txtCircCoxaEsqProximal);
-        configurarCampoDecimalAutomatico(txtCircCoxaDirProximal);
-        configurarCampoDecimalAutomatico(txtCircCoxaEsqMedial);
-        configurarCampoDecimalAutomatico(txtCircCoxaDirMedial);
-        configurarCampoDecimalAutomatico(txtCircCoxaEsqDistal);
-        configurarCampoDecimalAutomatico(txtCircCoxaDirDistal);
-
-        configurarCampoDecimalAutomatico(txtCircPanturrilhaEsq);
-        configurarCampoDecimalAutomatico(txtCircPanturrilhaDir);
-
-        configurarCampoInteiro(txtIdade);
+        maskManager.configurarMascarasNumericas(
+                montarCamposDecimais(),
+                txtIdade
+        );
     }
 
-    private void configurarCampoDecimalAutomatico(TextField campo) {
-        if (campo == null) {
-            return;
-        }
-
-        campo.textProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.isBlank()) {
-                return;
-            }
-
-            String numeros = newValue.replaceAll("[^\\d]", "");
-
-            if (numeros.isEmpty()) {
-                campo.setText("");
-                return;
-            }
-
-            try {
-                double valor = Double.parseDouble(numeros) / 100.0;
-
-                String formatado = String.format("%.2f", valor).replace(".", ",");
-
-                if (!formatado.equals(newValue)) {
-                    campo.setText(formatado);
-                    campo.positionCaret(formatado.length());
-                }
-
-            } catch (Exception ignored) {
-            }
-        });
-    }
-
-    private void configurarCampoInteiro(TextField campo) {
-        if (campo == null) {
-            return;
-        }
-
-        campo.setTextFormatter(new TextFormatter<>(change -> {
-            String texto = change.getControlNewText();
-
-            if (texto.matches("\\d{0,3}")) {
-                return change;
-            }
-
-            return null;
-        }));
+    private List<TextField> montarCamposDecimais() {
+        return Arrays.asList(
+                txtPeso,
+                txtAltura,
+                txtDobraTricipital,
+                txtDobraBicipital,
+                txtDobraAbdominal,
+                txtDobraSubescapular,
+                txtDobraAxilarMedia,
+                txtDobraCoxa,
+                txtDobraToracica,
+                txtDobraSuprailiaca,
+                txtDobraPanturrilha,
+                txtCircPescoco,
+                txtCircTorax,
+                txtCircOmbro,
+                txtCircCintura,
+                txtCircQuadril,
+                txtCircAbdomen,
+                txtCircBracoEsqRelaxado,
+                txtCircBracoDirRelaxado,
+                txtCircBracoEsqContraido,
+                txtCircBracoDirContraido,
+                txtCircAntebracoEsq,
+                txtCircAntebracoDir,
+                txtCircCoxaEsqProximal,
+                txtCircCoxaDirProximal,
+                txtCircCoxaEsqMedial,
+                txtCircCoxaDirMedial,
+                txtCircCoxaEsqDistal,
+                txtCircCoxaDirDistal,
+                txtCircPanturrilhaEsq,
+                txtCircPanturrilhaDir
+        );
     }
 
     private void configurarEventos() {
-        cbPacientes.valueProperty().addListener((obs, antigo, novo) -> {
-            if (novo != null) {
-                preencherIdadePorPaciente(novo);
-                carregarHistoricoPaciente();
-            }
-        });
+        if (cbPacientes != null) {
+            cbPacientes.valueProperty().addListener((obs, antigo, novo) -> {
+                if (novo != null) {
+                    comboManager.preencherIdadePorPaciente(novo, txtIdade);
+                    carregarHistoricoPaciente();
+                }
+            });
+        }
 
-        txtPeso.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtAltura.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtIdade.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        cbSexo.valueProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
+        adicionarListenerCalculo(txtPeso);
+        adicionarListenerCalculo(txtAltura);
+        adicionarListenerCalculo(txtIdade);
 
-        txtDobraTricipital.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraBicipital.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraAbdominal.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraSubescapular.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraAxilarMedia.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraCoxa.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraToracica.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraSuprailiaca.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtDobraPanturrilha.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
+        if (cbSexo != null) {
+            cbSexo.valueProperty().addListener((obs, antigo, novo) -> atualizarPreviewCalculos());
+        }
 
-        txtCircCintura.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
-        txtCircQuadril.textProperty().addListener((obs, o, n) -> atualizarPreviewCalculos());
+        adicionarListenerCalculo(txtDobraTricipital);
+        adicionarListenerCalculo(txtDobraBicipital);
+        adicionarListenerCalculo(txtDobraAbdominal);
+        adicionarListenerCalculo(txtDobraSubescapular);
+        adicionarListenerCalculo(txtDobraAxilarMedia);
+        adicionarListenerCalculo(txtDobraCoxa);
+        adicionarListenerCalculo(txtDobraToracica);
+        adicionarListenerCalculo(txtDobraSuprailiaca);
+        adicionarListenerCalculo(txtDobraPanturrilha);
+        adicionarListenerCalculo(txtCircCintura);
+        adicionarListenerCalculo(txtCircQuadril);
     }
 
-    private void carregarPacientes() {
-        List<Paciente> pacientes = pacienteDAO.listarAtivos();
-        cbPacientes.setItems(FXCollections.observableArrayList(pacientes));
-    }
-
-    private void carregarProfissionais() {
-        List<Usuario> profissionais = usuarioDAO.listarProfissionaisAtivos();
-        cbProfissionais.setItems(FXCollections.observableArrayList(profissionais));
+    private void adicionarListenerCalculo(TextField campo) {
+        if (campo != null) {
+            campo.textProperty().addListener((obs, antigo, novo) -> atualizarPreviewCalculos());
+        }
     }
 
     private void novaAvaliacao() {
-        avaliacaoSelecionada = null;
-
-        dpDataAvaliacao.setValue(LocalDate.now());
-        cbProfissionais.setValue(null);
-        txtObjetivo.clear();
-
-        txtPeso.clear();
-        txtAltura.clear();
-        cbSexo.setValue(null);
-        txtIdade.clear();
-        cbNivelAtividade.setValue(null);
-
-        limparDobras();
-        limparCircunferencias();
-
-        txtObservacoesGerais.clear();
-        txtObservacoesNutricionais.clear();
-        txtAnotacoesProfissional.clear();
-
-        limparResultados();
-        tableAvaliacoes.getSelectionModel().clearSelection();
-
-        Paciente paciente = cbPacientes.getValue();
-        if (paciente != null) {
-            preencherIdadePorPaciente(paciente);
-        }
+        formManager.novaAvaliacao();
+        resultManager.limparResultados(
+                lblImc,
+                lblClassificacaoImc,
+                lblPercentualGordura,
+                lblProtocolo,
+                lblMassaMagra,
+                lblMassaGorda,
+                lblRcq,
+                lblClassificacaoRcq
+        );
+        selectionManager.limparSelecao(tableAvaliacoes);
     }
 
-    private void limparDobras() {
-        txtDobraTricipital.clear();
-        txtDobraBicipital.clear();
-        txtDobraAbdominal.clear();
-        txtDobraSubescapular.clear();
-        txtDobraAxilarMedia.clear();
-        txtDobraCoxa.clear();
-        txtDobraToracica.clear();
-        txtDobraSuprailiaca.clear();
-        txtDobraPanturrilha.clear();
-    }
-
-    private void limparCircunferencias() {
-        txtCircPescoco.clear();
-        txtCircTorax.clear();
-        txtCircOmbro.clear();
-        txtCircCintura.clear();
-        txtCircQuadril.clear();
-        txtCircAbdomen.clear();
-
-        txtCircBracoEsqRelaxado.clear();
-        txtCircBracoDirRelaxado.clear();
-        txtCircBracoEsqContraido.clear();
-        txtCircBracoDirContraido.clear();
-
-        txtCircAntebracoEsq.clear();
-        txtCircAntebracoDir.clear();
-
-        txtCircCoxaEsqProximal.clear();
-        txtCircCoxaDirProximal.clear();
-        txtCircCoxaEsqMedial.clear();
-        txtCircCoxaDirMedial.clear();
-        txtCircCoxaEsqDistal.clear();
-        txtCircCoxaDirDistal.clear();
-
-        txtCircPanturrilhaEsq.clear();
-        txtCircPanturrilhaDir.clear();
-    }
-
-    private void limparResultados() {
-        lblImc.setText("-");
-        lblClassificacaoImc.setText("-");
-        lblPercentualGordura.setText("-");
-        lblProtocolo.setText("-");
-        lblMassaMagra.setText("-");
-        lblMassaGorda.setText("-");
-        lblRcq.setText("-");
-        lblClassificacaoRcq.setText("-");
-    }
-
-    private AvaliacaoFisica montarAvaliacaoDoFormulario() {
-        AvaliacaoFisica a = avaliacaoSelecionada == null ? new AvaliacaoFisica() : avaliacaoSelecionada;
-
-        Paciente paciente = cbPacientes.getValue();
-        if (paciente != null) {
-            a.setPaciente(paciente);
-            a.setPacienteId(paciente.getId());
-        }
-
-        Usuario profissional = cbProfissionais.getValue();
-
-        a.setDataAvaliacao(dpDataAvaliacao.getValue());
-        a.setProfissionalResponsavel(profissional == null ? null : profissional.toString());
-        a.setObjetivoPaciente(txtObjetivo.getText());
-
-        a.setPesoKg(parseDouble(txtPeso));
-        a.setAlturaM(parseDouble(txtAltura));
-        a.setSexoBiologico(cbSexo.getValue());
-        a.setIdadeNoMomento(parseInteger(txtIdade));
-        a.setNivelAtividadeFisica(cbNivelAtividade.getValue());
-
-        a.setDobraTricipitalMm(parseDouble(txtDobraTricipital));
-        a.setDobraBicipitalMm(parseDouble(txtDobraBicipital));
-        a.setDobraAbdominalMm(parseDouble(txtDobraAbdominal));
-        a.setDobraSubescapularMm(parseDouble(txtDobraSubescapular));
-        a.setDobraAxilarMediaMm(parseDouble(txtDobraAxilarMedia));
-        a.setDobraCoxaMm(parseDouble(txtDobraCoxa));
-        a.setDobraToracicaMm(parseDouble(txtDobraToracica));
-        a.setDobraSuprailiacaMm(parseDouble(txtDobraSuprailiaca));
-        a.setDobraPanturrilhaMm(parseDouble(txtDobraPanturrilha));
-
-        a.setCircPescocoCm(parseDouble(txtCircPescoco));
-        a.setCircToraxCm(parseDouble(txtCircTorax));
-        a.setCircOmbroCm(parseDouble(txtCircOmbro));
-        a.setCircCinturaCm(parseDouble(txtCircCintura));
-        a.setCircQuadrilCm(parseDouble(txtCircQuadril));
-        a.setCircAbdomenCm(parseDouble(txtCircAbdomen));
-
-        a.setCircBracoEsqRelaxadoCm(parseDouble(txtCircBracoEsqRelaxado));
-        a.setCircBracoDirRelaxadoCm(parseDouble(txtCircBracoDirRelaxado));
-        a.setCircBracoEsqContraidoCm(parseDouble(txtCircBracoEsqContraido));
-        a.setCircBracoDirContraidoCm(parseDouble(txtCircBracoDirContraido));
-
-        a.setCircAntebracoEsqCm(parseDouble(txtCircAntebracoEsq));
-        a.setCircAntebracoDirCm(parseDouble(txtCircAntebracoDir));
-
-        a.setCircCoxaEsqProximalCm(parseDouble(txtCircCoxaEsqProximal));
-        a.setCircCoxaDirProximalCm(parseDouble(txtCircCoxaDirProximal));
-        a.setCircCoxaEsqMedialCm(parseDouble(txtCircCoxaEsqMedial));
-        a.setCircCoxaDirMedialCm(parseDouble(txtCircCoxaDirMedial));
-        a.setCircCoxaEsqDistalCm(parseDouble(txtCircCoxaEsqDistal));
-        a.setCircCoxaDirDistalCm(parseDouble(txtCircCoxaDirDistal));
-
-        a.setCircPanturrilhaEsqCm(parseDouble(txtCircPanturrilhaEsq));
-        a.setCircPanturrilhaDirCm(parseDouble(txtCircPanturrilhaDir));
-
-        a.setObservacoesGerais(txtObservacoesGerais.getText());
-        a.setObservacoesNutricionais(txtObservacoesNutricionais.getText());
-        a.setAnotacoesProfissional(txtAnotacoesProfissional.getText());
-
-        return a;
-    }
-
-    private void preencherFormulario(AvaliacaoFisica a) {
-        avaliacaoSelecionada = a;
-
-        selecionarPacientePorId(a.getPacienteId());
-
-        dpDataAvaliacao.setValue(a.getDataAvaliacao());
-        txtObjetivo.setText(valorTextoParaCampo(a.getObjetivoPaciente()));
-
-        txtPeso.setText(valorNumeroParaCampo(a.getPesoKg()));
-        txtAltura.setText(valorNumeroParaCampo(a.getAlturaM()));
-        cbSexo.setValue(a.getSexoBiologico());
-        txtIdade.setText(a.getIdadeNoMomento() == null ? "" : String.valueOf(a.getIdadeNoMomento()));
-        cbNivelAtividade.setValue(a.getNivelAtividadeFisica());
-
-        txtDobraTricipital.setText(valorNumeroParaCampo(a.getDobraTricipitalMm()));
-        txtDobraBicipital.setText(valorNumeroParaCampo(a.getDobraBicipitalMm()));
-        txtDobraAbdominal.setText(valorNumeroParaCampo(a.getDobraAbdominalMm()));
-        txtDobraSubescapular.setText(valorNumeroParaCampo(a.getDobraSubescapularMm()));
-        txtDobraAxilarMedia.setText(valorNumeroParaCampo(a.getDobraAxilarMediaMm()));
-        txtDobraCoxa.setText(valorNumeroParaCampo(a.getDobraCoxaMm()));
-        txtDobraToracica.setText(valorNumeroParaCampo(a.getDobraToracicaMm()));
-        txtDobraSuprailiaca.setText(valorNumeroParaCampo(a.getDobraSuprailiacaMm()));
-        txtDobraPanturrilha.setText(valorNumeroParaCampo(a.getDobraPanturrilhaMm()));
-
-        txtCircPescoco.setText(valorNumeroParaCampo(a.getCircPescocoCm()));
-        txtCircTorax.setText(valorNumeroParaCampo(a.getCircToraxCm()));
-        txtCircOmbro.setText(valorNumeroParaCampo(a.getCircOmbroCm()));
-        txtCircCintura.setText(valorNumeroParaCampo(a.getCircCinturaCm()));
-        txtCircQuadril.setText(valorNumeroParaCampo(a.getCircQuadrilCm()));
-        txtCircAbdomen.setText(valorNumeroParaCampo(a.getCircAbdomenCm()));
-
-        txtCircBracoEsqRelaxado.setText(valorNumeroParaCampo(a.getCircBracoEsqRelaxadoCm()));
-        txtCircBracoDirRelaxado.setText(valorNumeroParaCampo(a.getCircBracoDirRelaxadoCm()));
-        txtCircBracoEsqContraido.setText(valorNumeroParaCampo(a.getCircBracoEsqContraidoCm()));
-        txtCircBracoDirContraido.setText(valorNumeroParaCampo(a.getCircBracoDirContraidoCm()));
-
-        txtCircAntebracoEsq.setText(valorNumeroParaCampo(a.getCircAntebracoEsqCm()));
-        txtCircAntebracoDir.setText(valorNumeroParaCampo(a.getCircAntebracoDirCm()));
-
-        txtCircCoxaEsqProximal.setText(valorNumeroParaCampo(a.getCircCoxaEsqProximalCm()));
-        txtCircCoxaDirProximal.setText(valorNumeroParaCampo(a.getCircCoxaDirProximalCm()));
-        txtCircCoxaEsqMedial.setText(valorNumeroParaCampo(a.getCircCoxaEsqMedialCm()));
-        txtCircCoxaDirMedial.setText(valorNumeroParaCampo(a.getCircCoxaDirMedialCm()));
-        txtCircCoxaEsqDistal.setText(valorNumeroParaCampo(a.getCircCoxaEsqDistalCm()));
-        txtCircCoxaDirDistal.setText(valorNumeroParaCampo(a.getCircCoxaDirDistalCm()));
-
-        txtCircPanturrilhaEsq.setText(valorNumeroParaCampo(a.getCircPanturrilhaEsqCm()));
-        txtCircPanturrilhaDir.setText(valorNumeroParaCampo(a.getCircPanturrilhaDirCm()));
-
-        txtObservacoesGerais.setText(valorTextoParaCampo(a.getObservacoesGerais()));
-        txtObservacoesNutricionais.setText(valorTextoParaCampo(a.getObservacoesNutricionais()));
-        txtAnotacoesProfissional.setText(valorTextoParaCampo(a.getAnotacoesProfissional()));
-
-        atualizarLabelsResultado(a);
+    private void preencherFormularioSelecionado(AvaliacaoFisica avaliacao) {
+        formManager.preencherFormulario(avaliacao);
+        resultManager.atualizarLabelsResultado(
+                avaliacao,
+                lblImc,
+                lblClassificacaoImc,
+                lblPercentualGordura,
+                lblProtocolo,
+                lblMassaMagra,
+                lblMassaGorda,
+                lblRcq,
+                lblClassificacaoRcq
+        );
     }
 
     private void atualizarPreviewCalculos() {
         try {
-            AvaliacaoFisica preview = montarAvaliacaoDoFormulario();
-            calculoService.calcularResultados(preview);
-            atualizarLabelsResultado(preview);
+            AvaliacaoFisica preview = formManager.montarAvaliacaoDoFormulario();
+            resultManager.atualizarPreview(
+                    preview,
+                    lblImc,
+                    lblClassificacaoImc,
+                    lblPercentualGordura,
+                    lblProtocolo,
+                    lblMassaMagra,
+                    lblMassaGorda,
+                    lblRcq,
+                    lblClassificacaoRcq
+            );
         } catch (Exception ignored) {
-            limparResultados();
+            resultManager.limparResultados(
+                    lblImc,
+                    lblClassificacaoImc,
+                    lblPercentualGordura,
+                    lblProtocolo,
+                    lblMassaMagra,
+                    lblMassaGorda,
+                    lblRcq,
+                    lblClassificacaoRcq
+            );
         }
-    }
-
-    private void atualizarLabelsResultado(AvaliacaoFisica a) {
-        lblImc.setText(valorNumero(a.getImc()));
-        lblClassificacaoImc.setText(valorTexto(a.getClassificacaoImc()));
-        lblPercentualGordura.setText(valorNumero(a.getPercentualGordura()));
-        lblProtocolo.setText(valorTexto(a.getProtocoloGordura()));
-        lblMassaMagra.setText(valorNumero(a.getMassaMagraKg()));
-        lblMassaGorda.setText(valorNumero(a.getMassaGordaKg()));
-        lblRcq.setText(valorNumero(a.getRcq()));
-        lblClassificacaoRcq.setText(valorTexto(a.getClassificacaoRcq()));
     }
 
     private void carregarHistoricoPaciente() {
-        Paciente paciente = cbPacientes.getValue();
-
-        if (paciente == null || paciente.getId() == null) {
-            tableAvaliacoes.setItems(FXCollections.observableArrayList());
-            chartPeso.getData().clear();
-            return;
-        }
-
-        List<AvaliacaoFisica> historico = avaliacaoService.listarPorPaciente(paciente.getId());
-
-        tableAvaliacoes.setItems(FXCollections.observableArrayList(historico));
-        atualizarGraficoPeso(historico);
-    }
-
-    private void atualizarGraficoPeso(List<AvaliacaoFisica> historico) {
-        chartPeso.getData().clear();
-
-        XYChart.Series<String, Number> serie = new XYChart.Series<>();
-        serie.setName("Peso");
-
-        for (int i = historico.size() - 1; i >= 0; i--) {
-            AvaliacaoFisica a = historico.get(i);
-
-            if (a.getDataAvaliacao() != null && a.getPesoKg() != null) {
-                serie.getData().add(new XYChart.Data<>(
-                        a.getDataAvaliacao().format(DATA_FORMATTER),
-                        a.getPesoKg()
-                ));
-            }
-        }
-
-        chartPeso.getData().add(serie);
-    }
-
-    private void preencherIdadePorPaciente(Paciente paciente) {
-        if (paciente != null && paciente.getDataNascimento() != null) {
-            txtIdade.setText(String.valueOf(paciente.getIdade()));
-        }
-    }
-
-    private void selecionarPacientePorId(Long pacienteId) {
-        if (pacienteId == null) return;
-
-        for (Paciente p : cbPacientes.getItems()) {
-            if (pacienteId.equals(p.getId())) {
-                cbPacientes.setValue(p);
-                return;
-            }
-        }
-    }
-
-    private Double parseDouble(TextInputControl campo) {
-        String texto = campo.getText();
-
-        if (texto == null || texto.isBlank()) {
-            return null;
-        }
-
-        try {
-            texto = texto.trim().replace(".", "").replace(",", ".");
-            return Double.parseDouble(texto);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Informe um número válido no campo: " + campo.getPromptText());
-        }
-    }
-
-    private Integer parseInteger(TextInputControl campo) {
-        String texto = campo.getText();
-
-        if (texto == null || texto.isBlank()) {
-            return null;
-        }
-
-        try {
-            return Integer.parseInt(texto.trim());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Informe uma idade válida.");
-        }
-    }
-
-    private String valorNumero(Double valor) {
-        return valor == null ? "-" : String.format("%.2f", valor);
-    }
-
-    private String valorNumeroParaCampo(Double valor) {
-        return valor == null ? "" : String.format("%.2f", valor).replace(".", ",");
-    }
-
-    private String valorTexto(String valor) {
-        return valor == null || valor.isBlank() ? "-" : valor;
-    }
-
-    private String valorTextoParaCampo(String valor) {
-        return valor == null || valor.isBlank() || "-".equals(valor) ? "" : valor;
+        historyManager.carregarHistoricoPaciente(cbPacientes, tableAvaliacoes, chartPeso);
     }
 }

@@ -23,6 +23,9 @@ public enum Permissao {
     AGENDA_VER("VER AGENDA"),
     AGENDA_GERENCIAR("GERENCIAR AGENDA"),
 
+    // Avaliação Física
+    AVALIACAO_FISICA_VER("VER / USAR AVALIAÇÃO FÍSICA"),
+
     // Financeiro
     FINANCEIRO_VER("VER FINANCEIRO"),
     NOTA_GERAR("GERAR NOTA"),

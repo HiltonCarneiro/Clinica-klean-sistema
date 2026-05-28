@@ -11,7 +11,6 @@
             stylesheets="@/styles/app.css">
 
     <top>
-
         <VBox spacing="18"
               styleClass="top-clean">
 
@@ -22,13 +21,10 @@
                         left="28"/>
             </padding>
 
-            <!-- HEADER -->
-
             <HBox alignment="CENTER_LEFT"
                   spacing="16">
 
                 <VBox spacing="5">
-
                     <Label text="Agenda Clínica"
                            styleClass="page-title"/>
 
@@ -48,8 +44,6 @@
                            styleClass="label-muted"/>
                 </VBox>
             </HBox>
-
-            <!-- CARDS -->
 
             <HBox spacing="18">
 
@@ -95,13 +89,10 @@
                            styleClass="metric-desc"/>
                 </VBox>
             </HBox>
-
         </VBox>
-
     </top>
 
     <center>
-
         <HBox spacing="22">
 
             <padding>
@@ -111,14 +102,11 @@
                         left="28"/>
             </padding>
 
-            <!-- FORMULÁRIO -->
-
             <ScrollPane fitToWidth="true"
                         prefWidth="430"
                         styleClass="page-scroll">
 
                 <content>
-
                     <VBox spacing="18"
                           styleClass="dashboard-panel">
 
@@ -143,10 +131,7 @@
 
                         <Separator/>
 
-                        <!-- DATA -->
-
                         <VBox spacing="8">
-
                             <Label text="Data"
                                    styleClass="form-label"/>
 
@@ -154,8 +139,6 @@
                                         onAction="#onDataAlterada"
                                         maxWidth="1.7976931348623157E308"/>
                         </VBox>
-
-                        <!-- HORÁRIOS -->
 
                         <HBox spacing="12">
 
@@ -180,10 +163,7 @@
                             </VBox>
                         </HBox>
 
-                        <!-- PROFISSIONAL -->
-
                         <VBox spacing="8">
-
                             <Label text="Profissional"
                                    styleClass="form-label"/>
 
@@ -191,10 +171,7 @@
                                       maxWidth="1.7976931348623157E308"/>
                         </VBox>
 
-                        <!-- PACIENTE -->
-
                         <VBox spacing="8">
-
                             <Label text="Paciente"
                                    styleClass="form-label"/>
 
@@ -203,10 +180,7 @@
                                       maxWidth="1.7976931348623157E308"/>
                         </VBox>
 
-                        <!-- SALA -->
-
                         <VBox spacing="8">
-
                             <Label text="Sala"
                                    styleClass="form-label"/>
 
@@ -214,18 +188,13 @@
                                       maxWidth="1.7976931348623157E308"/>
                         </VBox>
 
-                        <!-- PROCEDIMENTO -->
-
                         <VBox spacing="8">
-
                             <Label text="Procedimento"
                                    styleClass="form-label"/>
 
                             <TextField fx:id="txtProcedimento"
                                        promptText="Ex: Consulta, retorno, avaliação..."/>
                         </VBox>
-
-                        <!-- OBSERVAÇÕES -->
 
                         <VBox spacing="8"
                               VBox.vgrow="ALWAYS">
@@ -240,34 +209,18 @@
                                       promptText="Observações clínicas ou administrativas..."/>
                         </VBox>
 
-                        <!-- BOTÕES -->
+                        <!-- BOTÕES DO FORMULÁRIO -->
 
                         <HBox spacing="12">
 
-                            <Button text="Salvar"
+                            <Button text="💾 Salvar Agendamento"
                                     onAction="#onSalvar"
                                     maxWidth="1.7976931348623157E308"
                                     HBox.hgrow="ALWAYS"
                                     styleClass="btn-primary"/>
 
-                            <Button text="Atualizar"
-                                    onAction="#onAtualizarLista"
-                                    maxWidth="1.7976931348623157E308"
-                                    HBox.hgrow="ALWAYS"
-                                    styleClass="btn-ghost"/>
-                        </HBox>
-
-                        <HBox spacing="12">
-
-                            <Button text="Iniciar"
-                                    onAction="#onIniciarAtendimento"
-                                    maxWidth="1.7976931348623157E308"
-                                    HBox.hgrow="ALWAYS"
-                                    styleClass="btn-primary"/>
-
-                            <Button fx:id="btnFinalizarConsulta"
-                                    text="Finalizar"
-                                    onAction="#onFinalizarConsulta"
+                            <Button text="✎ Limpar"
+                                    onAction="#onNovo"
                                     maxWidth="1.7976931348623157E308"
                                     HBox.hgrow="ALWAYS"
                                     styleClass="btn-ghost"/>
@@ -278,12 +231,8 @@
                                styleClass="hint-text"/>
 
                     </VBox>
-
                 </content>
-
             </ScrollPane>
-
-            <!-- TABELA -->
 
             <VBox spacing="16"
                   HBox.hgrow="ALWAYS"
@@ -299,7 +248,6 @@
                 <HBox alignment="CENTER_LEFT">
 
                     <VBox spacing="4">
-
                         <Label text="Agenda do Dia"
                                styleClass="section-title"/>
 
@@ -314,12 +262,38 @@
                             styleClass="btn-ghost"/>
                 </HBox>
 
+                <HBox spacing="10"
+                      alignment="CENTER_LEFT"
+                      styleClass="agenda-action-bar">
+
+                    <Button text="▶ Iniciar Atendimento"
+                            onAction="#onIniciarAtendimento"
+                            styleClass="btn-primary"/>
+
+                    <Button fx:id="btnFinalizarConsulta"
+                            text="✓ Finalizar Atendimento"
+                            onAction="#onFinalizarConsulta"
+                            styleClass="btn-ghost"/>
+
+                    <Button text="💾 Salvar Agendamento"
+                            onAction="#onSalvar"
+                            styleClass="btn-primary"/>
+
+                    <Button text="⟳ Atualizar Lista"
+                            onAction="#onAtualizarLista"
+                            styleClass="btn-ghost"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Fluxo clínico"
+                           styleClass="dashboard-badge"/>
+                </HBox>
+
                 <TableView fx:id="tbAgenda"
                            VBox.vgrow="ALWAYS"
                            styleClass="table-soft">
 
                     <columns>
-
                         <TableColumn fx:id="colHora"
                                      text="Horário"
                                      prefWidth="120"/>
@@ -353,11 +327,8 @@
                     <Label text="Agenda clínica"
                            styleClass="dashboard-badge"/>
                 </HBox>
-
             </VBox>
-
         </HBox>
-
     </center>
 
 </BorderPane>
